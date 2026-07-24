@@ -1,0 +1,6 @@
+{
+  "name": "Micro-SaaS para Comércio Local",
+  "description": "Sistema multi-tenant para pequenos comércios (barbearias, restaurantes, lojas).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,167 @@
+'use client'
+
+import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import Link from 'next/link'
+import { Store, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
+
+export default function Register() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [storeName, setStoreName] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+
+  const supabase = createClient()
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            store_name: storeName
+          }
+        }
+      })
+
+      if (authError) throw authError
+
+      if (authData.user) {
+        const baseSlug = storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
+        const slug = `${baseSlug}-${Math.floor(Math.random() * 10000)}`
+
+        // Tenta inserir a loja. Se a confirmação de email for obrigatória,
+        // o Supabase não retorna uma sessão ativa aqui e o RLS bloqueará o insert.
+        // Veja as instruções para contornar isso (desativando a confirmação ou usando Triggers).
+        const { error: storeError } = await supabase.from('stores').insert({
+          owner_id: authData.user.id,
+          name: storeName,
+          slug: slug
+        })
+
+        if (storeError) {
+          console.error("Aviso: Falha ao criar registro da loja (RLS).", storeError)
+        }
+      }
+
+      setSuccess(true)
+    } catch (err: any) {
+      setError(err.message || 'Ocorreu um erro ao criar a conta.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg text-center space-y-6">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+            <CheckCircle2 className="w-8 h-8 text-green-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900">Cadastro realizado!</h2>
+          <p className="text-gray-600">
+            Enviamos um link de confirmação para <strong>{email}</strong>. 
+            Por favor, verifique sua caixa de entrada (e spam) para ativar sua conta.
+          </p>
+          <Link href="/login" className="inline-block w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+            Ir para o Login
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
+      <div className="mb-8 flex items-center gap-2">
+        <Store className="h-8 w-8 text-blue-600" />
+        <span className="text-2xl font-bold text-gray-900">Localiza<span className="text-blue-600">SaaS</span></span>
+      </div>
+
+      <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-900">Crie sua conta</h1>
+          <p className="text-gray-600 mt-2">Comece a modernizar seu negócio hoje mesmo.</p>
+        </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
+
+        <form onSubmit={handleRegister} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="storeName">
+              Nome da Empresa
+            </label>
+            <input
+              id="storeName"
+              type="text"
+              required
+              value={storeName}
+              onChange={(e) => setStoreName(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+              placeholder="Minha Barbearia"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">
+              E-mail
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+              placeholder="seu@email.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="password">
+              Senha
+            </label>
+            <input
+              id="password"
+              type="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Cadastrar meu negócio'}
+          </button>
+        </form>
+
+        <div className="mt-6 text-center text-sm text-gray-600">
+          Já tem uma conta?{' '}
+          <Link href="/login" className="text-blue-600 hover:underline font-medium">
+            Fazer login
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
