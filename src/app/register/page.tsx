@@ -6,9 +6,10 @@ import Link from 'next/link'
 import { Store, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 
 export default function Register() {
+  const [fullName, setFullName] = useState('')
+  const [storeName, setStoreName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [storeName, setStoreName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -21,11 +22,12 @@ export default function Register() {
     setError(null)
 
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
+            full_name: fullName,
             store_name: storeName
           }
         }
@@ -33,21 +35,18 @@ export default function Register() {
 
       if (authError) throw authError
 
-      if (authData.user) {
+      if (data.user) {
         const baseSlug = storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
         const slug = `${baseSlug}-${Math.floor(Math.random() * 10000)}`
 
-        // Tenta inserir a loja. Se a confirmação de email for obrigatória,
-        // o Supabase não retorna uma sessão ativa aqui e o RLS bloqueará o insert.
-        // Veja as instruções para contornar isso (desativando a confirmação ou usando Triggers).
         const { error: storeError } = await supabase.from('stores').insert({
-          owner_id: authData.user.id,
+          owner_id: data.user.id,
           name: storeName,
           slug: slug
         })
 
         if (storeError) {
-          console.error("Aviso: Falha ao criar registro da loja (RLS).", storeError)
+          console.error("Erro ao criar a loja:", storeError)
         }
       }
 
@@ -66,10 +65,10 @@ export default function Register() {
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
             <CheckCircle2 className="w-8 h-8 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Cadastro realizado!</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Cadastro realizado com sucesso!</h2>
           <p className="text-gray-600">
             Enviamos um link de confirmação para <strong>{email}</strong>. 
-            Por favor, verifique sua caixa de entrada (e spam) para ativar sua conta.
+            Por favor, verifique sua caixa de entrada para confirmar sua conta.
           </p>
           <Link href="/login" className="inline-block w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
             Ir para o Login
@@ -80,7 +79,7 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-8">
       <div className="mb-8 flex items-center gap-2">
         <Store className="h-8 w-8 text-blue-600" />
         <span className="text-2xl font-bold text-gray-900">Localiza<span className="text-blue-600">SaaS</span></span>
@@ -101,8 +100,23 @@ export default function Register() {
 
         <form onSubmit={handleRegister} className="space-y-5">
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="fullName">
+              Nome Completo
+            </label>
+            <input
+              id="fullName"
+              type="text"
+              required
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+              placeholder="João da Silva"
+            />
+          </div>
+
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="storeName">
-              Nome da Empresa
+              Nome do Negócio
             </label>
             <input
               id="storeName"
@@ -158,7 +172,7 @@ export default function Register() {
         <div className="mt-6 text-center text-sm text-gray-600">
           Já tem uma conta?{' '}
           <Link href="/login" className="text-blue-600 hover:underline font-medium">
-            Fazer login
+            Entre aqui
           </Link>
         </div>
       </div>

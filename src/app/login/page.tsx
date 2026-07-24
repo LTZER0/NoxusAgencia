@@ -29,14 +29,14 @@ export default function Login() {
 
       router.push('/dashboard')
     } catch (err: any) {
-      setError('Email ou senha incorretos. Verifique suas credenciais e tente novamente.')
+      setError('E-mail ou senha incorretos. Verifique suas credenciais e se seu e-mail já foi confirmado.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-8">
       <div className="mb-8 flex items-center gap-2">
         <Store className="h-8 w-8 text-blue-600" />
         <span className="text-2xl font-bold text-gray-900">Localiza<span className="text-blue-600">SaaS</span></span>
@@ -101,9 +101,9 @@ export default function Login() {
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-600">
-          Ainda não tem uma conta?{' '}
+          Ainda não tem conta?{' '}
           <Link href="/register" className="text-blue-600 hover:underline font-medium">
-            Cadastrar meu negócio
+            Cadastre-se
           </Link>
         </div>
       </div>
