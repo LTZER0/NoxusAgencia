@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 
 const navigation = [
   { name: 'Visão Geral', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Meus Serviços', href: '/dashboard/servicos', icon: Briefcase },
+  { name: 'Meus Serviços', href: '/dashboard/services', icon: Briefcase },
   { name: 'Agenda', href: '/dashboard/agenda', icon: CalendarDays },
   { name: 'Configurações', href: '/dashboard/configuracoes', icon: Settings },
 ]
