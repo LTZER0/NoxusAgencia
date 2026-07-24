@@ -1,4 +1,26 @@
-export default function DashboardPage() {
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { CalendarDays, Layers, DollarSign } from 'lucide-react'
+
+export default async function DashboardOverview() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Se o usuário não estiver autenticado, redireciona para o login
+  if (!user) {
+    redirect('/login')
+  }
+
+  // Busca as informações da loja do usuário na tabela stores
+  const { data: store } = await supabase
+    .from('stores')
+    .select('name')
+    .eq('owner_id', user.id)
+    .single()
+
+  // Define a variável storeName com um valor fallback caso não possua um nome configurado
+  const storeName = store?.name || 'sua loja'
+
   return (
     <div className="space-y-8">
       <div>
@@ -11,7 +33,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Card 1 */}
+        {/* Card 1: Agendamentos */}
         <div className="overflow-hidden rounded-xl bg-white p-6 shadow-sm border border-gray-100">
           <div className="flex items-center">
             <div className="p-3 rounded-lg bg-blue-50">
@@ -24,7 +46,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Card 2 */}
+        {/* Card 2: Serviços */}
         <div className="overflow-hidden rounded-xl bg-white p-6 shadow-sm border border-gray-100">
           <div className="flex items-center">
             <div className="p-3 rounded-lg bg-blue-50">
@@ -37,7 +59,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Card 3 */}
+        {/* Card 3: Faturamento */}
         <div className="overflow-hidden rounded-xl bg-white p-6 shadow-sm border border-gray-100">
           <div className="flex items-center">
             <div className="p-3 rounded-lg bg-blue-50">
