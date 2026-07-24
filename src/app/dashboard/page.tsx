@@ -3,24 +3,19 @@ import { redirect } from 'next/navigation'
 import { CalendarDays, Layers, DollarSign } from 'lucide-react'
 
 export default async function DashboardOverview() {
-  // 1. Initialize Supabase SSR client
   const supabase = await createClient()
-  
-  // 2. Get the authenticated user session
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
     redirect('/login')
   }
 
-  // 3. Query the stores table where owner_id matches the user id
   const { data: store } = await supabase
     .from('stores')
     .select('name')
     .eq('owner_id', user.id)
     .single()
 
-  // 4. Define the variable safely so the build succeeds
   const storeName = store?.name || 'sua loja'
 
   return (
