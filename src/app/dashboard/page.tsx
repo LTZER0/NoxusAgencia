@@ -3,22 +3,24 @@ import { redirect } from 'next/navigation'
 import { CalendarDays, Layers, DollarSign } from 'lucide-react'
 
 export default async function DashboardOverview() {
+  // 1. Initialize Supabase SSR client
   const supabase = await createClient()
+  
+  // 2. Get the authenticated user session
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Se o usuário não estiver autenticado, redireciona para o login
   if (!user) {
     redirect('/login')
   }
 
-  // Busca as informações da loja do usuário na tabela stores
+  // 3. Query the stores table where owner_id matches the user id
   const { data: store } = await supabase
     .from('stores')
     .select('name')
     .eq('owner_id', user.id)
     .single()
 
-  // Define a variável storeName com um valor fallback caso não possua um nome configurado
+  // 4. Define the variable safely so the build succeeds
   const storeName = store?.name || 'sua loja'
 
   return (
@@ -33,7 +35,7 @@ export default async function DashboardOverview() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Card 1: Agendamentos */}
+        {/* Card 1 */}
         <div className="overflow-hidden rounded-xl bg-white p-6 shadow-sm border border-gray-100">
           <div className="flex items-center">
             <div className="p-3 rounded-lg bg-blue-50">
@@ -46,7 +48,7 @@ export default async function DashboardOverview() {
           </div>
         </div>
 
-        {/* Card 2: Serviços */}
+        {/* Card 2 */}
         <div className="overflow-hidden rounded-xl bg-white p-6 shadow-sm border border-gray-100">
           <div className="flex items-center">
             <div className="p-3 rounded-lg bg-blue-50">
@@ -59,7 +61,7 @@ export default async function DashboardOverview() {
           </div>
         </div>
 
-        {/* Card 3: Faturamento */}
+        {/* Card 3 */}
         <div className="overflow-hidden rounded-xl bg-white p-6 shadow-sm border border-gray-100">
           <div className="flex items-center">
             <div className="p-3 rounded-lg bg-blue-50">
