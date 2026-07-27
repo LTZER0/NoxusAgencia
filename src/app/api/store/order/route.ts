@@ -4,22 +4,41 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient();
-    
     const body = await req.json();
-    const { storeId, productId, clientName, clientWhatsapp } = body;
+    
+    const { 
+      storeId, 
+      clientName, 
+      clientWhatsapp, 
+      customerCpf, 
+      orderType, 
+      paymentMethod, 
+      cartItems, 
+      totalAmount,
+      deliveryAddress
+    } = body;
 
-    if (!storeId || !clientName || !clientWhatsapp) {
+    if (!storeId || !clientName || !cartItems || cartItems.length === 0) {
       return NextResponse.json({ error: 'Dados incompletos.' }, { status: 400 });
     }
 
+    // Insert order. Use the first product's ID for product_id if it's required by the schema,
+    // but store the full cart in a JSON payload. We will serialize everything into the row.
     const { error } = await supabase
       .from('appointments_orders')
       .insert({
         store_id: storeId,
-        product_id: productId,
+        product_id: cartItems[0]?.product?.id, // Fallback for the existing non-null constraint if any
         client_name: clientName,
-        client_whatsapp: clientWhatsapp,
-        status: 'pending' // Estado inicial do pedido
+        client_whatsapp: clientWhatsapp || '',
+        customer_cpf: customerCpf,
+        order_type: orderType,
+        payment_method: paymentMethod,
+        status: 'pending',
+        // Assuming cart_items, total_amount, delivery_address columns were added or can be added
+        cart_items: cartItems,
+        total_amount: totalAmount,
+        delivery_address: deliveryAddress
       });
 
     if (error) {
@@ -33,3 +52,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Erro interno ao processar pedido.' }, { status: 500 });
   }
 }
+

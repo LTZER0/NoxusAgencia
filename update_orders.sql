@@ -1,0 +1,4 @@
+ALTER TABLE appointments_orders
+ADD COLUMN IF NOT EXISTS cart_items JSONB DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS total_amount NUMERIC(10, 2) DEFAULT 0,
+ADD COLUMN IF NOT EXISTS delivery_address TEXT;
