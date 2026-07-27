@@ -151,7 +151,7 @@ export default function SettingsForm({
               </div>
               {slug && (
                 <p className="mt-2 text-sm text-gray-500">
-                  Seu link público será: <strong className="text-indigo-600">seusite.com/{slug}</strong>
+                  Seu link público será: <strong className="text-indigo-600">https://ldam.vercel.app/{slug}</strong>
                 </p>
               )}
             </div>
