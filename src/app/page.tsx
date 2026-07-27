@@ -1,112 +1,71 @@
-'use client'
+import Link from "next/link";
+import { Store, ArrowRight, CheckCircle2 } from "lucide-react";
 
-import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Store, Loader2, AlertCircle } from 'lucide-react'
-
-export default function Login() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
-  const supabase = createClient()
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-
-    try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (authError) throw authError
-
-      router.push('/dashboard')
-    } catch (err: any) {
-      setError('E-mail ou senha incorretos. Verifique suas credenciais e se seu e-mail já foi confirmado.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
+export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-8">
-      <div className="mb-8 flex items-center gap-2">
-        <Store className="h-8 w-8 text-blue-600" />
-        <span className="text-2xl font-bold text-gray-900">Localiza<span className="text-blue-600">SaaS</span></span>
-      </div>
-
-      <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg border border-gray-100">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Acesse sua conta</h1>
-          <p className="text-gray-600 mt-2">Bem-vindo de volta ao seu painel.</p>
-        </div>
-
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-700">{error}</p>
-          </div>
-        )}
-
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">
-              E-mail
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
-              placeholder="seu@email.com"
-            />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-medium text-gray-700" htmlFor="password">
-                Senha
-              </label>
-              <Link href="#" className="text-sm text-blue-600 hover:underline">
-                Esqueceu a senha?
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16 items-center">
+            <div className="flex items-center gap-2">
+              <Store className="h-8 w-8 text-blue-600" />
+              <span className="text-2xl font-bold text-gray-900">Localiza<span className="text-blue-600">SaaS</span></span>
+            </div>
+            <div className="flex items-center gap-4">
+              <Link href="/login" className="text-gray-600 hover:text-gray-900 font-medium">
+                Entrar
+              </Link>
+              <Link href="/register" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                Criar conta
               </Link>
             </div>
-            <input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
-              placeholder="••••••••"
-            />
           </div>
+        </div>
+      </header>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Entrar'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center text-sm text-gray-600">
-          Ainda não tem conta?{' '}
-          <Link href="/register" className="text-blue-600 hover:underline font-medium">
-            Cadastre-se
+      {/* Hero Section */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+        <h1 className="text-5xl font-extrabold text-gray-900 tracking-tight mb-6">
+          Cardápio Digital Inteligente para<br/>
+          <span className="text-blue-600">Comércios Locais</span>
+        </h1>
+        <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-10">
+          Digitalize seu negócio, receba pedidos online e gerencie entregas de forma simples. Tudo o que você precisa para vender mais.
+        </p>
+        
+        <div className="flex justify-center gap-4">
+          <Link href="/register" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-colors flex items-center gap-2">
+            Começar Grátis <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
-      </div>
+
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-left">
+            <div className="bg-blue-100 w-12 h-12 flex items-center justify-center rounded-xl mb-4">
+              <Store className="w-6 h-6 text-blue-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Cardápio Digital</h3>
+            <p className="text-gray-600">Um link exclusivo com seus produtos, categorias e fotos para os clientes pedirem direto do celular.</p>
+          </div>
+          
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-left">
+            <div className="bg-blue-100 w-12 h-12 flex items-center justify-center rounded-xl mb-4">
+              <CheckCircle2 className="w-6 h-6 text-blue-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Gestão de Pedidos</h3>
+            <p className="text-gray-600">Acompanhe todos os pedidos em tempo real. Altere status e imprima comandas facilmente.</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-left">
+            <div className="bg-blue-100 w-12 h-12 flex items-center justify-center rounded-xl mb-4">
+              <CheckCircle2 className="w-6 h-6 text-blue-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Áreas de Entrega</h3>
+            <p className="text-gray-600">Configure taxas de entrega diferentes para cada bairro que você atende.</p>
+          </div>
+        </div>
+      </main>
     </div>
-  )
+  );
 }

@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PackageOpen } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import ServicesClient from "./ServicesClient";
+import ServicesClient from "./services/ServicesClient";
 
 export default async function ServicesPage() {
   const supabase = await createClient();
