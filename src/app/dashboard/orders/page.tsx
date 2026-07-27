@@ -45,7 +45,7 @@ export default async function OrdersPage() {
 
   // Obter pedidos da loja
   const { data: orders, error } = await supabase
-    .from('orders')
+    .from('appointments_orders')
     .select('*')
     .eq('store_id', store.id)
     .order('created_at', { ascending: false });
@@ -62,7 +62,7 @@ export default async function OrdersPage() {
     const supabaseServer = await createClient();
     
     await supabaseServer
-      .from('orders')
+      .from('appointments_orders')
       .update({ status: newStatus })
       .eq('id', orderId);
       
@@ -72,31 +72,23 @@ export default async function OrdersPage() {
   // Função auxiliar para definir os detalhes de cada status
   const getStatusDetails = (status: string) => {
     switch (status?.toLowerCase()) {
-      case 'novo':
+      case 'pending':
         return { 
           label: 'Novo', 
           color: 'bg-blue-100 text-blue-700 border-blue-200',
           icon: Clock,
-          nextStatus: 'Preparando',
-          nextLabel: 'Iniciar Preparo'
+          nextStatus: 'confirmed',
+          nextLabel: 'Confirmar'
         };
-      case 'preparando':
+      case 'confirmed':
         return { 
-          label: 'Preparando', 
+          label: 'Confirmado', 
           color: 'bg-amber-100 text-amber-700 border-amber-200',
           icon: Package,
-          nextStatus: 'Saiu para Entrega',
-          nextLabel: 'Enviar p/ Entrega'
+          nextStatus: 'completed',
+          nextLabel: 'Finalizar'
         };
-      case 'saiu para entrega':
-        return { 
-          label: 'Saiu para Entrega', 
-          color: 'bg-purple-100 text-purple-700 border-purple-200',
-          icon: Truck,
-          nextStatus: 'Finalizado',
-          nextLabel: 'Finalizar Pedido'
-        };
-      case 'finalizado':
+      case 'completed':
         return { 
           label: 'Finalizado', 
           color: 'bg-green-100 text-green-700 border-green-200',
@@ -104,9 +96,17 @@ export default async function OrdersPage() {
           nextStatus: null,
           nextLabel: null
         };
+      case 'canceled':
+        return { 
+          label: 'Cancelado', 
+          color: 'bg-red-100 text-red-700 border-red-200',
+          icon: Truck,
+          nextStatus: null,
+          nextLabel: null
+        };
       default:
         return { 
-          label: status || 'Desconhecido', 
+          label: status === 'novo' ? 'Novo' : status || 'Desconhecido', 
           color: 'bg-gray-100 text-gray-700 border-gray-200',
           icon: ShoppingBag,
           nextStatus: null,
@@ -141,12 +141,6 @@ export default async function OrdersPage() {
           {orderList.map((order) => {
             const statusDetails = getStatusDetails(order.status);
             const StatusIcon = statusDetails.icon;
-            
-            // Format total amount
-            const formattedTotal = new Intl.NumberFormat('pt-BR', {
-              style: 'currency',
-              currency: 'BRL'
-            }).format(order.total_amount || 0);
 
             // Format date
             const formattedDate = new Intl.DateTimeFormat('pt-BR', {
@@ -168,8 +162,13 @@ export default async function OrdersPage() {
                         Pedido #{String(order.id).substring(0, 8)}
                       </p>
                       <h3 className="text-base font-semibold text-gray-900">
-                        {order.customer_name || 'Cliente Não Identificado'}
+                        {order.client_name || 'Cliente Não Identificado'}
                       </h3>
+                      {order.client_whatsapp && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          WhatsApp: {order.client_whatsapp}
+                        </p>
+                      )}
                     </div>
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${statusDetails.color}`}>
                       <StatusIcon className="w-3.5 h-3.5 mr-1" />
@@ -178,10 +177,6 @@ export default async function OrdersPage() {
                   </div>
 
                   <div className="space-y-2 mt-4">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-500">Valor Total:</span>
-                      <span className="font-medium text-gray-900">{formattedTotal}</span>
-                    </div>
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-500">Data:</span>
                       <span className="text-gray-900">{formattedDate}</span>

@@ -11,7 +11,7 @@ const navigation = [
   { name: 'Pedidos', href: '/dashboard/orders', icon: ShoppingBag },
   { name: 'Meus Serviços', href: '/dashboard/services', icon: Briefcase },
   { name: 'Agenda', href: '/dashboard/agenda', icon: CalendarDays },
-  { name: 'Configurações', href: '/dashboard/configuracoes', icon: Settings },
+  { name: 'Configurações', href: '/dashboard/settings', icon: Settings },
 ]
 
 export default function ClientShell({ children }: { children: React.ReactNode }) {
