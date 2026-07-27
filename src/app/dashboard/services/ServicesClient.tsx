@@ -82,17 +82,22 @@ export default function ServicesClient({
     try {
       const parsedPrice = parseFloat(price);
       
+      const payload: any = {
+        store_id: storeId,
+        name,
+        description,
+        price: parsedPrice,
+        image_url: imageUrl,
+        ingredients: ingredients.map(({ id, ...rest }) => rest)
+      };
+
+      if (category) {
+        payload.category = category;
+      }
+
       const { data, error: insertError } = await supabase
         .from('products_services')
-        .insert({
-          store_id: storeId,
-          name,
-          description,
-          price: parsedPrice,
-          image_url: imageUrl,
-          category,
-          ingredients: ingredients.map(({ id, ...rest }) => rest) // Remover o ID temporário gerado no front
-        })
+        .insert(payload)
         .select()
         .single();
 
@@ -102,8 +107,8 @@ export default function ServicesClient({
       resetForm();
       router.refresh();
     } catch (err: any) {
-      console.error(err);
-      setError('Erro ao salvar produto. Verifique se os campos estão preenchidos corretamente.');
+      console.error("Supabase insert error:", err);
+      setError(`Erro ao salvar: ${err.message || err.details || 'Verifique os campos.'}`);
     } finally {
       setLoading(false);
     }
