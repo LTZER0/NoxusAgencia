@@ -31,7 +31,7 @@ type CartItem = {
   unitPrice: number; // calculated base on extras
 };
 
-export default function StoreFrontClient({ store, products }: { store: any; products: Product[] }) {
+export default function StoreFrontClient({ store, products, deliveryZones = [] }: { store: any; products: Product[]; deliveryZones?: any[] }) {
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -50,6 +50,7 @@ export default function StoreFrontClient({ store, products }: { store: any; prod
   const [orderType, setOrderType] = useState('delivery'); // delivery, retirada_comer, retirada_levar
   const [paymentMethod, setPaymentMethod] = useState('pix');
   const [address, setAddress] = useState({ street: '', number: '', neighborhood: '', complement: '' });
+  const [changeFor, setChangeFor] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getThemeClasses = () => {
@@ -120,12 +121,12 @@ export default function StoreFrontClient({ store, products }: { store: any; prod
 
   const currentItemPrice = useMemo(() => {
     if (!selectedProduct) return 0;
-    let price = selectedProduct.price;
+    let price = Number(selectedProduct.price);
     if (selectedProduct.ingredients) {
       Object.entries(extraIngs).forEach(([ingId, qty]) => {
-        const ing = selectedProduct.ingredients?.find(i => i.id === ingId);
+        const ing = selectedProduct.ingredients?.find((i, idx) => (i.id || `ing-${idx}`) === ingId);
         if (ing && ing.price) {
-          price += (ing.price * qty);
+          price += (Number(ing.price) * qty);
         }
       });
     }
@@ -154,16 +155,32 @@ export default function StoreFrontClient({ store, products }: { store: any; prod
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
   const cartTotalValue = cart.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
-  const deliveryFee = store.delivery_fee || 0;
-  const finalTotalValue = cartTotalValue + (orderType === 'delivery' ? deliveryFee : 0);
+  
+  const deliveryFee = useMemo(() => {
+    if (orderType !== 'delivery') return 0;
+    if (deliveryZones.length > 0 && address.neighborhood) {
+      const zone = deliveryZones.find(z => z.neighborhood === address.neighborhood);
+      if (zone) return Number(zone.fee);
+    }
+    return Number(store.delivery_fee) || 0;
+  }, [orderType, address.neighborhood, deliveryZones, store.delivery_fee]);
+
+  const finalTotalValue = cartTotalValue + deliveryFee;
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const fullAddress = orderType === 'delivery' 
-      ? `${address.street}, ${address.number} - ${address.neighborhood} ${address.complement ? `(${address.complement})` : ''}`
-      : null;
+    let fullAddress = null;
+    if (orderType === 'delivery') {
+      fullAddress = `${address.street}, ${address.number} - ${address.neighborhood} ${address.complement ? `(${address.complement})` : ''}`;
+    }
+
+    // Include payment notes if paying with cash
+    let paymentDetails = paymentMethod;
+    if (paymentMethod === 'dinheiro' && changeFor) {
+      paymentDetails = `dinheiro (Troco para R$ ${changeFor})`;
+    }
 
     try {
       const res = await fetch('/api/store/order', {
@@ -175,7 +192,7 @@ export default function StoreFrontClient({ store, products }: { store: any; prod
           clientWhatsapp,
           customerCpf,
           orderType,
-          paymentMethod,
+          paymentMethod: paymentDetails,
           cartItems: cart,
           totalAmount: finalTotalValue,
           deliveryAddress: fullAddress
@@ -223,8 +240,10 @@ export default function StoreFrontClient({ store, products }: { store: any; prod
               <div className="space-y-5 border-t border-gray-200/20 pt-4">
                 <h3 className="font-semibold text-lg flex items-center gap-2">Customização</h3>
                 
-                {selectedProduct.ingredients.map(ing => (
-                  <div key={ing.id} className="flex flex-col gap-2 p-3 rounded-xl bg-gray-500/5">
+                {selectedProduct.ingredients.map((ing, idx) => {
+                  const ingKey = ing.id || `ing-${idx}`;
+                  return (
+                  <div key={ingKey} className="flex flex-col gap-2 p-3 rounded-xl bg-gray-500/5">
                     <div className="flex justify-between items-center">
                       <span className="font-medium">{ing.name}</span>
                       {ing.price > 0 && <span className="text-sm font-semibold opacity-70">+ {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ing.price)}</span>}
@@ -235,13 +254,13 @@ export default function StoreFrontClient({ store, products }: { store: any; prod
                           <input 
                             type="checkbox" 
                             className="rounded border-gray-300 text-red-500 focus:ring-red-500"
-                            checked={removedIngs.includes(ing.id)}
+                            checked={removedIngs.includes(ingKey)}
                             onChange={(e) => {
                               if (e.target.checked) {
-                                setRemovedIngs([...removedIngs, ing.id]);
-                                setExtraIngs({ ...extraIngs, [ing.id]: 0 }); // reset extra if removed
+                                setRemovedIngs([...removedIngs, ingKey]);
+                                setExtraIngs({ ...extraIngs, [ingKey]: 0 }); // reset extra if removed
                               } else {
-                                setRemovedIngs(removedIngs.filter(id => id !== ing.id));
+                                setRemovedIngs(removedIngs.filter(id => id !== ingKey));
                               }
                             }}
                           />
@@ -252,16 +271,18 @@ export default function StoreFrontClient({ store, products }: { store: any; prod
                       {ing.can_add && (
                         <div className="flex items-center gap-3 bg-gray-500/10 rounded-full px-2 py-1 ml-auto">
                           <button 
-                            disabled={!extraIngs[ing.id] || removedIngs.includes(ing.id)}
-                            onClick={() => setExtraIngs({...extraIngs, [ing.id]: (extraIngs[ing.id] || 0) - 1})}
+                            type="button"
+                            disabled={!extraIngs[ingKey] || removedIngs.includes(ingKey)}
+                            onClick={() => setExtraIngs({...extraIngs, [ingKey]: Math.max(0, (extraIngs[ingKey] || 0) - 1)})}
                             className="p-1 rounded-full hover:bg-gray-500/20 disabled:opacity-30"
                           >
                             <Minus className="w-3.5 h-3.5" />
                           </button>
-                          <span className="text-sm font-medium w-4 text-center">{extraIngs[ing.id] || 0}</span>
+                          <span className="text-sm font-medium w-4 text-center">{extraIngs[ingKey] || 0}</span>
                           <button 
-                            disabled={removedIngs.includes(ing.id)}
-                            onClick={() => setExtraIngs({...extraIngs, [ing.id]: (extraIngs[ing.id] || 0) + 1})}
+                            type="button"
+                            disabled={removedIngs.includes(ingKey)}
+                            onClick={() => setExtraIngs({...extraIngs, [ingKey]: (extraIngs[ingKey] || 0) + 1})}
                             className="p-1 rounded-full hover:bg-gray-500/20 disabled:opacity-30"
                           >
                             <Plus className="w-3.5 h-3.5" />
@@ -270,7 +291,7 @@ export default function StoreFrontClient({ store, products }: { store: any; prod
                       )}
                     </div>
                   </div>
-                ))}
+                )})}
               </div>
             )}
           </div>
@@ -443,12 +464,12 @@ export default function StoreFrontClient({ store, products }: { store: any; prod
                             {(item.removedIngredients.length > 0 || Object.keys(item.extraIngredients).length > 0) && (
                               <div className="text-sm opacity-70 space-y-1">
                                 {item.removedIngredients.map(id => {
-                                  const ing = item.product.ingredients?.find(i => i.id === id);
+                                  const ing = item.product.ingredients?.find((i, idx) => (i.id || `ing-${idx}`) === id);
                                   return ing ? <p key={id}>Sem: {ing.name}</p> : null;
                                 })}
                                 {Object.entries(item.extraIngredients).map(([id, qty]) => {
                                   if (qty === 0) return null;
-                                  const ing = item.product.ingredients?.find(i => i.id === id);
+                                  const ing = item.product.ingredients?.find((i, idx) => (i.id || `ing-${idx}`) === id);
                                   return ing ? <p key={id}>Extra: {qty}x {ing.name}</p> : null;
                                 })}
                               </div>
@@ -512,7 +533,29 @@ export default function StoreFrontClient({ store, products }: { store: any; prod
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-semibold mb-1">Bairro</label>
-                            <input required type="text" value={address.neighborhood} onChange={e => setAddress({...address, neighborhood: e.target.value})} className={`w-full rounded-xl p-3 ${theme.inputBg}`} />
+                            {deliveryZones.length > 0 ? (
+                              <select 
+                                required 
+                                value={address.neighborhood} 
+                                onChange={e => setAddress({...address, neighborhood: e.target.value})} 
+                                className={`w-full rounded-xl p-3 ${theme.inputBg}`}
+                              >
+                                <option value="">Selecione um bairro</option>
+                                {deliveryZones.map(zone => (
+                                  <option key={zone.id} value={zone.neighborhood}>
+                                    {zone.neighborhood} (+{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(zone.fee)})
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <input 
+                                required 
+                                type="text" 
+                                value={address.neighborhood} 
+                                onChange={e => setAddress({...address, neighborhood: e.target.value})} 
+                                className={`w-full rounded-xl p-3 ${theme.inputBg}`} 
+                              />
+                            )}
                           </div>
                           <div>
                             <label className="block text-sm font-semibold mb-1">Complemento</label>
@@ -524,10 +567,10 @@ export default function StoreFrontClient({ store, products }: { store: any; prod
 
                     <div className="space-y-4">
                       <h3 className="font-bold border-b border-gray-200/20 pb-2">Pagamento</h3>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-1 gap-2">
                         {[
-                          { id: 'pix', label: 'PIX' },
-                          { id: 'cartao', label: 'Cartão' },
+                          { id: 'pix', label: 'Já pago no PIX' },
+                          { id: 'cartao', label: 'Cartão (pagar na entrega)' },
                           { id: 'dinheiro', label: 'Dinheiro' }
                         ].map(type => (
                           <label key={type.id} className={`cursor-pointer rounded-xl p-3 text-center text-sm font-semibold border-2 transition-colors ${paymentMethod === type.id ? `border-${theme.primaryText.split('-')[1]}-500 bg-${theme.primaryText.split('-')[1]}-500/10` : 'border-transparent bg-gray-500/5 hover:bg-gray-500/10'}`}>
@@ -536,6 +579,19 @@ export default function StoreFrontClient({ store, products }: { store: any; prod
                           </label>
                         ))}
                       </div>
+
+                      {paymentMethod === 'dinheiro' && (
+                        <div className="animate-in slide-in-from-top-2 pt-2">
+                          <label className="block text-sm font-semibold mb-1">Troco para quanto?</label>
+                          <input 
+                            type="text" 
+                            value={changeFor} 
+                            onChange={e => setChangeFor(e.target.value)} 
+                            className={`w-full rounded-xl p-3 ${theme.inputBg} focus:ring-2 focus:ring-${theme.primaryText.split('-')[1]}-500`} 
+                            placeholder="Ex: 50, 100, ou deixe em branco se não precisar" 
+                          />
+                        </div>
+                      )}
                     </div>
                   </form>
                 )}

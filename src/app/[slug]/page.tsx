@@ -31,10 +31,18 @@ export default async function StoreFrontPage(props: { params: Promise<{ slug: st
     .select("*")
     .eq("store_id", store.id);
 
+  // Buscar as áreas de entrega
+  const { data: deliveryZones } = await supabase
+    .from("delivery_zones")
+    .select("*")
+    .eq("store_id", store.id)
+    .order("neighborhood", { ascending: true });
+
   return (
     <StoreFrontClient 
       store={store} 
       products={products || []} 
+      deliveryZones={deliveryZones || []}
     />
   );
 }

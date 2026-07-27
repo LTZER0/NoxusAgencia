@@ -9,6 +9,7 @@ import {
   ArrowRight,
   ClipboardList
 } from "lucide-react";
+import PrintReceiptButton from "./PrintReceiptButton";
 
 export default async function OrdersPage() {
   const supabase = await createClient();
@@ -25,7 +26,7 @@ export default async function OrdersPage() {
   // Obter a loja do usuário
   const { data: store } = await supabase
     .from('stores')
-    .select('id')
+    .select('id, name')
     .eq('owner_id', user.id)
     .single();
 
@@ -182,19 +183,33 @@ export default async function OrdersPage() {
                       <span className="text-gray-900">{formattedDate}</span>
                     </div>
                   </div>
+                  
+                  <PrintReceiptButton order={order} storeName={store.name || 'Loja'} />
                 </div>
 
-                {statusDetails.nextStatus && (
-                  <div className="bg-gray-50 border-t border-gray-100 p-4">
-                    <form action={updateOrderStatus.bind(null, order.id, statusDetails.nextStatus)}>
-                      <button 
-                        type="submit"
-                        className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
-                      >
-                        {statusDetails.nextLabel}
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </form>
+                {(statusDetails.nextStatus || (order.status !== 'canceled' && order.status !== 'completed')) && (
+                  <div className="bg-gray-50 border-t border-gray-100 p-4 flex flex-col gap-2">
+                    {statusDetails.nextStatus && (
+                      <form action={updateOrderStatus.bind(null, order.id, statusDetails.nextStatus)}>
+                        <button 
+                          type="submit"
+                          className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
+                        >
+                          {statusDetails.nextLabel}
+                          <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </form>
+                    )}
+                    {(order.status !== 'canceled' && order.status !== 'completed') && (
+                      <form action={updateOrderStatus.bind(null, order.id, 'canceled')}>
+                        <button 
+                          type="submit"
+                          className="w-full flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
+                        >
+                          Cancelar Pedido
+                        </button>
+                      </form>
+                    )}
                   </div>
                 )}
               </div>
