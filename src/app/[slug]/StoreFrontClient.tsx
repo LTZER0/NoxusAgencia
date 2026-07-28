@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, MapPin, CreditCard, User, Phone, CheckCircle2 } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, MapPin, CreditCard, User, Phone, CheckCircle2, Home, Clock, Utensils, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 type Ingredient = {
@@ -52,6 +52,13 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
   const [address, setAddress] = useState({ street: '', number: '', neighborhood: '', complement: '' });
   const [changeFor, setChangeFor] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [activeCategory, setActiveCategory] = useState<string>('Todos');
+
+  const categories = useMemo(() => {
+    const cats = Array.from(new Set(products.map(p => p.category || 'Geral').filter(Boolean)));
+    return cats.length > 0 ? cats : ['Geral'];
+  }, [products]);
 
   const getThemeClasses = () => {
     const isDark = store.theme_mode === 'preto';
@@ -395,87 +402,224 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
   };
 
   return (
-    <div className={`min-h-screen ${theme.bg} ${theme.text} transition-colors duration-300`}>
-      {/* Header */}
-      <header className={`${theme.secondaryBg} border-b ${theme.border} sticky top-0 z-30 shadow-sm`}>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full ${theme.primaryBg} flex items-center justify-center text-white shadow-sm`}>
-              <StoreIcon className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="font-bold text-lg leading-tight">{store.name}</h1>
-              {store.description && <p className={`text-xs ${theme.mutedText} line-clamp-1`}>{store.description}</p>}
-            </div>
+    <div className={`min-h-screen ${theme.bg} ${theme.text} transition-colors duration-300 pb-16`}>
+      {/* 1. Cover & Store Header (Anota Aí style banner & logo) */}
+      <div className="relative">
+        <div className={`h-40 sm:h-48 w-full ${theme.primaryBg} bg-gradient-to-r from-black/40 via-transparent to-black/30 relative overflow-hidden flex items-center justify-center`}>
+          <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-15"></div>
+          {store.cover_url && (
+            <img src={store.cover_url} alt={store.name} className="w-full h-full object-cover absolute inset-0 opacity-80" />
+          )}
+        </div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 relative -mt-14 sm:-mt-16 flex flex-col sm:flex-row items-center sm:items-end gap-4 pb-4 border-b border-gray-200/10">
+          <div className={`w-24 h-24 sm:w-28 sm:h-28 rounded-2xl ${theme.secondaryBg} p-1 shadow-xl border-4 ${theme.border} flex items-center justify-center overflow-hidden shrink-0 z-10`}>
+            {store.logo_url ? (
+              <img src={store.logo_url} alt={store.name} className="w-full h-full object-cover rounded-xl" />
+            ) : (
+              <div className={`w-full h-full ${theme.primaryBg} rounded-xl flex items-center justify-center text-white`}>
+                <StoreIcon className="w-10 h-10" />
+              </div>
+            )}
+          </div>
+          <div className="text-center sm:text-left flex-1 min-w-0 pt-2 sm:pt-0">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight mb-1">{store.name}</h1>
+            {store.description && <p className={`text-sm ${theme.mutedText} line-clamp-2 max-w-xl`}>{store.description}</p>}
           </div>
         </div>
-      </header>
+      </div>
+
+      {/* 2. Info Bar (Operational details / status) */}
+      <div className={`${theme.secondaryBg} border-b ${theme.border} shadow-sm`}>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-center sm:justify-start gap-4 sm:gap-6 text-xs sm:text-sm font-medium">
+          <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Aberto agora
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Clock className={`w-4 h-4 ${theme.mutedText}`} />
+            <span>Entrega: <strong className={theme.text}>30 - 45 min</strong></span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <MapPin className={`w-4 h-4 ${theme.mutedText}`} />
+            <span className="truncate max-w-[200px] sm:max-w-xs">{store.street || store.neighborhood || 'Atendimento na região'}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Horizontal Category Tabs */}
+      <div className={`sticky top-0 z-30 ${theme.secondaryBg} border-b ${theme.border} shadow-md backdrop-blur-md bg-opacity-95 dark:bg-opacity-95 transition-all`}>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth pb-1">
+            {['Todos', ...categories].map((category) => {
+              const isActive = activeCategory === category;
+              return (
+                <button
+                  key={category}
+                  onClick={() => setActiveCategory(category)}
+                  className={`whitespace-nowrap px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all transform duration-150 shrink-0 flex items-center gap-1.5 ${
+                    isActive
+                      ? `${theme.primaryBg} text-white shadow-md scale-105`
+                      : `${theme.cartBg} ${theme.mutedText} hover:${theme.text} border ${theme.border}`
+                  }`}
+                >
+                  {category === 'Todos' && <Sparkles className="w-3.5 h-3.5" />}
+                  {category}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-32">
-        <div className="mb-8">
-          <h2 className="text-2xl font-black mb-2">Cardápio Digital</h2>
-          <p className={theme.mutedText}>Escolha seus produtos e personalize do seu jeito.</p>
-        </div>
-
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-32 md:pb-24">
         {products.length === 0 ? (
-          <div className={`${theme.secondaryBg} rounded-2xl p-8 text-center border ${theme.border}`}>
-            <p className={theme.mutedText}>Nenhum produto disponível no momento.</p>
+          <div className={`${theme.secondaryBg} rounded-2xl p-12 text-center border ${theme.border} my-8`}>
+            <Utensils className={`w-12 h-12 mx-auto mb-3 opacity-30 ${theme.mutedText}`} />
+            <p className={`text-base font-medium ${theme.mutedText}`}>Nenhum produto disponível no cardápio no momento.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {products.map(product => (
-              <div 
-                key={product.id}
-                onClick={() => handleProductClick(product)}
-                className={`${theme.secondaryBg} border ${theme.border} rounded-2xl p-4 flex gap-4 cursor-pointer hover:shadow-md transition-shadow group`}
-              >
-                <div className="flex-1 min-w-0 flex flex-col">
-                  <h3 className="font-bold text-lg mb-1 group-hover:underline decoration-2 underline-offset-2">{product.name}</h3>
-                  <p className={`text-sm ${theme.mutedText} line-clamp-2 mb-3 flex-1`}>{product.description}</p>
-                  <div className="font-bold text-lg mt-auto">
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
-                  </div>
-                </div>
-                {product.image_url ? (
-                  <div className="w-28 h-28 rounded-xl overflow-hidden shrink-0 bg-gray-100">
-                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
-                  </div>
-                ) : (
-                  <div className="w-28 h-28 rounded-xl overflow-hidden shrink-0 bg-gray-100 flex items-center justify-center text-gray-300">
-                    Sem foto
-                  </div>
-                )}
-              </div>
-            ))}
+          <div className="space-y-8">
+            {categories
+              .filter((cat) => activeCategory === 'Todos' || activeCategory === cat)
+              .map((cat) => {
+                const categoryProducts = products.filter((p) => (p.category || 'Geral') === cat);
+                if (categoryProducts.length === 0) return null;
+
+                return (
+                  <section key={cat} className="space-y-3">
+                    <div className="flex items-center gap-2 border-l-4 border-emerald-500 pl-3 py-1">
+                      <h2 className="text-xl sm:text-2xl font-black tracking-tight">{cat}</h2>
+                      <span className={`text-xs ${theme.mutedText} font-semibold px-2 py-0.5 rounded-full ${theme.secondaryBg} border ${theme.border}`}>
+                        {categoryProducts.length}
+                      </span>
+                    </div>
+
+                    {/* 4. Product Card Layout (Title, desc, price left | Image right) */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                      {categoryProducts.map((product) => (
+                        <div
+                          key={product.id}
+                          onClick={() => handleProductClick(product)}
+                          className={`${theme.secondaryBg} border ${theme.border} rounded-2xl p-4 flex justify-between items-stretch gap-4 cursor-pointer hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 group relative overflow-hidden`}
+                        >
+                          {/* Left Content */}
+                          <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                            <div>
+                              <h3 className="font-bold text-base sm:text-lg mb-1 group-hover:underline decoration-2 underline-offset-2 leading-snug">
+                                {product.name}
+                              </h3>
+                              <p className={`text-xs sm:text-sm ${theme.mutedText} line-clamp-2 mb-3 leading-relaxed`}>
+                                {product.description || 'Delicioso e preparado com ingredientes selecionados.'}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 mt-auto pt-1">
+                              <span className="font-black text-base sm:text-lg text-emerald-600 dark:text-emerald-400">
+                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
+                              </span>
+                              {product.ingredients && product.ingredients.length > 0 && (
+                                <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-gray-500/10 font-semibold opacity-80">
+                                  Personalizável
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Right Image */}
+                          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden shrink-0 bg-gray-500/10 relative shadow-sm group-hover:scale-105 transition-transform duration-300">
+                            {product.image_url ? (
+                              <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 p-2 text-center">
+                                <Utensils className="w-6 h-6 mb-1 opacity-40" />
+                                <span className="text-[10px] font-medium opacity-60">Sem foto</span>
+                              </div>
+                            )}
+                            <div className={`absolute bottom-1.5 right-1.5 ${theme.primaryBg} text-white p-1.5 rounded-lg shadow-md opacity-90 group-hover:opacity-100 transition-all transform group-hover:scale-110`}>
+                              <Plus className="w-3.5 h-3.5" />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
           </div>
         )}
       </main>
 
       {/* Floating Cart Button */}
       {totalItems > 0 && !isCartOpen && (
-        <div className="fixed bottom-6 left-0 right-0 px-4 sm:px-0 z-20 flex justify-center animate-in slide-in-from-bottom-10">
+        <div className="fixed bottom-20 md:bottom-6 left-0 right-0 px-4 sm:px-0 z-30 flex justify-center animate-in slide-in-from-bottom-10 duration-300">
           <button
             onClick={() => {
               setCheckoutStep('cart');
               setIsCartOpen(true);
             }}
-            className={`w-full max-w-md ${theme.primaryBg} ${theme.primaryHover} text-white rounded-2xl shadow-xl py-4 px-5 flex items-center justify-between transition-all transform hover:scale-[1.02] active:scale-[0.98]`}
+            className={`w-full max-w-md ${theme.primaryBg} ${theme.primaryHover} text-white rounded-2xl shadow-2xl py-4 px-5 flex items-center justify-between transition-all transform hover:scale-[1.02] active:scale-[0.98] border border-white/10`}
           >
             <div className="flex items-center gap-3">
-              <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold">
+              <div className="bg-white/20 backdrop-blur-md px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
                 {totalItems} {totalItems === 1 ? 'item' : 'itens'}
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-semibold">Ver Pedido</span>
-              <span className="font-bold ml-2 border-l border-white/20 pl-3">
+              <span className="font-bold text-sm tracking-wide uppercase">Ver Pedido</span>
+              <span className="font-black text-base ml-2 border-l border-white/20 pl-3">
                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cartTotalValue)}
               </span>
             </div>
           </button>
         </div>
       )}
+
+      {/* 5. Fixed Bottom Navigation Bar (Mobile / App UX) */}
+      <nav className={`fixed bottom-0 left-0 right-0 z-40 ${theme.secondaryBg} border-t ${theme.border} px-4 py-2 flex justify-around items-center shadow-[0_-4px_15px_rgba(0,0,0,0.08)] md:hidden backdrop-blur-lg bg-opacity-95 dark:bg-opacity-95`}>
+        <button
+          onClick={() => {
+            setIsCartOpen(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${!isCartOpen ? `${theme.primaryText} font-bold scale-105` : `${theme.mutedText} opacity-70`}`}
+        >
+          <Home className="w-5 h-5" />
+          <span className="text-[11px]">Início</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setCheckoutStep('cart');
+            setIsCartOpen(true);
+          }}
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all relative ${isCartOpen && checkoutStep === 'cart' ? `${theme.primaryText} font-bold scale-105` : `${theme.mutedText} opacity-70`}`}
+        >
+          <div className="relative">
+            <ShoppingCart className="w-5 h-5" />
+            {totalItems > 0 && (
+              <span className={`absolute -top-1.5 -right-2.5 ${theme.primaryBg} text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm`}>
+                {totalItems}
+              </span>
+            )}
+          </div>
+          <span className="text-[11px]">Carrinho</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setCheckoutStep('checkout');
+            if (cart.length > 0) {
+              setIsCartOpen(true);
+            } else {
+              alert('Adicione ao menos um item ao carrinho para fazer ou acompanhar pedidos.');
+            }
+          }}
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${isCartOpen && checkoutStep === 'checkout' ? `${theme.primaryText} font-bold scale-105` : `${theme.mutedText} opacity-70`}`}
+        >
+          <Clock className="w-5 h-5" />
+          <span className="text-[11px]">Pedidos</span>
+        </button>
+      </nav>
 
       {renderProductModal()}
 
