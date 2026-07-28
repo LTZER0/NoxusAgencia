@@ -10,7 +10,7 @@ ALTER TABLE delivery_zones ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Gestão de visualização de zonas de entrega" ON delivery_zones
     FOR SELECT
-    USING (store_id IN (SELECT id FROM stores WHERE owner_id = auth.uid()));
+    USING (true);
 
 CREATE POLICY "Gestão de inserção de zonas de entrega" ON delivery_zones
     FOR INSERT

@@ -159,7 +159,7 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
   const deliveryFee = useMemo(() => {
     if (orderType !== 'delivery') return 0;
     if (deliveryZones.length > 0 && address.neighborhood) {
-      const zone = deliveryZones.find(z => z.neighborhood === address.neighborhood);
+      const zone = deliveryZones.find(z => z.neighborhood_name === address.neighborhood);
       if (zone) return Number(zone.fee);
     }
     return 0;
@@ -202,6 +202,9 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
       if (res.ok) {
         setCheckoutStep('success');
         setCart([]);
+        // Optional: Reset payment method so next order doesn't default to PIX if they don't want it
+        setPaymentMethod('');
+        setChangeFor('');
       } else {
         const data = await res.json();
         alert(data.error || 'Erro ao processar pedido.');
@@ -412,7 +415,10 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
       {/* Slide-over Cart & Checkout */}
       {isCartOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setIsCartOpen(false)} />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => {
+            setIsCartOpen(false);
+            if (checkoutStep === 'success') setCheckoutStep('cart');
+          }} />
           <div className="fixed inset-y-0 right-0 max-w-md w-full flex">
             <div className={`w-full h-full ${theme.cartBg} shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 rounded-l-2xl sm:rounded-none overflow-hidden`}>
               
@@ -422,7 +428,10 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
                   {checkoutStep === 'checkout' && <CreditCard className={`w-5 h-5 ${theme.primaryText}`} />}
                   {checkoutStep === 'cart' ? 'Seu Pedido' : 'Finalizar Pedido'}
                 </h2>
-                <button onClick={() => setIsCartOpen(false)} className="p-2 rounded-full hover:bg-gray-500/10 transition-colors">
+                <button onClick={() => {
+                  setIsCartOpen(false);
+                  if (checkoutStep === 'success') setCheckoutStep('cart');
+                }} className="p-2 rounded-full hover:bg-gray-500/10 transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -583,8 +592,8 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
                               >
                                 <option value="">Selecione um bairro</option>
                                 {deliveryZones.map(zone => (
-                                  <option key={zone.id} value={zone.neighborhood}>
-                                    {zone.neighborhood} (+{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(zone.fee)})
+                                  <option key={zone.id} value={zone.neighborhood_name}>
+                                    {zone.neighborhood_name} (+{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(zone.fee)})
                                   </option>
                                 ))}
                               </select>
@@ -615,7 +624,7 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
                           { id: 'dinheiro', label: 'Dinheiro' }
                         ].map(type => (
                           <label key={type.id} className={`cursor-pointer rounded-xl p-3 text-center text-sm font-semibold border-2 transition-colors ${paymentMethod === type.id ? `border-${theme.primaryText.split('-')[1]}-500 bg-${theme.primaryText.split('-')[1]}-500/10` : 'border-transparent bg-gray-500/5 hover:bg-gray-500/10'}`}>
-                            <input type="radio" name="paymentMethod" value={type.id} checked={paymentMethod === type.id} onChange={e => setPaymentMethod(e.target.value)} className="sr-only" />
+                            <input required type="radio" name="paymentMethod" value={type.id} checked={paymentMethod === type.id} onChange={e => setPaymentMethod(e.target.value)} className="sr-only" />
                             {type.label}
                           </label>
                         ))}
