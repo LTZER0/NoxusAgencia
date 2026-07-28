@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Store, Link as LinkIcon, Phone, Save, CheckCircle, AlertCircle, MapPin, Building, Hash, Banknote, Tag, Palette } from 'lucide-react';
+import { Store, Link as LinkIcon, Phone, Save, CheckCircle, AlertCircle, MapPin, Building, Hash, Tag, Palette } from 'lucide-react';
 
 export default function SettingsForm({ 
   initialStore, 
@@ -23,7 +23,7 @@ export default function SettingsForm({
   const [block, setBlock] = useState(initialStore?.block || '');
   const [lot, setLot] = useState(initialStore?.lot || '');
   const [neighborhood, setNeighborhood] = useState(initialStore?.neighborhood || '');
-  const [deliveryFee, setDeliveryFee] = useState(initialStore?.delivery_fee?.toString() || '');
+  const [deliveryFee] = useState(initialStore?.delivery_fee?.toString() || '');
   const [storeCategory, setStoreCategory] = useState(initialStore?.store_category || 'lanchonete');
   const [themeMode, setThemeMode] = useState(initialStore?.theme_mode || 'branco');
 
