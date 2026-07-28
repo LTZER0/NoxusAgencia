@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Package, Search, Clock, CheckCircle, Truck, MapPin } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
@@ -22,6 +22,13 @@ export default function TrackingClient({ store }: { store: any }) {
   const [hasSearched, setHasSearched] = useState(false);
   
   const supabase = createClient();
+
+  useEffect(() => {
+    const savedPhone = localStorage.getItem('@delivery_client_whatsapp');
+    if (savedPhone) {
+      setIdentifier(savedPhone);
+    }
+  }, []);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
