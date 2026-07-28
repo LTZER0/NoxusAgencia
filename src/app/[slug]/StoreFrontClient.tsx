@@ -62,54 +62,83 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
 
   const getThemeClasses = () => {
     switch (store.store_category) {
-      case 'hamburgueria':
-        return {
-          bg: 'bg-stone-900',
-          text: 'text-stone-100',
-          primaryBg: 'bg-amber-500',
-          primaryHover: 'hover:bg-amber-600',
-          primaryText: 'text-amber-500',
-          secondaryBg: 'bg-stone-800',
-          border: 'border-stone-800',
-          mutedText: 'text-stone-400',
-          cartBg: 'bg-stone-900 text-stone-100',
-          inputBg: 'bg-stone-800 text-white border-stone-700',
-        };
       case 'acaiteria':
         return {
-          bg: 'bg-purple-900',
-          text: 'text-white',
-          primaryBg: 'bg-fuchsia-500',
-          primaryHover: 'hover:bg-fuchsia-600',
-          primaryText: 'text-fuchsia-400',
-          secondaryBg: 'bg-purple-800',
-          border: 'border-purple-800',
-          mutedText: 'text-purple-300',
+          bg: 'bg-gray-50/50',
+          text: 'text-gray-900',
+          primaryBg: 'bg-purple-600',
+          primaryHover: 'hover:bg-purple-700',
+          primaryText: 'text-purple-600',
+          priceText: 'text-purple-600',
+          hoverText: 'group-hover:text-purple-600',
+          badgeBg: 'bg-purple-50 text-purple-700 border-purple-200',
+          secondaryBg: 'bg-white',
+          border: 'border-gray-200/80',
+          mutedText: 'text-gray-500',
+          cartBg: 'bg-white text-gray-900',
+          inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
+        };
+      case 'hamburgueria':
+        return {
+          bg: 'bg-gray-50/50',
+          text: 'text-gray-900',
+          primaryBg: 'bg-amber-600',
+          primaryHover: 'hover:bg-amber-700',
+          primaryText: 'text-amber-600',
+          priceText: 'text-amber-600',
+          hoverText: 'group-hover:text-amber-600',
+          badgeBg: 'bg-amber-50 text-amber-800 border-amber-200',
+          secondaryBg: 'bg-white',
+          border: 'border-gray-200/80',
+          mutedText: 'text-gray-500',
           cartBg: 'bg-white text-gray-900',
           inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
         };
       case 'pizzaria':
         return {
-          bg: 'bg-red-50',
-          text: 'text-red-950',
+          bg: 'bg-gray-50/50',
+          text: 'text-gray-900',
           primaryBg: 'bg-red-600',
           primaryHover: 'hover:bg-red-700',
           primaryText: 'text-red-600',
+          priceText: 'text-red-600',
+          hoverText: 'group-hover:text-red-600',
+          badgeBg: 'bg-red-50 text-red-700 border-red-200',
           secondaryBg: 'bg-white',
-          border: 'border-red-100',
-          mutedText: 'text-red-700/70',
+          border: 'border-gray-200/80',
+          mutedText: 'text-gray-500',
           cartBg: 'bg-white text-gray-900',
           inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
         };
-      default: // lanchonete or fallback
+      case 'restaurante':
         return {
-          bg: 'bg-gray-50',
+          bg: 'bg-gray-50/50',
+          text: 'text-gray-900',
+          primaryBg: 'bg-amber-800',
+          primaryHover: 'hover:bg-amber-900',
+          primaryText: 'text-amber-800',
+          priceText: 'text-amber-800',
+          hoverText: 'group-hover:text-amber-800',
+          badgeBg: 'bg-amber-100 text-amber-900 border-amber-300',
+          secondaryBg: 'bg-white',
+          border: 'border-gray-200/80',
+          mutedText: 'text-gray-500',
+          cartBg: 'bg-white text-gray-900',
+          inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
+        };
+      case 'lanchonete':
+      default:
+        return {
+          bg: 'bg-gray-50/50',
           text: 'text-gray-900',
           primaryBg: 'bg-indigo-600',
           primaryHover: 'hover:bg-indigo-700',
           primaryText: 'text-indigo-600',
+          priceText: 'text-indigo-600',
+          hoverText: 'group-hover:text-indigo-600',
+          badgeBg: 'bg-indigo-50 text-indigo-700 border-indigo-200',
           secondaryBg: 'bg-white',
-          border: 'border-gray-200',
+          border: 'border-gray-200/80',
           mutedText: 'text-gray-500',
           cartBg: 'bg-white text-gray-900',
           inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
@@ -464,7 +493,7 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
                         >
                           <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                             <div>
-                              <h4 className="font-bold text-base sm:text-lg mb-1 group-hover:text-emerald-500 transition-colors leading-snug">
+                              <h4 className={`font-bold text-base sm:text-lg mb-1 ${theme.hoverText} transition-colors leading-snug`}>
                                 {product.name}
                               </h4>
                               <p className={`text-xs sm:text-sm ${theme.mutedText} line-clamp-2 mb-3 leading-relaxed`}>
@@ -472,11 +501,11 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
                               </p>
                             </div>
                             <div className="flex items-center gap-2 mt-2">
-                              <span className="font-extrabold text-base sm:text-lg text-emerald-500">
+                              <span className={`font-extrabold text-base sm:text-lg ${theme.priceText}`}>
                                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
                               </span>
                               {product.ingredients && product.ingredients.length > 0 && (
-                                <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${theme.bg} ${theme.mutedText} border ${theme.border}`}>
+                                <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${theme.badgeBg}`}>
                                   Personalizável
                                 </span>
                               )}
