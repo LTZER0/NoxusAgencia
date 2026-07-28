@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Package, Search, Clock, CheckCircle, Truck, MapPin } from 'lucide-react';
+import { Package, Search, Clock, CheckCircle, Truck, MapPin, Phone } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 type Order = {
@@ -178,19 +178,40 @@ export default function TrackingClient({ store }: { store: any }) {
                     {order.payment_method === 'pix' && order.status === 'pending' && (
                       <div className="mt-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
                         <p className="font-semibold text-gray-800 mb-2">Finalize seu pagamento via PIX</p>
-                        <p className="text-xs text-gray-600 mb-3">Copie a chave abaixo e envie o comprovante.</p>
-                        <button 
-                          onClick={(e) => {
-                            navigator.clipboard.writeText("00020101021126580014br.gov.bcb.pix0136123e4567-e89b-12d3-a456-426614174000520400005303986540510.005802BR5913Nome da Loja6008S. Paulo62070503***63041D3D");
-                            const target = e.currentTarget;
-                            const origText = target.innerText;
-                            target.innerText = "Chave Copiada!";
-                            setTimeout(() => { target.innerText = origText }, 2000);
-                          }}
-                          className="w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold py-2 rounded-lg transition-colors mb-3 text-sm"
-                        >
-                          Copiar Chave PIX
-                        </button>
+                        <p className="text-xl font-bold text-gray-900 mb-2">
+                           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(order.total_amount)}
+                        </p>
+                        <p className="text-xs text-gray-600 mb-3">Copie a chave abaixo para pagar e envie o comprovante.</p>
+                        
+                        <div className="flex flex-col gap-2">
+                           <div className="bg-gray-200 p-3 rounded-lg text-sm font-mono break-all text-gray-800 text-center font-semibold">
+                             {store.pix_key || 'Chave não configurada'}
+                           </div>
+                           <button 
+                             onClick={(e) => {
+                               navigator.clipboard.writeText(store.pix_key || '');
+                               const target = e.currentTarget;
+                               target.innerText = "Chave Copiada!";
+                               setTimeout(() => { target.innerText = "Copiar Chave PIX" }, 2000);
+                             }}
+                             className="w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold py-3 rounded-lg transition-colors mb-4 text-sm"
+                           >
+                             Copiar Chave PIX
+                           </button>
+
+                           <div className="border-t border-gray-200 pt-4 mt-2">
+                             <p className="text-sm text-gray-600 mb-3 font-medium">Após realizar o pagamento, envie o comprovante pelo WhatsApp:</p>
+                             <a 
+                               href={`https://wa.me/55${(store.pix_receipt_phone || store.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Acabei de fazer o pedido #${String(order.id).substring(0, 8)} na ${store.name}. Paguei via PIX e este é o meu comprovante:`)}`}
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm"
+                             >
+                               <Phone className="w-5 h-5" />
+                               Enviar Comprovante no WhatsApp
+                             </a>
+                           </div>
+                        </div>
                       </div>
                     )}
                   </div>
