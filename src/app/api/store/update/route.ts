@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { userId, name, slug, phone, street, block, lot, neighborhood, delivery_fee, store_category, theme_mode, isUpdate } = body;
+    const { userId, name, slug, phone, street, block, lot, neighborhood, delivery_fee, store_category, theme_mode, logo_url, cover_url, isUpdate } = body;
 
     if (userId !== user.id) {
       return NextResponse.json({ error: 'Operação inválida.' }, { status: 403 });
@@ -46,6 +46,12 @@ export async function POST(req: NextRequest) {
     }
     if (theme_mode !== undefined) {
       storeData.theme_mode = theme_mode || 'branco';
+    }
+    if (logo_url !== undefined) {
+      storeData.logo_url = logo_url || null;
+    }
+    if (cover_url !== undefined) {
+      storeData.cover_url = cover_url || null;
     }
 
     if (isUpdate) {
