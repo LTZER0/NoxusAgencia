@@ -162,8 +162,8 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
       const zone = deliveryZones.find(z => z.neighborhood === address.neighborhood);
       if (zone) return Number(zone.fee);
     }
-    return Number(store.delivery_fee) || 0;
-  }, [orderType, address.neighborhood, deliveryZones, store.delivery_fee]);
+    return 0;
+  }, [orderType, address.neighborhood, deliveryZones]);
 
   const finalTotalValue = cartTotalValue + deliveryFee;
 

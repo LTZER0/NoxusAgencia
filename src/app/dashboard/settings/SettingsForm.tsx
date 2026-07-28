@@ -257,29 +257,6 @@ export default function SettingsForm({
               </div>
             </div>
 
-            <div className="sm:col-span-4">
-              <label htmlFor="deliveryFee" className="block text-sm font-medium leading-6 text-gray-900">
-                Taxa de Entrega
-              </label>
-              <div className="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm">
-                  <Banknote className="h-4 w-4 mr-2" />
-                  R$
-                </span>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  name="deliveryFee"
-                  id="deliveryFee"
-                  value={deliveryFee}
-                  onChange={(e) => setDeliveryFee(e.target.value)}
-                  className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                  placeholder="5.00"
-                />
-              </div>
-            </div>
-
           </div>
         </div>
         <div className="flex items-center justify-end gap-x-6 border-t border-gray-900/10 px-4 py-4 sm:px-8 bg-gray-50 rounded-b-xl">
