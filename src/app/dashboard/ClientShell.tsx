@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 const navigation = [
   { name: 'Visão Geral', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Pedidos', href: '/dashboard/orders', icon: ShoppingBag },
-  { name: 'Meus Serviços', href: '/dashboard/services', icon: Briefcase },
+  { name: 'Meus Produtos', href: '/dashboard/services', icon: Briefcase },
   { name: 'Áreas de Entrega', href: '/dashboard/delivery', icon: MapPin },
   { name: 'Configurações', href: '/dashboard/settings', icon: Settings },
 ]

@@ -432,7 +432,48 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
                   <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
                     <CheckCircle2 className="w-20 h-20 text-green-500" />
                     <h3 className="text-2xl font-bold">Pedido Enviado!</h3>
-                    <p className="opacity-70 max-w-[250px]">O restaurante já recebeu seu pedido. Aguarde o contato ou acompanhe o status.</p>
+                    
+                    {paymentMethod === 'pix' ? (
+                      <div className="bg-gray-100 p-4 rounded-xl w-full">
+                        <p className="font-semibold text-gray-800 mb-2">Finalize seu pagamento via PIX</p>
+                        <p className="text-sm text-gray-600 mb-4">Escaneie o QR Code ou copie a chave PIX abaixo.</p>
+                        <div className="bg-white p-2 rounded-lg border border-gray-200 inline-block mb-4">
+                           {/* Placeholder for QR Code */}
+                           <div className="w-32 h-32 bg-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center text-xs text-gray-500 font-mono text-center">QR CODE<br/>PIX</div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                           <div className="bg-gray-200 p-2 rounded text-xs font-mono break-all text-gray-700">
+                             00020101021126580014br.gov.bcb.pix0136123e4567-e89b-12d3-a456-426614174000520400005303986540510.005802BR5913Nome da Loja6008S. Paulo62070503***63041D3D
+                           </div>
+                           <button 
+                             onClick={(e) => {
+                               navigator.clipboard.writeText("00020101021126580014br.gov.bcb.pix0136123e4567-e89b-12d3-a456-426614174000520400005303986540510.005802BR5913Nome da Loja6008S. Paulo62070503***63041D3D");
+                               const target = e.currentTarget;
+                               target.innerText = "Chave Copiada!";
+                               setTimeout(() => { target.innerText = "Copiar Chave PIX" }, 2000);
+                             }}
+                             className={`w-full ${theme.primaryBg} ${theme.primaryHover} text-white font-semibold py-2 rounded-lg transition-colors mb-4`}
+                           >
+                             Copiar Chave PIX
+                           </button>
+
+                           <div className="border-t border-gray-200 pt-4 mt-2">
+                             <p className="text-sm text-gray-600 mb-3 font-medium">Após realizar o pagamento, envie o comprovante pelo WhatsApp:</p>
+                             <a 
+                               href={`https://wa.me/55${(store.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Acabei de fazer um pedido na ${store.name}. Paguei via PIX e este é o meu comprovante:`)}`}
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                             >
+                               <Phone className="w-5 h-5" /> Enviar Comprovante
+                             </a>
+                           </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="opacity-70 max-w-[250px]">O restaurante já recebeu seu pedido. Aguarde o contato ou acompanhe o status.</p>
+                    )}
+                    
                     <button 
                       onClick={() => {
                         setIsCartOpen(false);
@@ -569,7 +610,7 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
                       <h3 className="font-bold border-b border-gray-200/20 pb-2">Pagamento</h3>
                       <div className="grid grid-cols-1 gap-2">
                         {[
-                          { id: 'pix', label: 'Já pago no PIX' },
+                          { id: 'pix', label: 'PIX (Automático)' },
                           { id: 'cartao', label: 'Cartão (pagar na entrega)' },
                           { id: 'dinheiro', label: 'Dinheiro' }
                         ].map(type => (
