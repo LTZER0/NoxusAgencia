@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { userId, name, slug, phone, street, block, lot, neighborhood, delivery_fee, isUpdate } = body;
+    const { userId, name, slug, phone, street, block, lot, neighborhood, delivery_fee, store_category, theme_mode, isUpdate } = body;
 
     if (userId !== user.id) {
       return NextResponse.json({ error: 'Operação inválida.' }, { status: 403 });
@@ -22,7 +22,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Nome e Link são obrigatórios.' }, { status: 400 });
     }
 
-    const storeData = {
+    if (store_category && !['restaurante', 'hamburgueria', 'pizzaria', 'acaiteria', 'lanchonete'].includes(store_category)) {
+      return NextResponse.json({ error: 'Categoria da loja inválida.' }, { status: 400 });
+    }
+
+    if (theme_mode && !['branco', 'preto'].includes(theme_mode)) {
+      return NextResponse.json({ error: 'Tema da loja inválido.' }, { status: 400 });
+    }
+
+    const storeData: Record<string, any> = {
       name,
       slug,
       phone,
@@ -32,6 +40,13 @@ export async function POST(req: NextRequest) {
       neighborhood,
       delivery_fee: delivery_fee ? parseFloat(delivery_fee) : 0,
     };
+
+    if (store_category !== undefined) {
+      storeData.store_category = store_category || null;
+    }
+    if (theme_mode !== undefined) {
+      storeData.theme_mode = theme_mode || 'branco';
+    }
 
     if (isUpdate) {
       // Update existing store
