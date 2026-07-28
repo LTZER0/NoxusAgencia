@@ -64,10 +64,31 @@ export default async function OrdersPage() {
     "use server";
     const supabaseServer = await createClient();
     
+    // 🔒 SEGURANÇA [VULN-3]: Extrair userId do token
+    const { data: { user } } = await supabaseServer.auth.getUser();
+    if (!user) throw new Error('Não autorizado');
+
+    // 🔒 SEGURANÇA [VULN-3]: Validar enum de status
+    const VALID_STATUSES = ['pending', 'confirmed', 'completed', 'canceled'];
+    if (!VALID_STATUSES.includes(newStatus)) {
+      throw new Error('Status inválido');
+    }
+
+    // 🔒 SEGURANÇA [VULN-3]: Verificar que o pedido pertence a uma loja do usuário
+    const { data: storeOwner } = await supabaseServer
+      .from('stores')
+      .select('id')
+      .eq('owner_id', user.id)
+      .single();
+
+    if (!storeOwner) throw new Error('Loja não encontrada');
+
+    // 🔒 SEGURANÇA [VULN-3]: Update com filtro duplo (orderId + store_id)
     await supabaseServer
       .from('appointments_orders')
       .update({ status: newStatus })
-      .eq('id', orderId);
+      .eq('id', orderId)
+      .eq('store_id', storeOwner.id);
       
     revalidatePath('/dashboard/orders');
   }
