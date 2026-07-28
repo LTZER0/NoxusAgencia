@@ -54,9 +54,35 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getThemeClasses = () => {
+    const isDark = store.theme_mode === 'preto';
+
     switch (store.store_category) {
+      case 'restaurante':
+        return isDark ? {
+          bg: 'bg-stone-900',
+          text: 'text-stone-100',
+          primaryBg: 'bg-amber-700',
+          primaryHover: 'hover:bg-amber-600',
+          primaryText: 'text-amber-500',
+          secondaryBg: 'bg-stone-800',
+          border: 'border-stone-800',
+          mutedText: 'text-stone-400',
+          cartBg: 'bg-stone-900 text-stone-100',
+          inputBg: 'bg-stone-800 text-white border-stone-700',
+        } : {
+          bg: 'bg-amber-50/50',
+          text: 'text-stone-900',
+          primaryBg: 'bg-amber-800',
+          primaryHover: 'hover:bg-amber-900',
+          primaryText: 'text-amber-800',
+          secondaryBg: 'bg-white',
+          border: 'border-amber-200/60',
+          mutedText: 'text-stone-600',
+          cartBg: 'bg-white text-stone-900',
+          inputBg: 'bg-white text-stone-900 border-amber-200',
+        };
       case 'hamburgueria':
-        return {
+        return isDark ? {
           bg: 'bg-stone-900',
           text: 'text-stone-100',
           primaryBg: 'bg-amber-500',
@@ -67,22 +93,31 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
           mutedText: 'text-stone-400',
           cartBg: 'bg-stone-900 text-stone-100',
           inputBg: 'bg-stone-800 text-white border-stone-700',
-        };
-      case 'acaiteria':
-        return {
-          bg: 'bg-purple-900',
-          text: 'text-white',
-          primaryBg: 'bg-fuchsia-500',
-          primaryHover: 'hover:bg-fuchsia-600',
-          primaryText: 'text-fuchsia-400',
-          secondaryBg: 'bg-purple-800',
-          border: 'border-purple-800',
-          mutedText: 'text-purple-300',
+        } : {
+          bg: 'bg-amber-50',
+          text: 'text-amber-950',
+          primaryBg: 'bg-amber-500',
+          primaryHover: 'hover:bg-amber-600',
+          primaryText: 'text-amber-600',
+          secondaryBg: 'bg-white',
+          border: 'border-amber-200',
+          mutedText: 'text-amber-800/70',
           cartBg: 'bg-white text-gray-900',
-          inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
+          inputBg: 'bg-white text-gray-900 border-amber-200',
         };
       case 'pizzaria':
-        return {
+        return isDark ? {
+          bg: 'bg-stone-950',
+          text: 'text-red-50',
+          primaryBg: 'bg-red-600',
+          primaryHover: 'hover:bg-red-700',
+          primaryText: 'text-red-500',
+          secondaryBg: 'bg-stone-900',
+          border: 'border-stone-800',
+          mutedText: 'text-stone-400',
+          cartBg: 'bg-stone-900 text-stone-100',
+          inputBg: 'bg-stone-800 text-white border-stone-700',
+        } : {
           bg: 'bg-red-50',
           text: 'text-red-950',
           primaryBg: 'bg-red-600',
@@ -94,8 +129,43 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
           cartBg: 'bg-white text-gray-900',
           inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
         };
+      case 'acaiteria':
+        return isDark ? {
+          bg: 'bg-purple-950',
+          text: 'text-white',
+          primaryBg: 'bg-fuchsia-500',
+          primaryHover: 'hover:bg-fuchsia-600',
+          primaryText: 'text-fuchsia-400',
+          secondaryBg: 'bg-purple-900',
+          border: 'border-purple-800',
+          mutedText: 'text-purple-300',
+          cartBg: 'bg-purple-900 text-white',
+          inputBg: 'bg-purple-900 text-white border-purple-800',
+        } : {
+          bg: 'bg-purple-50',
+          text: 'text-purple-950',
+          primaryBg: 'bg-fuchsia-600',
+          primaryHover: 'hover:bg-fuchsia-700',
+          primaryText: 'text-fuchsia-600',
+          secondaryBg: 'bg-white',
+          border: 'border-purple-100',
+          mutedText: 'text-purple-700/70',
+          cartBg: 'bg-white text-gray-900',
+          inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
+        };
       default: // lanchonete or fallback
-        return {
+        return isDark ? {
+          bg: 'bg-slate-950',
+          text: 'text-slate-100',
+          primaryBg: 'bg-indigo-500',
+          primaryHover: 'hover:bg-indigo-600',
+          primaryText: 'text-indigo-400',
+          secondaryBg: 'bg-slate-900',
+          border: 'border-slate-800',
+          mutedText: 'text-slate-400',
+          cartBg: 'bg-slate-900 text-slate-100',
+          inputBg: 'bg-slate-800 text-white border-slate-700',
+        } : {
           bg: 'bg-gray-50',
           text: 'text-gray-900',
           primaryBg: 'bg-indigo-600',
