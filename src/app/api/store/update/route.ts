@@ -13,8 +13,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const { 
-      userId, name, slug, phone, street, block, lot, neighborhood, delivery_fee, 
-      store_category, theme_mode, logo_url, cover_url, isUpdate,
+      userId, name, slug, phone, street, block, lot, neighborhood, delivery_fee, isUpdate,
       accepts_pix, accepts_card, accepts_cash, pix_key, pix_receipt_phone
     } = body;
 
@@ -26,7 +25,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Nome e Link são obrigatórios.' }, { status: 400 });
     }
 
-    const storeData: Record<string, any> = {
+    const storeData = {
       name,
       slug,
       phone,
@@ -42,18 +41,6 @@ export async function POST(req: NextRequest) {
       pix_receipt_phone,
     };
 
-    if (store_category !== undefined) {
-      storeData.store_category = store_category || null;
-    }
-    if (theme_mode !== undefined) {
-      storeData.theme_mode = theme_mode || 'branco';
-    }
-    if (logo_url !== undefined) {
-      storeData.logo_url = logo_url || null;
-    }
-    if (cover_url !== undefined) {
-      storeData.cover_url = cover_url || null;
-    }
     if (isUpdate) {
       // Update existing store
       const { error } = await supabase

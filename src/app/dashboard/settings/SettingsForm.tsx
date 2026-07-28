@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Store, Link as LinkIcon, Phone, Save, CheckCircle, AlertCircle, MapPin, Building, Hash, Tag, Palette, Image as ImageIcon, Layout, Banknote } from 'lucide-react';
+import { Store, Link as LinkIcon, Phone, Save, CheckCircle, AlertCircle, MapPin, Building, Hash, Banknote } from 'lucide-react';
 
 export default function SettingsForm({ 
   initialStore, 
@@ -24,10 +24,6 @@ export default function SettingsForm({
   const [lot, setLot] = useState(initialStore?.lot || '');
   const [neighborhood, setNeighborhood] = useState(initialStore?.neighborhood || '');
   const [deliveryFee, setDeliveryFee] = useState(initialStore?.delivery_fee?.toString() || '');
-  const [storeCategory, setStoreCategory] = useState(initialStore?.store_category || 'lanchonete');
-  const [themeMode, setThemeMode] = useState(initialStore?.theme_mode || 'branco');
-  const [logoUrl, setLogoUrl] = useState(initialStore?.logo_url || '');
-  const [coverUrl, setCoverUrl] = useState(initialStore?.cover_url || '');
 
   // Métodos de pagamento
   const [acceptsPix, setAcceptsPix] = useState<boolean>(initialStore?.accepts_pix ?? true);
@@ -64,10 +60,6 @@ export default function SettingsForm({
           lot,
           neighborhood,
           delivery_fee: deliveryFee,
-          store_category: storeCategory,
-          theme_mode: themeMode,
-          logo_url: logoUrl,
-          cover_url: coverUrl,
           accepts_pix: acceptsPix,
           accepts_card: acceptsCard,
           accepts_cash: acceptsCash,
@@ -273,91 +265,6 @@ export default function SettingsForm({
                   onChange={(e) => setNeighborhood(e.target.value)}
                   className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                   placeholder="Centro"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="storeCategory" className="block text-sm font-medium leading-6 text-gray-900">
-                Categoria da Loja
-              </label>
-              <div className="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
-                <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm">
-                  <Tag className="h-4 w-4 mr-2" />
-                </span>
-                <select
-                  id="storeCategory"
-                  name="storeCategory"
-                  value={storeCategory}
-                  onChange={(e) => setStoreCategory(e.target.value)}
-                  className="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 focus:ring-0 sm:text-sm sm:leading-6"
-                >
-                  <option value="restaurante">Restaurante</option>
-                  <option value="hamburgueria">Hamburgueria</option>
-                  <option value="pizzaria">Pizzaria</option>
-                  <option value="acaiteria">Açaiteria</option>
-                  <option value="lanchonete">Lanchonete</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="themeMode" className="block text-sm font-medium leading-6 text-gray-900">
-                Tema do Cardápio
-              </label>
-              <div className="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
-                <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm">
-                  <Palette className="h-4 w-4 mr-2" />
-                </span>
-                <select
-                  id="themeMode"
-                  name="themeMode"
-                  value={themeMode}
-                  onChange={(e) => setThemeMode(e.target.value)}
-                  className="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 focus:ring-0 sm:text-sm sm:leading-6"
-                >
-                  <option value="branco">Claro (branco)</option>
-                  <option value="preto">Escuro (preto)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="logoUrl" className="block text-sm font-medium leading-6 text-gray-900">
-                Logo URL (Foto de Perfil)
-              </label>
-              <div className="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
-                <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm">
-                  <ImageIcon className="h-4 w-4 mr-2" />
-                </span>
-                <input
-                  type="text"
-                  name="logoUrl"
-                  id="logoUrl"
-                  value={logoUrl}
-                  onChange={(e) => setLogoUrl(e.target.value)}
-                  className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                  placeholder="https://exemplo.com/logo.png"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="coverUrl" className="block text-sm font-medium leading-6 text-gray-900">
-                Cover Banner URL (Capa)
-              </label>
-              <div className="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
-                <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm">
-                  <Layout className="h-4 w-4 mr-2" />
-                </span>
-                <input
-                  type="text"
-                  name="coverUrl"
-                  id="coverUrl"
-                  value={coverUrl}
-                  onChange={(e) => setCoverUrl(e.target.value)}
-                  className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                  placeholder="https://exemplo.com/capa.png"
                 />
               </div>
             </div>

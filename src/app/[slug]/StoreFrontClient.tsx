@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, MapPin, CreditCard, User, Phone, CheckCircle2 } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, MapPin, CreditCard, User, Phone, CheckCircle2, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 type Ingredient = {
@@ -34,8 +34,8 @@ type CartItem = {
 export default function StoreFrontClient({ store, products, deliveryZones = [] }: { store: any; products: Product[]; deliveryZones?: any[] }) {
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'success'>('cart');
-  const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
   
   // Customization Modal State
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -220,9 +220,6 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
       if (res.ok) {
         setCheckoutStep('success');
         setCart([]);
-        // Optional: Reset payment method so next order doesn't default to PIX if they don't want it
-        setPaymentMethod('');
-        setChangeFor('');
       } else {
         const data = await res.json();
         alert(data.error || 'Erro ao processar pedido.');
@@ -346,223 +343,99 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
   };
 
   return (
-    <div className={`min-h-screen ${theme.bg} ${theme.text} transition-colors duration-300 pb-20`}>
-      {/* 1. Cover & Store Header (Anota Aí style banner & logo) */}
-      <div className="relative">
-        <div className={`h-40 sm:h-48 w-full ${theme.primaryBg} bg-gradient-to-r from-black/40 via-transparent to-black/30 relative overflow-hidden flex items-center justify-center`}>
-          <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-15"></div>
-          {store.cover_url && (
-            <img src={store.cover_url} alt={store.name} className="w-full h-full object-cover absolute inset-0 opacity-80" />
-          )}
-        </div>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 relative -mt-14 sm:-mt-16 flex flex-col sm:flex-row items-center sm:items-end gap-4 pb-4 border-b border-gray-200/10">
-          <div className={`w-24 h-24 sm:w-28 sm:h-28 rounded-2xl ${theme.secondaryBg} p-1 shadow-xl border-4 ${theme.border} flex items-center justify-center overflow-hidden shrink-0 z-10`}>
-            {store.logo_url ? (
-              <img src={store.logo_url} alt={store.name} className="w-full h-full object-cover rounded-xl" />
-            ) : (
-              <div className={`w-full h-full ${theme.primaryBg} rounded-xl flex items-center justify-center text-white`}>
-                <StoreIcon className="w-10 h-10" />
-              </div>
-            )}
-          </div>
-          <div className="text-center sm:text-left flex-1 min-w-0 pt-2 sm:pt-0">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight mb-1">{store.name}</h1>
-                {store.description && <p className={`text-sm ${theme.mutedText} line-clamp-2 max-w-xl`}>{store.description}</p>}
-              </div>
-              <button 
-                onClick={() => router.push(`/${store.slug}/rastreio`)}
-                className={`inline-flex items-center justify-center gap-2 text-sm font-bold ${theme.primaryBg} text-white hover:opacity-90 px-4 py-2.5 rounded-xl shadow-md transition-all self-center sm:self-auto shrink-0`}
-              >
-                <User className="w-4 h-4" />
-                <span>Meus Pedidos</span>
-              </button>
+    <div className={`min-h-screen ${theme.bg} ${theme.text} transition-colors duration-300`}>
+      {/* Header */}
+      <header className={`${theme.secondaryBg} border-b ${theme.border} sticky top-0 z-30 shadow-sm`}>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-full ${theme.primaryBg} flex items-center justify-center text-white shadow-sm`}>
+              <StoreIcon className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="font-bold text-lg leading-tight">{store.name}</h1>
+              {store.description && <p className={`text-xs ${theme.mutedText} line-clamp-1`}>{store.description}</p>}
             </div>
           </div>
+          <button 
+            onClick={() => router.push(`/${store.slug}/rastreio`)}
+            className={`flex items-center gap-2 text-sm font-bold ${theme.primaryText} hover:bg-gray-500/10 px-3 py-2 rounded-full transition-colors`}
+          >
+            <User className="w-4 h-4" />
+            <span className="hidden sm:inline">Meus Pedidos</span>
+          </button>
         </div>
-      </div>
+      </header>
 
-      {/* 2. Operational Info Bar */}
-      <div className={`max-w-4xl mx-auto px-4 sm:px-6 py-3 border-b border-gray-200/10 flex flex-wrap items-center justify-center sm:justify-start gap-x-6 gap-y-2 text-xs sm:text-sm ${theme.mutedText}`}>
-        <div className="flex items-center gap-2 font-medium text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Aberto agora</span>
+      {/* Main Content */}
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-32">
+        <div className="mb-8">
+          <h2 className="text-2xl font-black mb-2">Cardápio Digital</h2>
+          <p className={theme.mutedText}>Escolha seus produtos e personalize do seu jeito.</p>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Clock className="w-4 h-4 opacity-70" />
-          <span>Entrega: 30 - 45 min</span>
-        </div>
-        {store.neighborhood && (
-          <div className="flex items-center gap-1.5">
-            <MapPin className="w-4 h-4 opacity-70" />
-            <span>{store.neighborhood}{store.street ? `, ${store.street}` : ''}</span>
-          </div>
-        )}
-      </div>
 
-      {/* 3. Horizontal Category Tabs */}
-      <div className={`sticky top-0 z-30 ${theme.secondaryBg}/95 backdrop-blur-md border-b ${theme.border} shadow-sm`}>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-2 overflow-x-auto py-3 no-scrollbar">
-            <button
-              onClick={() => setSelectedCategory('Todos')}
-              className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                selectedCategory === 'Todos'
-                  ? `${theme.primaryBg} text-white shadow-md scale-105`
-                  : `${theme.bg} ${theme.mutedText} hover:opacity-80 border ${theme.border}`
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Todos</span>
-            </button>
-            {categories.map(category => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${
-                  selectedCategory === category
-                    ? `${theme.primaryBg} text-white shadow-md scale-105`
-                    : `${theme.bg} ${theme.mutedText} hover:opacity-80 border ${theme.border}`
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* 4. Main Product Grid */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
         {products.length === 0 ? (
-          <div className={`${theme.secondaryBg} rounded-2xl p-12 text-center border ${theme.border} my-8`}>
-            <Utensils className="w-12 h-12 mx-auto mb-3 opacity-20" />
-            <p className={`font-medium ${theme.mutedText}`}>Nenhum produto disponível no momento.</p>
+          <div className={`${theme.secondaryBg} rounded-2xl p-8 text-center border ${theme.border}`}>
+            <p className={theme.mutedText}>Nenhum produto disponível no momento.</p>
           </div>
         ) : (
-          <div className="space-y-10">
-            {categories
-              .filter(category => selectedCategory === 'Todos' || selectedCategory === category)
-              .map(category => {
-                const categoryProducts = products.filter(p => (p.category || 'Outros') === category);
-                if (categoryProducts.length === 0) return null;
-                return (
-                  <section key={category} className="space-y-4">
-                    <div className="flex items-center gap-2 border-b border-gray-200/15 pb-2">
-                      <h3 className="text-xl font-extrabold tracking-tight">{category}</h3>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${theme.secondaryBg} ${theme.mutedText} border ${theme.border}`}>
-                        {categoryProducts.length}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {categoryProducts.map(product => (
-                        <div 
-                          key={product.id}
-                          onClick={() => handleProductClick(product)}
-                          className={`${theme.secondaryBg} border ${theme.border} rounded-2xl p-4 flex justify-between gap-4 cursor-pointer hover:shadow-lg hover:border-gray-400/30 transition-all group relative overflow-hidden`}
-                        >
-                          <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                            <div>
-                              <h4 className="font-bold text-base sm:text-lg mb-1 group-hover:text-emerald-500 transition-colors leading-snug">
-                                {product.name}
-                              </h4>
-                              <p className={`text-xs sm:text-sm ${theme.mutedText} line-clamp-2 mb-3 leading-relaxed`}>
-                                {product.description || 'Sem descrição.'}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2 mt-2">
-                              <span className="font-extrabold text-base sm:text-lg text-emerald-500">
-                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
-                              </span>
-                              {product.ingredients && product.ingredients.length > 0 && (
-                                <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${theme.bg} ${theme.mutedText} border ${theme.border}`}>
-                                  Personalizável
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden shrink-0 bg-gray-100 relative group-hover:scale-[1.02] transition-transform">
-                            {product.image_url ? (
-                              <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-500/5 text-xs">
-                                <Utensils className="w-6 h-6 mb-1 opacity-40" />
-                                <span>Foto</span>
-                              </div>
-                            )}
-                            <div className={`absolute bottom-1.5 right-1.5 ${theme.primaryBg} text-white p-1.5 rounded-lg shadow-md flex items-center justify-center`}>
-                              <Plus className="w-4 h-4" />
-                            </div>
+          <div className="space-y-12">
+            {categories.map(category => {
+              const categoryProducts = products.filter(p => (p.category || 'Outros') === category);
+              if (categoryProducts.length === 0) return null;
+              return (
+                <section key={category} className="space-y-4">
+                  <h3 className="text-xl font-bold border-b border-gray-200/20 pb-2">{category}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {categoryProducts.map(product => (
+                      <div 
+                        key={product.id}
+                        onClick={() => handleProductClick(product)}
+                        className={`${theme.secondaryBg} border ${theme.border} rounded-2xl p-4 flex gap-4 cursor-pointer hover:shadow-md transition-shadow group`}
+                      >
+                        <div className="flex-1 min-w-0 flex flex-col">
+                          <h4 className="font-bold text-lg mb-1 group-hover:underline decoration-2 underline-offset-2">{product.name}</h4>
+                          <p className={`text-sm ${theme.mutedText} line-clamp-2 mb-3 flex-1`}>{product.description}</p>
+                          <div className="font-bold text-lg mt-auto">
+                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </section>
-                );
-              })}
+                        {product.image_url ? (
+                          <div className="w-28 h-28 rounded-xl overflow-hidden shrink-0 bg-gray-100">
+                            <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-28 h-28 rounded-xl overflow-hidden shrink-0 bg-gray-100 flex items-center justify-center text-gray-300">
+                            Sem foto
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
           </div>
         )}
       </main>
 
-      {/* 5. Mobile Bottom Navigation Bar */}
-      <div className={`fixed bottom-0 left-0 right-0 z-40 ${theme.secondaryBg} border-t ${theme.border} px-6 py-2.5 flex items-center justify-around sm:hidden shadow-lg backdrop-blur-lg bg-opacity-95`}>
-        <button 
-          onClick={() => {
-            setSelectedCategory('Todos');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          className={`flex flex-col items-center gap-1 ${selectedCategory === 'Todos' ? theme.primaryText : theme.mutedText}`}
-        >
-          <Home className="w-5 h-5" />
-          <span className="text-[11px] font-bold">Início</span>
-        </button>
-
-        <button 
-          onClick={() => {
-            setCheckoutStep('cart');
-            setIsCartOpen(true);
-          }}
-          className={`flex flex-col items-center gap-1 relative ${totalItems > 0 ? theme.primaryText : theme.mutedText}`}
-        >
-          <div className="relative">
-            <ShoppingCart className="w-5 h-5" />
-            {totalItems > 0 && (
-              <span className="absolute -top-1.5 -right-2 bg-red-500 text-white font-black text-[10px] w-4 h-4 rounded-full flex items-center justify-center animate-bounce">
-                {totalItems}
-              </span>
-            )}
-          </div>
-          <span className="text-[11px] font-bold">Carrinho</span>
-        </button>
-
-        <button 
-          onClick={() => router.push(`/${store.slug}/rastreio`)}
-          className={`flex flex-col items-center gap-1 ${theme.mutedText} hover:opacity-80`}
-        >
-          <User className="w-5 h-5" />
-          <span className="text-[11px] font-bold">Pedidos</span>
-        </button>
-      </div>
-
-      {/* Floating Cart Button for Desktop / Tablet */}
+      {/* Floating Cart Button */}
       {totalItems > 0 && !isCartOpen && (
-        <div className="hidden sm:flex fixed bottom-6 left-0 right-0 px-4 sm:px-0 z-30 justify-center animate-in slide-in-from-bottom-10">
+        <div className="fixed bottom-6 left-0 right-0 px-4 sm:px-0 z-20 flex justify-center animate-in slide-in-from-bottom-10">
           <button
             onClick={() => {
               setCheckoutStep('cart');
               setIsCartOpen(true);
             }}
-            className={`w-full max-w-md ${theme.primaryBg} ${theme.primaryHover} text-white rounded-2xl shadow-2xl py-4 px-6 flex items-center justify-between transition-all transform hover:scale-[1.02] active:scale-[0.98] border border-white/10`}
+            className={`w-full max-w-md ${theme.primaryBg} ${theme.primaryHover} text-white rounded-2xl shadow-xl py-4 px-5 flex items-center justify-between transition-all transform hover:scale-[1.02] active:scale-[0.98]`}
           >
             <div className="flex items-center gap-3">
-              <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-extrabold">
+              <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold">
                 {totalItems} {totalItems === 1 ? 'item' : 'itens'}
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-bold">Ver Pedido</span>
-              <span className="font-extrabold ml-2 border-l border-white/20 pl-3">
+              <span className="font-semibold">Ver Pedido</span>
+              <span className="font-bold ml-2 border-l border-white/20 pl-3">
                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cartTotalValue)}
               </span>
             </div>
