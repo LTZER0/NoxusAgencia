@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, MapPin, CreditCard, User, Phone, CheckCircle2, Clock, Sparkles, Utensils, Home } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, MapPin, CreditCard, User, Phone, CheckCircle2, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 type Ingredient = {
@@ -62,83 +62,54 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
 
   const getThemeClasses = () => {
     switch (store.store_category) {
-      case 'acaiteria':
-        return {
-          bg: 'bg-gray-50/50',
-          text: 'text-gray-900',
-          primaryBg: 'bg-purple-600',
-          primaryHover: 'hover:bg-purple-700',
-          primaryText: 'text-purple-600',
-          priceText: 'text-purple-600',
-          hoverText: 'group-hover:text-purple-600',
-          badgeBg: 'bg-purple-50 text-purple-700 border-purple-200',
-          secondaryBg: 'bg-white',
-          border: 'border-gray-200/80',
-          mutedText: 'text-gray-500',
-          cartBg: 'bg-white text-gray-900',
-          inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
-        };
       case 'hamburgueria':
         return {
-          bg: 'bg-gray-50/50',
-          text: 'text-gray-900',
-          primaryBg: 'bg-amber-600',
-          primaryHover: 'hover:bg-amber-700',
-          primaryText: 'text-amber-600',
-          priceText: 'text-amber-600',
-          hoverText: 'group-hover:text-amber-600',
-          badgeBg: 'bg-amber-50 text-amber-800 border-amber-200',
-          secondaryBg: 'bg-white',
-          border: 'border-gray-200/80',
-          mutedText: 'text-gray-500',
+          bg: 'bg-stone-900',
+          text: 'text-stone-100',
+          primaryBg: 'bg-amber-500',
+          primaryHover: 'hover:bg-amber-600',
+          primaryText: 'text-amber-500',
+          secondaryBg: 'bg-stone-800',
+          border: 'border-stone-800',
+          mutedText: 'text-stone-400',
+          cartBg: 'bg-stone-900 text-stone-100',
+          inputBg: 'bg-stone-800 text-white border-stone-700',
+        };
+      case 'acaiteria':
+        return {
+          bg: 'bg-purple-900',
+          text: 'text-white',
+          primaryBg: 'bg-fuchsia-500',
+          primaryHover: 'hover:bg-fuchsia-600',
+          primaryText: 'text-fuchsia-400',
+          secondaryBg: 'bg-purple-800',
+          border: 'border-purple-800',
+          mutedText: 'text-purple-300',
           cartBg: 'bg-white text-gray-900',
           inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
         };
       case 'pizzaria':
         return {
-          bg: 'bg-gray-50/50',
-          text: 'text-gray-900',
+          bg: 'bg-red-50',
+          text: 'text-red-950',
           primaryBg: 'bg-red-600',
           primaryHover: 'hover:bg-red-700',
           primaryText: 'text-red-600',
-          priceText: 'text-red-600',
-          hoverText: 'group-hover:text-red-600',
-          badgeBg: 'bg-red-50 text-red-700 border-red-200',
           secondaryBg: 'bg-white',
-          border: 'border-gray-200/80',
-          mutedText: 'text-gray-500',
+          border: 'border-red-100',
+          mutedText: 'text-red-700/70',
           cartBg: 'bg-white text-gray-900',
           inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
         };
-      case 'restaurante':
+      default: // lanchonete or fallback
         return {
-          bg: 'bg-gray-50/50',
-          text: 'text-gray-900',
-          primaryBg: 'bg-amber-800',
-          primaryHover: 'hover:bg-amber-900',
-          primaryText: 'text-amber-800',
-          priceText: 'text-amber-800',
-          hoverText: 'group-hover:text-amber-800',
-          badgeBg: 'bg-amber-100 text-amber-900 border-amber-300',
-          secondaryBg: 'bg-white',
-          border: 'border-gray-200/80',
-          mutedText: 'text-gray-500',
-          cartBg: 'bg-white text-gray-900',
-          inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
-        };
-      case 'lanchonete':
-      default:
-        return {
-          bg: 'bg-gray-50/50',
+          bg: 'bg-gray-50',
           text: 'text-gray-900',
           primaryBg: 'bg-indigo-600',
           primaryHover: 'hover:bg-indigo-700',
           primaryText: 'text-indigo-600',
-          priceText: 'text-indigo-600',
-          hoverText: 'group-hover:text-indigo-600',
-          badgeBg: 'bg-indigo-50 text-indigo-700 border-indigo-200',
           secondaryBg: 'bg-white',
-          border: 'border-gray-200/80',
+          border: 'border-gray-200',
           mutedText: 'text-gray-500',
           cartBg: 'bg-white text-gray-900',
           inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
@@ -407,46 +378,25 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
             <p className={theme.mutedText}>Nenhum produto disponível no momento.</p>
           </div>
         ) : (
-          <div className="space-y-10">
-            {categories
-              .filter(category => selectedCategory === 'Todos' || selectedCategory === category)
-              .map(category => {
-                const categoryProducts = products.filter(p => (p.category || 'Outros') === category);
-                if (categoryProducts.length === 0) return null;
-                return (
-                  <section key={category} className="space-y-4">
-                    <div className="flex items-center gap-2 border-b border-gray-200/15 pb-2">
-                      <h3 className="text-xl font-extrabold tracking-tight">{category}</h3>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${theme.secondaryBg} ${theme.mutedText} border ${theme.border}`}>
-                        {categoryProducts.length}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {categoryProducts.map(product => (
-                        <div 
-                          key={product.id}
-                          onClick={() => handleProductClick(product)}
-                          className={`${theme.secondaryBg} border ${theme.border} rounded-2xl p-4 flex justify-between gap-4 cursor-pointer hover:shadow-lg hover:border-gray-400/30 transition-all group relative overflow-hidden`}
-                        >
-                          <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                            <div>
-                              <h4 className="font-bold text-base sm:text-lg mb-1 group-hover:text-emerald-500 transition-colors leading-snug">
-                                {product.name}
-                              </h4>
-                              <p className={`text-xs sm:text-sm ${theme.mutedText} line-clamp-2 mb-3 leading-relaxed`}>
-                                {product.description || 'Sem descrição.'}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2 mt-2">
-                              <span className="font-extrabold text-base sm:text-lg text-emerald-500">
-                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
-                              </span>
-                              {product.ingredients && product.ingredients.length > 0 && (
-                                <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${theme.bg} ${theme.mutedText} border ${theme.border}`}>
-                                  Personalizável
-                                </span>
-                              )}
-                            </div>
+          <div className="space-y-12">
+            {categories.map(category => {
+              const categoryProducts = products.filter(p => (p.category || 'Outros') === category);
+              if (categoryProducts.length === 0) return null;
+              return (
+                <section key={category} className="space-y-4">
+                  <h3 className="text-xl font-bold border-b border-gray-200/20 pb-2">{category}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {categoryProducts.map(product => (
+                      <div 
+                        key={product.id}
+                        onClick={() => handleProductClick(product)}
+                        className={`${theme.secondaryBg} border ${theme.border} rounded-2xl p-4 flex gap-4 cursor-pointer hover:shadow-md transition-shadow group`}
+                      >
+                        <div className="flex-1 min-w-0 flex flex-col">
+                          <h4 className="font-bold text-lg mb-1 group-hover:underline decoration-2 underline-offset-2">{product.name}</h4>
+                          <p className={`text-sm ${theme.mutedText} line-clamp-2 mb-3 flex-1`}>{product.description}</p>
+                          <div className="font-bold text-lg mt-auto">
+                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
                           </div>
                         </div>
                         {product.image_url ? (
