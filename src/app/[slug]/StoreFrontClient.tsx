@@ -17,6 +17,8 @@ type Product = {
   name: string;
   description: string;
   price: number;
+  discount_price?: number;
+  is_promotional?: boolean;
   image_url: string;
   category: string;
   ingredients?: Ingredient[];
@@ -31,7 +33,17 @@ type CartItem = {
   unitPrice: number; // calculated base on extras
 };
 
-export default function StoreFrontClient({ store, products, deliveryZones = [] }: { store: any; products: Product[]; deliveryZones?: any[] }) {
+export default function StoreFrontClient({ 
+  store, 
+  products, 
+  deliveryZones = [],
+  categories = [] 
+}: { 
+  store: any; 
+  products: Product[]; 
+  deliveryZones?: any[]; 
+  categories?: any[]; 
+}) {
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'success'>('cart');
@@ -149,15 +161,29 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
 
   const theme = getThemeClasses();
 
-  const categories = useMemo(() => {
-    const cats = new Set<string>();
+  const categoryTabs = useMemo(() => {
+    const names: string[] = [];
+    if (categories && categories.length > 0) {
+      categories.forEach(c => {
+        if (c && c.name && !names.includes(c.name)) {
+          names.push(c.name);
+        }
+      });
+    }
     products.forEach(p => {
-      cats.add(p.category || 'Outros');
+      const catName = p.category || 'Outros';
+      if (!names.includes(catName)) {
+        names.push(catName);
+      }
     });
-    return Array.from(cats).sort();
-  }, [products]);
+    return names;
+  }, [products, categories]);
 
   const handleProductClick = (product: Product) => {
+    if (store.is_open === false) {
+      alert(`O estabelecimento ${store.name} está fechado no momento e não está aceitando pedidos.`);
+      return;
+    }
     setSelectedProduct(product);
     setRemovedIngs([]);
     setExtraIngs({});
@@ -166,7 +192,7 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
 
   const currentItemPrice = useMemo(() => {
     if (!selectedProduct) return 0;
-    let price = Number(selectedProduct.price);
+    let price = Number(selectedProduct.discount_price || selectedProduct.price);
     if (selectedProduct.ingredients) {
       Object.entries(extraIngs).forEach(([ingId, qty]) => {
         const ing = selectedProduct.ingredients?.find((i, idx) => (i.id || `ing-${idx}`) === ingId);
@@ -415,10 +441,23 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
 
       {/* 2. Operational Info Bar */}
       <div className={`max-w-4xl mx-auto px-4 sm:px-6 py-3 border-b border-gray-200/10 flex flex-wrap items-center justify-center sm:justify-start gap-x-6 gap-y-2 text-xs sm:text-sm ${theme.mutedText}`}>
-        <div className="flex items-center gap-2 font-medium text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Aberto agora</span>
-        </div>
+        {store.is_open === false ? (
+          <div className="flex items-center gap-2 font-bold text-red-600 bg-red-100 px-3 py-1 rounded-full">
+            <span className="w-2 h-2 rounded-full bg-red-600"></span>
+            <span>Fechado no momento</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 font-medium text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Aberto agora</span>
+          </div>
+        )}
+        {store.opening_hours && (
+          <div className="flex items-center gap-1.5">
+            <Clock className="w-4 h-4 opacity-70" />
+            <span>Horário: {store.opening_hours}</span>
+          </div>
+        )}
         <div className="flex items-center gap-1.5">
           <Clock className="w-4 h-4 opacity-70" />
           <span>Entrega: 30 - 45 min</span>
@@ -430,6 +469,14 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
           </div>
         )}
       </div>
+
+      {store.is_open === false && (
+        <div className="bg-red-50 border-y border-red-200 py-3 px-4 text-center">
+          <p className="text-sm font-bold text-red-800 flex items-center justify-center gap-2">
+            O estabelecimento está fechado para pedidos no momento. {store.opening_hours ? `Horário de atendimento: ${store.opening_hours}` : ''}
+          </p>
+        </div>
+      )}
 
       {/* 3. Horizontal Category Tabs */}
       <div className={`sticky top-0 z-30 ${theme.secondaryBg}/95 backdrop-blur-md border-b ${theme.border} shadow-sm`}>
@@ -446,7 +493,7 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
               <Sparkles className="w-3.5 h-3.5" />
               <span>Todos</span>
             </button>
-            {categories.map(category => (
+            {categoryTabs.map(category => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
@@ -472,7 +519,7 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
           </div>
         ) : (
           <div className="space-y-10">
-            {categories
+            {categoryTabs
               .filter(category => selectedCategory === 'Todos' || selectedCategory === category)
               .map(category => {
                 const categoryProducts = products.filter(p => (p.category || 'Outros') === category);
@@ -494,17 +541,35 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
                         >
                           <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                             <div>
-                              <h4 className={`font-bold text-base sm:text-lg mb-1 ${theme.hoverText} transition-colors leading-snug`}>
-                                {product.name}
-                              </h4>
+                              <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                                <h4 className={`font-bold text-base sm:text-lg ${theme.hoverText} transition-colors leading-snug`}>
+                                  {product.name}
+                                </h4>
+                                {(product.is_promotional || product.discount_price) && (
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-0.5">
+                                    🔥 Oferta
+                                  </span>
+                                )}
+                              </div>
                               <p className={`text-xs sm:text-sm ${theme.mutedText} line-clamp-2 mb-3 leading-relaxed`}>
                                 {product.description || 'Sem descrição.'}
                               </p>
                             </div>
-                            <div className="flex items-center gap-2 mt-2">
-                              <span className={`font-extrabold text-base sm:text-lg ${theme.priceText}`}>
-                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
-                              </span>
+                            <div className="flex items-center gap-2 mt-2 flex-wrap">
+                              {product.discount_price ? (
+                                <div className="flex items-center gap-2">
+                                  <span className="line-through text-gray-400 text-xs font-medium">
+                                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
+                                  </span>
+                                  <span className="font-extrabold text-base sm:text-lg text-emerald-600">
+                                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.discount_price)}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className={`font-extrabold text-base sm:text-lg ${theme.priceText}`}>
+                                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
+                                </span>
+                              )}
                               {product.ingredients && product.ingredients.length > 0 && (
                                 <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${theme.badgeBg}`}>
                                   Personalizável

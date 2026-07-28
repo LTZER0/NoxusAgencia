@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, AlertCircle, PackageOpen, X, Edit, Image as ImageIcon, Check } from 'lucide-react';
+import { Plus, Trash2, AlertCircle, PackageOpen, X, Edit, Image as ImageIcon, Check, Tag, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 type Ingredient = {
@@ -15,15 +15,18 @@ type Ingredient = {
 
 export default function ServicesClient({
   storeId,
-  initialProducts
+  initialProducts,
+  initialCategories = []
 }: {
   storeId: string;
   initialProducts: any[];
+  initialCategories?: any[];
 }) {
   const router = useRouter();
   const supabase = createClient();
   const [products, setProducts] = useState(initialProducts);
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,6 +34,8 @@ export default function ServicesClient({
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
+  const [discountPrice, setDiscountPrice] = useState('');
+  const [isPromotional, setIsPromotional] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [category, setCategory] = useState('');
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -39,10 +44,36 @@ export default function ServicesClient({
     setName('');
     setDescription('');
     setPrice('');
+    setDiscountPrice('');
+    setIsPromotional(false);
     setImageUrl('');
     setCategory('');
     setIngredients([]);
+    setEditingId(null);
     setIsAdding(false);
+    setError(null);
+  };
+
+  const handleEditProduct = (product: any) => {
+    setName(product.name || '');
+    setDescription(product.description || '');
+    setPrice(product.price ? product.price.toString() : '');
+    setDiscountPrice(product.discount_price ? product.discount_price.toString() : '');
+    setIsPromotional(product.is_promotional || false);
+    setImageUrl(product.image_url || '');
+    setCategory(product.category || '');
+    
+    // Garantir que cada ingrediente tenha um id local se vier do banco sem
+    const formattedIngs = (product.ingredients || []).map((ing: any, idx: number) => ({
+      id: ing.id || Math.random().toString(36).substring(7),
+      name: ing.name || '',
+      price: Number(ing.price) || 0,
+      can_remove: ing.can_remove !== false,
+      can_add: ing.can_add === true
+    }));
+    setIngredients(formattedIngs);
+    setEditingId(product.id);
+    setIsAdding(true);
     setError(null);
   };
 
@@ -72,7 +103,7 @@ export default function ServicesClient({
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !price) {
-      setError('Nome e Preço são obrigatórios.');
+      setError('Nome e Preço Base são obrigatórios.');
       return;
     }
     
@@ -81,33 +112,57 @@ export default function ServicesClient({
 
     try {
       const parsedPrice = parseFloat(price);
+      const parsedDiscountPrice = discountPrice ? parseFloat(discountPrice) : null;
       
       const payload: any = {
         store_id: storeId,
         name,
         description,
         price: parsedPrice,
+        discount_price: parsedDiscountPrice,
+        is_promotional: isPromotional,
         image_url: imageUrl,
         ingredients: ingredients.map(({ id, ...rest }) => rest)
       };
 
       if (category) {
         payload.category = category;
+        const matchedCat = initialCategories.find(c => c.name === category);
+        if (matchedCat) {
+          payload.category_id = matchedCat.id;
+        }
+      } else {
+        payload.category = null;
+        payload.category_id = null;
       }
 
-      const { data, error: insertError } = await supabase
-        .from('products_services')
-        .insert(payload)
-        .select()
-        .single();
+      if (editingId) {
+        const { data, error: updateError } = await supabase
+          .from('products_services')
+          .update(payload)
+          .eq('id', editingId)
+          .select()
+          .single();
 
-      if (insertError) throw insertError;
-      
-      setProducts([data, ...products]);
+        if (updateError) throw updateError;
+        
+        setProducts(products.map(p => p.id === editingId ? data : p));
+      } else {
+        const { data, error: insertError } = await supabase
+          .from('products_services')
+          .insert(payload)
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+        
+        setProducts([data, ...products]);
+      }
+
       resetForm();
       router.refresh();
     } catch (err: any) {
-      console.error("Supabase insert error:", err);
+      console.error("Supabase error:", err);
       setError(`Erro ao salvar: ${err.message || err.details || 'Verifique os campos.'}`);
     } finally {
       setLoading(false);
@@ -126,6 +181,7 @@ export default function ServicesClient({
       if (deleteError) throw deleteError;
       
       setProducts(products.filter(p => p.id !== id));
+      if (editingId === id) resetForm();
       router.refresh();
     } catch (err: any) {
       console.error(err);
@@ -142,13 +198,13 @@ export default function ServicesClient({
             Gestão de Produtos
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            Cadastre os produtos e ingredientes para o seu cardápio.
+            Cadastre, edite e crie promoções para os itens do seu cardápio.
           </p>
         </div>
         {!isAdding && (
           <button 
-            onClick={() => setIsAdding(true)}
-            className="inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors bg-indigo-600 text-white hover:bg-indigo-700 h-10 px-4 py-2"
+            onClick={() => { resetForm(); setIsAdding(true); }}
+            className="inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors bg-indigo-600 text-white hover:bg-indigo-700 h-10 px-4 py-2 shadow-sm"
           >
             <Plus className="mr-2 h-4 w-4" />
             Adicionar Produto
@@ -156,11 +212,18 @@ export default function ServicesClient({
         )}
       </div>
 
-      {/* Formulário de Adição */}
+      {/* Formulário de Adição/Edição */}
       {isAdding && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
-            <h2 className="text-lg font-bold text-gray-900">Novo Produto</h2>
+            <div className="flex items-center gap-2">
+              <span className={`p-2 rounded-lg ${editingId ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-600'}`}>
+                {editingId ? <Edit className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+              </span>
+              <h2 className="text-lg font-bold text-gray-900">
+                {editingId ? 'Editar Produto' : 'Novo Produto'}
+              </h2>
+            </div>
             <button onClick={resetForm} className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-50 transition-colors">
               <X className="w-5 h-5" />
             </button>
@@ -190,47 +253,98 @@ export default function ServicesClient({
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-1.5">
-                    Preço Base (R$) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    required
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    placeholder="25.00"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-1.5">
+                      Preço Base (R$) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      required
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      placeholder="25.00"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-1.5 flex items-center gap-1 text-amber-700">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Preço Promocional
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={discountPrice}
+                      onChange={(e) => setDiscountPrice(e.target.value)}
+                      className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-amber-200 focus:ring-2 focus:ring-inset focus:ring-amber-600 sm:text-sm sm:leading-6 bg-amber-50/30"
+                      placeholder="Ex: 19.90 (Opcional)"
+                    />
+                  </div>
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-1.5">
-                    Categoria
-                  </label>
-                  <input
-                    type="text"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    placeholder="Ex: Lanches, Bebidas, Sobremesas"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center pt-2">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-1.5 flex items-center gap-1.5">
+                      <Tag className="w-4 h-4 text-indigo-500" />
+                      Categoria
+                    </label>
+                    {initialCategories.length > 0 ? (
+                      <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      >
+                        <option value="">Selecione a categoria...</option>
+                        {initialCategories.map((cat) => (
+                          <option key={cat.id} value={cat.name}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        placeholder="Ex: Lanches, Bebidas (Crie em Categorias)"
+                      />
+                    )}
+                  </div>
+
+                  <div className="flex items-center pt-5">
+                    <label className="relative inline-flex items-center cursor-pointer gap-3">
+                      <input
+                        type="checkbox"
+                        checked={isPromotional}
+                        onChange={(e) => setIsPromotional(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                      <span className="text-sm font-semibold text-gray-900 flex items-center gap-1">
+                        Destaque Oferta 🔥
+                      </span>
+                    </label>
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-1.5">
-                    Descrição
+                    Descrição do Produto
                   </label>
                   <textarea
                     rows={3}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 resize-none"
-                    placeholder="Descreva os detalhes do produto..."
+                    placeholder="Descreva os ingredientes, tamanho e sabor..."
                   />
                 </div>
                 
@@ -255,7 +369,7 @@ export default function ServicesClient({
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-sm font-bold text-gray-900">Ingredientes e Adicionais</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">Defina o que o cliente pode remover ou adicionar.</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Defina o que o cliente pode remover ou pedir como extra.</p>
                 </div>
                 <button
                   type="button"
@@ -273,13 +387,13 @@ export default function ServicesClient({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {ingredients.map((ingredient, index) => (
+                  {ingredients.map((ingredient) => (
                     <div key={ingredient.id} className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                       <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
                         <div className="sm:col-span-5">
                           <input
                             type="text"
-                            placeholder="Nome (ex: Bacon)"
+                            placeholder="Nome (ex: Bacon, Queijo)"
                             value={ingredient.name}
                             onChange={(e) => handleUpdateIngredient(ingredient.id, 'name', e.target.value)}
                             className="block w-full rounded-lg border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
@@ -344,7 +458,7 @@ export default function ServicesClient({
                 disabled={loading}
                 className="inline-flex items-center rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 transition-colors"
               >
-                {loading ? 'Salvando...' : 'Salvar Produto'}
+                {loading ? 'Salvando...' : editingId ? 'Salvar Alterações' : 'Cadastrar Produto'}
               </button>
             </div>
           </form>
@@ -384,11 +498,16 @@ export default function ServicesClient({
                   )}
                   
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <h3 className="font-bold text-gray-900">{product.name}</h3>
                       {product.category && (
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-600 uppercase tracking-wider">
                           {product.category}
+                        </span>
+                      )}
+                      {(product.is_promotional || product.discount_price) && (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wider flex items-center gap-1">
+                          <Sparkles className="w-3 h-3" /> Promocional
                         </span>
                       )}
                     </div>
@@ -396,9 +515,21 @@ export default function ServicesClient({
                       <p className="text-sm text-gray-500 mb-2 line-clamp-1">{product.description}</p>
                     )}
                     <div className="flex flex-wrap items-center gap-4 text-sm">
-                      <span className="font-semibold text-gray-900">
-                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
-                      </span>
+                      {product.discount_price ? (
+                        <div className="flex items-center gap-2">
+                          <span className="line-through text-gray-400 text-xs font-medium">
+                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
+                          </span>
+                          <span className="font-bold text-amber-600">
+                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.discount_price)}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="font-semibold text-gray-900">
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
+                        </span>
+                      )}
+
                       {product.ingredients && product.ingredients.length > 0 && (
                         <span className="text-gray-500 text-xs font-medium flex items-center gap-1.5">
                           <Check className="w-3.5 h-3.5 text-green-500" />
@@ -410,6 +541,13 @@ export default function ServicesClient({
                 </div>
                 
                 <div className="flex items-center gap-2 sm:self-center self-end">
+                  <button
+                    onClick={() => handleEditProduct(product)}
+                    className="p-2.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all border border-transparent hover:border-indigo-100"
+                    title="Editar produto"
+                  >
+                    <Edit className="w-5 h-5" />
+                  </button>
                   <button
                     onClick={() => handleDeleteProduct(product.id)}
                     className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-100"

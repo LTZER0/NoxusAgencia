@@ -1,10 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
-import { PackageOpen } from "lucide-react";
+import { Tag } from "lucide-react";
+import CategoriesClient from "./CategoriesClient";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import ServicesClient from "./ServicesClient";
 
-export default async function ServicesPage() {
+export default async function CategoriesPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -22,10 +22,10 @@ export default async function ServicesPage() {
   if (!store) {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh] text-center max-w-md mx-auto">
-        <PackageOpen className="w-12 h-12 text-gray-400 mb-4" />
+        <Tag className="w-12 h-12 text-gray-400 mb-4" />
         <h2 className="text-xl font-bold text-gray-900 mb-2">Loja não configurada</h2>
         <p className="text-gray-500 mb-6">
-          Você precisa configurar as informações da sua loja antes de gerenciar o catálogo.
+          Você precisa configurar as informações da sua loja antes de gerenciar as categorias.
         </p>
         <Link 
           href="/dashboard/settings" 
@@ -37,14 +37,6 @@ export default async function ServicesPage() {
     );
   }
 
-  // Fetch existing products
-  const { data: products } = await supabase
-    .from('products_services')
-    .select('*')
-    .eq('store_id', store.id)
-    .order('created_at', { ascending: false });
-
-  // Fetch existing categories
   const { data: categories } = await supabase
     .from('categories')
     .select('*')
@@ -52,12 +44,22 @@ export default async function ServicesPage() {
     .order('created_at', { ascending: true });
 
   return (
-    <div className="max-w-5xl mx-auto w-full">
-      <ServicesClient 
-        storeId={store.id} 
-        initialProducts={products || []} 
-        initialCategories={categories || []}
-      />
+    <div className="flex flex-col gap-8 max-w-4xl mx-auto w-full">
+      <div className="flex items-center gap-3">
+        <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+          <Tag className="w-6 h-6" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+            Categorias do Cardápio
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Crie e organize as categorias de produtos que serão exibidas em abas no seu cardápio digital.
+          </p>
+        </div>
+      </div>
+
+      <CategoriesClient storeId={store.id} initialCategories={categories || []} />
     </div>
   );
 }

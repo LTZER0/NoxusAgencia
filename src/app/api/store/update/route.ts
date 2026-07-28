@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { 
       userId, name, slug, phone, street, block, lot, neighborhood, delivery_fee, 
-      store_category, theme_mode, logo_url, cover_url, isUpdate,
+      store_category, is_open, opening_hours, logo_url, cover_url, isUpdate,
       accepts_pix, accepts_card, accepts_cash, pix_key, pix_receipt_phone
     } = body;
 
@@ -45,8 +45,11 @@ export async function POST(req: NextRequest) {
     if (store_category !== undefined) {
       storeData.store_category = store_category || null;
     }
-    if (theme_mode !== undefined) {
-      storeData.theme_mode = theme_mode || 'branco';
+    if (is_open !== undefined) {
+      storeData.is_open = is_open;
+    }
+    if (opening_hours !== undefined) {
+      storeData.opening_hours = opening_hours || null;
     }
     if (logo_url !== undefined) {
       storeData.logo_url = logo_url || null;
