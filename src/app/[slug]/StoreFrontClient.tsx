@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, MapPin, CreditCard, User, Phone, CheckCircle2 } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, MapPin, CreditCard, User, Phone, CheckCircle2, Clock, Sparkles, Utensils, Home } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 type Ingredient = {
