@@ -36,6 +36,7 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
   const [cart, setCart] = useState<CartItem[]>([]);
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'success'>('cart');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
+  const [isCartOpen, setIsCartOpen] = useState(false);
   
   // Customization Modal State
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
