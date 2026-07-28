@@ -22,6 +22,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Dados incompletos.' }, { status: 400 });
     }
 
+    // Server-Side Validation: Never trust client-side data.
+    // Verify if the store exists and is currently open for orders.
+    const { data: store, error: storeError } = await supabase
+      .from('stores')
+      .select('is_open, name')
+      .eq('id', storeId)
+      .single();
+
+    if (storeError || !store) {
+      return NextResponse.json({ error: 'Estabelecimento não encontrado.' }, { status: 404 });
+    }
+
+    if (store.is_open === false) {
+      return NextResponse.json({ error: `O estabelecimento ${store.name} está fechado no momento e não está aceitando novos pedidos.` }, { status: 403 });
+    }
+
     // Insert order. Use the first product's ID for product_id if it's required by the schema,
     // but store the full cart in a JSON payload. We will serialize everything into the row.
     const { error } = await supabase
