@@ -11,6 +11,7 @@ import {
   MapPin
 } from "lucide-react";
 import PrintReceiptButton from "./PrintReceiptButton";
+import ConfirmAndNotifyButton from "./ConfirmAndNotifyButton";
 
 export default async function OrdersPage() {
   const supabase = await createClient();
@@ -188,7 +189,7 @@ export default async function OrdersPage() {
                   {order.order_type === 'delivery' && order.delivery_address && (
                     <div className="mb-3">
                       <a 
-                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.delivery_address)}`}
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.delivery_address + ", Luziânia, Goiás")}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-full flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none"
@@ -204,7 +205,14 @@ export default async function OrdersPage() {
 
                 {(statusDetails.nextStatus || (order.status !== 'canceled' && order.status !== 'completed')) && (
                   <div className="bg-gray-50 border-t border-gray-100 p-4 flex flex-col gap-2">
-                    {statusDetails.nextStatus && (
+                    {statusDetails.nextStatus && statusDetails.nextStatus === 'confirmed' ? (
+                      <ConfirmAndNotifyButton 
+                        orderId={order.id} 
+                        clientWhatsapp={order.client_whatsapp || ''} 
+                        clientName={order.client_name || ''}
+                        updateAction={updateOrderStatus}
+                      />
+                    ) : statusDetails.nextStatus ? (
                       <form action={updateOrderStatus.bind(null, order.id, statusDetails.nextStatus)}>
                         <button 
                           type="submit"
@@ -214,7 +222,7 @@ export default async function OrdersPage() {
                           <ArrowRight className="w-4 h-4" />
                         </button>
                       </form>
-                    )}
+                    ) : null}
                     {(order.status !== 'canceled' && order.status !== 'completed') && (
                       <form action={updateOrderStatus.bind(null, order.id, 'canceled')}>
                         <button 
