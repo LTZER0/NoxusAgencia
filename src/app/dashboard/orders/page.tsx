@@ -7,7 +7,8 @@ import {
   Package, 
   Truck, 
   ArrowRight,
-  ClipboardList
+  ClipboardList,
+  MapPin
 } from "lucide-react";
 import PrintReceiptButton from "./PrintReceiptButton";
 
@@ -177,13 +178,27 @@ export default async function OrdersPage() {
                     </span>
                   </div>
 
-                  <div className="space-y-2 mt-4">
+                  <div className="space-y-2 mt-4 mb-4">
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-500">Data:</span>
                       <span className="text-gray-900">{formattedDate}</span>
                     </div>
                   </div>
                   
+                  {order.order_type === 'delivery' && order.delivery_address && (
+                    <div className="mb-3">
+                      <a 
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.delivery_address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none"
+                      >
+                        <MapPin className="w-4 h-4" />
+                        Ver no Mapa
+                      </a>
+                    </div>
+                  )}
+
                   <PrintReceiptButton order={order} storeName={store.name || 'Loja'} />
                 </div>
 
