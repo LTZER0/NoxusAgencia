@@ -37,20 +37,33 @@ export default function TrackingClient({ store }: { store: any }) {
     setIsLoading(true);
     setHasSearched(true);
 
-    const { data, error } = await supabase
-      .from('appointments_orders')
-      .select('*')
-      .eq('store_id', store.id)
-      .or(`client_whatsapp.eq.${identifier},customer_cpf.eq.${identifier}`)
-      .order('created_at', { ascending: false });
+    try {
+      const response = await fetch('/api/store/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storeId: store.id,
+          identifier: identifier
+        })
+      });
 
-    if (data) {
-      setOrders(data);
-    } else {
+      if (!response.ok) {
+        throw new Error('Erro ao buscar pedidos');
+      }
+
+      const { orders: data } = await response.json();
+      
+      if (data) {
+        setOrders(data);
+      } else {
+        setOrders([]);
+      }
+    } catch (err) {
+      console.error(err);
       setOrders([]);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const getStatusDisplay = (status: string) => {
