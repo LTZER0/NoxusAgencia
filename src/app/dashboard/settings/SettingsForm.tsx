@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Store, Link as LinkIcon, Phone, Save, CheckCircle, AlertCircle, MapPin, Building, Hash, Tag, Palette, Image as ImageIcon, Layout } from 'lucide-react';
+import { Store, Link as LinkIcon, Phone, Save, CheckCircle, AlertCircle, MapPin, Building, Hash, Tag, Palette, Image as ImageIcon, Layout, Banknote } from 'lucide-react';
 
 export default function SettingsForm({ 
   initialStore, 
@@ -23,11 +23,18 @@ export default function SettingsForm({
   const [block, setBlock] = useState(initialStore?.block || '');
   const [lot, setLot] = useState(initialStore?.lot || '');
   const [neighborhood, setNeighborhood] = useState(initialStore?.neighborhood || '');
-  const [deliveryFee] = useState(initialStore?.delivery_fee?.toString() || '');
+  const [deliveryFee, setDeliveryFee] = useState(initialStore?.delivery_fee?.toString() || '');
   const [storeCategory, setStoreCategory] = useState(initialStore?.store_category || 'lanchonete');
   const [themeMode, setThemeMode] = useState(initialStore?.theme_mode || 'branco');
   const [logoUrl, setLogoUrl] = useState(initialStore?.logo_url || '');
   const [coverUrl, setCoverUrl] = useState(initialStore?.cover_url || '');
+
+  // Métodos de pagamento
+  const [acceptsPix, setAcceptsPix] = useState<boolean>(initialStore?.accepts_pix ?? true);
+  const [acceptsCard, setAcceptsCard] = useState<boolean>(initialStore?.accepts_card ?? true);
+  const [acceptsCash, setAcceptsCash] = useState<boolean>(initialStore?.accepts_cash ?? true);
+  const [pixKey, setPixKey] = useState(initialStore?.pix_key || '');
+  const [pixReceiptPhone, setPixReceiptPhone] = useState(initialStore?.pix_receipt_phone || '');
 
   const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Apenas letras minúsculas, números e hífens
@@ -61,6 +68,11 @@ export default function SettingsForm({
           theme_mode: themeMode,
           logo_url: logoUrl,
           cover_url: coverUrl,
+          accepts_pix: acceptsPix,
+          accepts_card: acceptsCard,
+          accepts_cash: acceptsCash,
+          pix_key: pixKey,
+          pix_receipt_phone: pixReceiptPhone,
           isUpdate: !!initialStore
         }),
       });
@@ -349,7 +361,95 @@ export default function SettingsForm({
                 />
               </div>
             </div>
+          </div>
+        </div>
 
+        <div className="border-t border-gray-900/10 px-4 py-6 sm:p-8">
+          <h2 className="text-base font-semibold leading-7 text-gray-900">Métodos de Pagamento</h2>
+          <p className="mt-1 text-sm leading-6 text-gray-500">Selecione quais formas de pagamento sua loja aceita.</p>
+          
+          <div className="mt-6 space-y-6">
+            <div className="flex items-center justify-between gap-4 sm:max-w-md">
+              <div>
+                <label className="text-sm font-medium leading-6 text-gray-900 block">Aceita Pix?</label>
+                <p className="text-sm text-gray-500">Ativar pagamento via Pix (Automático).</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAcceptsPix(!acceptsPix)}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ${acceptsPix ? 'bg-indigo-600' : 'bg-gray-200'}`}
+              >
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${acceptsPix ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+            </div>
+
+            {acceptsPix && (
+              <div className="space-y-4 pl-4 border-l-2 border-indigo-100 sm:max-w-md">
+                <div>
+                  <label htmlFor="pixKey" className="block text-sm font-medium leading-6 text-gray-900">
+                    Chave Pix
+                  </label>
+                  <div className="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
+                    <input
+                      type="text"
+                      name="pixKey"
+                      id="pixKey"
+                      value={pixKey}
+                      onChange={(e) => setPixKey(e.target.value)}
+                      className="block flex-1 border-0 bg-transparent py-1.5 pl-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                      placeholder="email, cpf ou telefone"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="pixReceiptPhone" className="block text-sm font-medium leading-6 text-gray-900">
+                    WhatsApp para envio do comprovante
+                  </label>
+                  <div className="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
+                    <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm">
+                      <Phone className="h-4 w-4 mr-2" />
+                    </span>
+                    <input
+                      type="text"
+                      name="pixReceiptPhone"
+                      id="pixReceiptPhone"
+                      value={pixReceiptPhone}
+                      onChange={(e) => setPixReceiptPhone(e.target.value)}
+                      className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                      placeholder="(11) 99999-9999"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between gap-4 sm:max-w-md">
+              <div>
+                <label className="text-sm font-medium leading-6 text-gray-900 block">Aceita Cartão?</label>
+                <p className="text-sm text-gray-500">Pagamento com maquininha na entrega.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAcceptsCard(!acceptsCard)}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ${acceptsCard ? 'bg-indigo-600' : 'bg-gray-200'}`}
+              >
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${acceptsCard ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between gap-4 sm:max-w-md">
+              <div>
+                <label className="text-sm font-medium leading-6 text-gray-900 block">Aceita Dinheiro?</label>
+                <p className="text-sm text-gray-500">Pagamento em espécie na entrega.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAcceptsCash(!acceptsCash)}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ${acceptsCash ? 'bg-indigo-600' : 'bg-gray-200'}`}
+              >
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${acceptsCash ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+            </div>
           </div>
         </div>
         <div className="flex items-center justify-end gap-x-6 border-t border-gray-900/10 px-4 py-4 sm:px-8 bg-gray-50 rounded-b-xl">

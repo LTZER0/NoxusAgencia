@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, MapPin, CreditCard, User, Phone, CheckCircle2, Home, Clock, Utensils, Sparkles } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, MapPin, CreditCard, User, Phone, CheckCircle2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 type Ingredient = {
@@ -53,43 +53,10 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
   const [changeFor, setChangeFor] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [activeCategory, setActiveCategory] = useState<string>('Todos');
-
-  const categories = useMemo(() => {
-    const cats = Array.from(new Set(products.map(p => p.category || 'Geral').filter(Boolean)));
-    return cats.length > 0 ? cats : ['Geral'];
-  }, [products]);
-
   const getThemeClasses = () => {
-    const isDark = store.theme_mode === 'preto';
-
     switch (store.store_category) {
-      case 'restaurante':
-        return isDark ? {
-          bg: 'bg-stone-900',
-          text: 'text-stone-100',
-          primaryBg: 'bg-amber-700',
-          primaryHover: 'hover:bg-amber-600',
-          primaryText: 'text-amber-500',
-          secondaryBg: 'bg-stone-800',
-          border: 'border-stone-800',
-          mutedText: 'text-stone-400',
-          cartBg: 'bg-stone-900 text-stone-100',
-          inputBg: 'bg-stone-800 text-white border-stone-700',
-        } : {
-          bg: 'bg-amber-50/50',
-          text: 'text-stone-900',
-          primaryBg: 'bg-amber-800',
-          primaryHover: 'hover:bg-amber-900',
-          primaryText: 'text-amber-800',
-          secondaryBg: 'bg-white',
-          border: 'border-amber-200/60',
-          mutedText: 'text-stone-600',
-          cartBg: 'bg-white text-stone-900',
-          inputBg: 'bg-white text-stone-900 border-amber-200',
-        };
       case 'hamburgueria':
-        return isDark ? {
+        return {
           bg: 'bg-stone-900',
           text: 'text-stone-100',
           primaryBg: 'bg-amber-500',
@@ -100,31 +67,22 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
           mutedText: 'text-stone-400',
           cartBg: 'bg-stone-900 text-stone-100',
           inputBg: 'bg-stone-800 text-white border-stone-700',
-        } : {
-          bg: 'bg-amber-50',
-          text: 'text-amber-950',
-          primaryBg: 'bg-amber-500',
-          primaryHover: 'hover:bg-amber-600',
-          primaryText: 'text-amber-600',
-          secondaryBg: 'bg-white',
-          border: 'border-amber-200',
-          mutedText: 'text-amber-800/70',
+        };
+      case 'acaiteria':
+        return {
+          bg: 'bg-purple-900',
+          text: 'text-white',
+          primaryBg: 'bg-fuchsia-500',
+          primaryHover: 'hover:bg-fuchsia-600',
+          primaryText: 'text-fuchsia-400',
+          secondaryBg: 'bg-purple-800',
+          border: 'border-purple-800',
+          mutedText: 'text-purple-300',
           cartBg: 'bg-white text-gray-900',
-          inputBg: 'bg-white text-gray-900 border-amber-200',
+          inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
         };
       case 'pizzaria':
-        return isDark ? {
-          bg: 'bg-stone-950',
-          text: 'text-red-50',
-          primaryBg: 'bg-red-600',
-          primaryHover: 'hover:bg-red-700',
-          primaryText: 'text-red-500',
-          secondaryBg: 'bg-stone-900',
-          border: 'border-stone-800',
-          mutedText: 'text-stone-400',
-          cartBg: 'bg-stone-900 text-stone-100',
-          inputBg: 'bg-stone-800 text-white border-stone-700',
-        } : {
+        return {
           bg: 'bg-red-50',
           text: 'text-red-950',
           primaryBg: 'bg-red-600',
@@ -136,43 +94,8 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
           cartBg: 'bg-white text-gray-900',
           inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
         };
-      case 'acaiteria':
-        return isDark ? {
-          bg: 'bg-purple-950',
-          text: 'text-white',
-          primaryBg: 'bg-fuchsia-500',
-          primaryHover: 'hover:bg-fuchsia-600',
-          primaryText: 'text-fuchsia-400',
-          secondaryBg: 'bg-purple-900',
-          border: 'border-purple-800',
-          mutedText: 'text-purple-300',
-          cartBg: 'bg-purple-900 text-white',
-          inputBg: 'bg-purple-900 text-white border-purple-800',
-        } : {
-          bg: 'bg-purple-50',
-          text: 'text-purple-950',
-          primaryBg: 'bg-fuchsia-600',
-          primaryHover: 'hover:bg-fuchsia-700',
-          primaryText: 'text-fuchsia-600',
-          secondaryBg: 'bg-white',
-          border: 'border-purple-100',
-          mutedText: 'text-purple-700/70',
-          cartBg: 'bg-white text-gray-900',
-          inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
-        };
       default: // lanchonete or fallback
-        return isDark ? {
-          bg: 'bg-slate-950',
-          text: 'text-slate-100',
-          primaryBg: 'bg-indigo-500',
-          primaryHover: 'hover:bg-indigo-600',
-          primaryText: 'text-indigo-400',
-          secondaryBg: 'bg-slate-900',
-          border: 'border-slate-800',
-          mutedText: 'text-slate-400',
-          cartBg: 'bg-slate-900 text-slate-100',
-          inputBg: 'bg-slate-800 text-white border-slate-700',
-        } : {
+        return {
           bg: 'bg-gray-50',
           text: 'text-gray-900',
           primaryBg: 'bg-indigo-600',
@@ -188,6 +111,14 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
   };
 
   const theme = getThemeClasses();
+
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    products.forEach(p => {
+      cats.add(p.category || 'Outros');
+    });
+    return Array.from(cats).sort();
+  }, [products]);
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
@@ -260,6 +191,9 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
     }
 
     try {
+      localStorage.setItem('@delivery_client_name', clientName);
+      localStorage.setItem('@delivery_client_whatsapp', clientWhatsapp);
+
       const res = await fetch('/api/store/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -471,6 +405,13 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
               );
             })}
           </div>
+          <button 
+            onClick={() => router.push(`/${store.slug}/rastreio`)}
+            className={`flex items-center gap-2 text-sm font-bold ${theme.primaryText} hover:bg-gray-500/10 px-3 py-2 rounded-full transition-colors`}
+          >
+            <User className="w-4 h-4" />
+            <span className="hidden sm:inline">Meus Pedidos</span>
+          </button>
         </div>
       </div>
 
@@ -482,72 +423,31 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
             <p className={`text-base font-medium ${theme.mutedText}`}>Nenhum produto disponível no cardápio no momento.</p>
           </div>
         ) : (
-          <div className="space-y-8">
-            {categories
-              .filter((cat) => activeCategory === 'Todos' || activeCategory === cat)
-              .map((cat) => {
-                const categoryProducts = products.filter((p) => (p.category || 'Geral') === cat);
-                if (categoryProducts.length === 0) return null;
-
-                return (
-                  <section key={cat} className="space-y-3">
-                    <div className="flex items-center gap-2 border-l-4 border-emerald-500 pl-3 py-1">
-                      <h2 className="text-xl sm:text-2xl font-black tracking-tight">{cat}</h2>
-                      <span className={`text-xs ${theme.mutedText} font-semibold px-2 py-0.5 rounded-full ${theme.secondaryBg} border ${theme.border}`}>
-                        {categoryProducts.length}
-                      </span>
-                    </div>
-
-                    {/* 4. Product Card Layout (Title, desc, price left | Image right) */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                      {categoryProducts.map((product) => (
-                        <div
-                          key={product.id}
-                          onClick={() => handleProductClick(product)}
-                          className={`${theme.secondaryBg} border ${theme.border} rounded-2xl p-4 flex justify-between items-stretch gap-4 cursor-pointer hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 group relative overflow-hidden`}
-                        >
-                          {/* Left Content */}
-                          <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                            <div>
-                              <h3 className="font-bold text-base sm:text-lg mb-1 group-hover:underline decoration-2 underline-offset-2 leading-snug">
-                                {product.name}
-                              </h3>
-                              <p className={`text-xs sm:text-sm ${theme.mutedText} line-clamp-2 mb-3 leading-relaxed`}>
-                                {product.description || 'Delicioso e preparado com ingredientes selecionados.'}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2 mt-auto pt-1">
-                              <span className="font-black text-base sm:text-lg text-emerald-600 dark:text-emerald-400">
-                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
-                              </span>
-                              {product.ingredients && product.ingredients.length > 0 && (
-                                <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-gray-500/10 font-semibold opacity-80">
-                                  Personalizável
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Right Image */}
-                          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden shrink-0 bg-gray-500/10 relative shadow-sm group-hover:scale-105 transition-transform duration-300">
-                            {product.image_url ? (
-                              <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 p-2 text-center">
-                                <Utensils className="w-6 h-6 mb-1 opacity-40" />
-                                <span className="text-[10px] font-medium opacity-60">Sem foto</span>
-                              </div>
-                            )}
-                            <div className={`absolute bottom-1.5 right-1.5 ${theme.primaryBg} text-white p-1.5 rounded-lg shadow-md opacity-90 group-hover:opacity-100 transition-all transform group-hover:scale-110`}>
-                              <Plus className="w-3.5 h-3.5" />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                );
-              })}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {products.map(product => (
+              <div 
+                key={product.id}
+                onClick={() => handleProductClick(product)}
+                className={`${theme.secondaryBg} border ${theme.border} rounded-2xl p-4 flex gap-4 cursor-pointer hover:shadow-md transition-shadow group`}
+              >
+                <div className="flex-1 min-w-0 flex flex-col">
+                  <h3 className="font-bold text-lg mb-1 group-hover:underline decoration-2 underline-offset-2">{product.name}</h3>
+                  <p className={`text-sm ${theme.mutedText} line-clamp-2 mb-3 flex-1`}>{product.description}</p>
+                  <div className="font-bold text-lg mt-auto">
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
+                  </div>
+                </div>
+                {product.image_url ? (
+                  <div className="w-28 h-28 rounded-xl overflow-hidden shrink-0 bg-gray-100">
+                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="w-28 h-28 rounded-xl overflow-hidden shrink-0 bg-gray-100 flex items-center justify-center text-gray-300">
+                    Sem foto
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </main>
@@ -659,23 +559,22 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
                     {paymentMethod === 'pix' ? (
                       <div className="bg-gray-100 p-4 rounded-xl w-full">
                         <p className="font-semibold text-gray-800 mb-2">Finalize seu pagamento via PIX</p>
-                        <p className="text-sm text-gray-600 mb-4">Escaneie o QR Code ou copie a chave PIX abaixo.</p>
-                        <div className="bg-white p-2 rounded-lg border border-gray-200 inline-block mb-4">
-                           {/* Placeholder for QR Code */}
-                           <div className="w-32 h-32 bg-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center text-xs text-gray-500 font-mono text-center">QR CODE<br/>PIX</div>
-                        </div>
+                        <p className="text-xl font-bold text-gray-900 mb-2">
+                           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(finalTotalValue)}
+                        </p>
+                        <p className="text-sm text-gray-600 mb-4">Copie a chave PIX abaixo para pagar.</p>
                         <div className="flex flex-col gap-2">
-                           <div className="bg-gray-200 p-2 rounded text-xs font-mono break-all text-gray-700">
-                             00020101021126580014br.gov.bcb.pix0136123e4567-e89b-12d3-a456-426614174000520400005303986540510.005802BR5913Nome da Loja6008S. Paulo62070503***63041D3D
+                           <div className="bg-gray-200 p-3 rounded-lg text-sm font-mono break-all text-gray-800 text-center font-semibold">
+                             {store.pix_key || 'Chave não configurada'}
                            </div>
                            <button 
                              onClick={(e) => {
-                               navigator.clipboard.writeText("00020101021126580014br.gov.bcb.pix0136123e4567-e89b-12d3-a456-426614174000520400005303986540510.005802BR5913Nome da Loja6008S. Paulo62070503***63041D3D");
+                               navigator.clipboard.writeText(store.pix_key || '');
                                const target = e.currentTarget;
                                target.innerText = "Chave Copiada!";
                                setTimeout(() => { target.innerText = "Copiar Chave PIX" }, 2000);
                              }}
-                             className={`w-full ${theme.primaryBg} ${theme.primaryHover} text-white font-semibold py-2 rounded-lg transition-colors mb-4`}
+                             className={`w-full ${theme.primaryBg} ${theme.primaryHover} text-white font-semibold py-3 rounded-lg transition-colors mb-4`}
                            >
                              Copiar Chave PIX
                            </button>
@@ -683,12 +582,12 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
                            <div className="border-t border-gray-200 pt-4 mt-2">
                              <p className="text-sm text-gray-600 mb-3 font-medium">Após realizar o pagamento, envie o comprovante pelo WhatsApp:</p>
                              <a 
-                               href={`https://wa.me/55${(store.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Acabei de fazer um pedido na ${store.name}. Paguei via PIX e este é o meu comprovante:`)}`}
+                               href={`https://wa.me/55${(store.pix_receipt_phone || store.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Acabei de fazer um pedido na ${store.name}. Paguei via PIX e este é o meu comprovante:`)}`}
                                target="_blank"
                                rel="noopener noreferrer"
-                               className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                               className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm"
                              >
-                               <Phone className="w-5 h-5" /> Enviar Comprovante
+                               <Phone className="w-5 h-5" /> Enviar Comprovante no WhatsApp
                              </a>
                            </div>
                         </div>
@@ -833,10 +732,10 @@ export default function StoreFrontClient({ store, products, deliveryZones = [] }
                       <h3 className="font-bold border-b border-gray-200/20 pb-2">Pagamento</h3>
                       <div className="grid grid-cols-1 gap-2">
                         {[
-                          { id: 'pix', label: 'PIX (Automático)' },
-                          { id: 'cartao', label: 'Cartão (pagar na entrega)' },
-                          { id: 'dinheiro', label: 'Dinheiro' }
-                        ].map(type => (
+                          { id: 'pix', label: 'PIX (Automático)', active: store.accepts_pix !== false },
+                          { id: 'cartao', label: 'Cartão (pagar na entrega)', active: store.accepts_card !== false },
+                          { id: 'dinheiro', label: 'Dinheiro', active: store.accepts_cash !== false }
+                        ].filter(t => t.active).map(type => (
                           <label key={type.id} className={`cursor-pointer rounded-xl p-3 text-center text-sm font-semibold border-2 transition-colors ${paymentMethod === type.id ? `border-${theme.primaryText.split('-')[1]}-500 bg-${theme.primaryText.split('-')[1]}-500/10` : 'border-transparent bg-gray-500/5 hover:bg-gray-500/10'}`}>
                             <input required type="radio" name="paymentMethod" value={type.id} checked={paymentMethod === type.id} onChange={e => setPaymentMethod(e.target.value)} className="sr-only" />
                             {type.label}
