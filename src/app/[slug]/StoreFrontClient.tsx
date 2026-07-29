@@ -162,23 +162,30 @@ export default function StoreFrontClient({
 
   const theme = getThemeClasses();
 
+  const hasOffers = useMemo(() => {
+    return products.some(p => p.is_promotional || (p.discount_price && Number(p.discount_price) > 0));
+  }, [products]);
+
   const categoryTabs = useMemo(() => {
     const names: string[] = [];
+    if (hasOffers) {
+      names.push('🔥 Ofertas');
+    }
     if (categories && categories.length > 0) {
       categories.forEach(c => {
-        if (c && c.name && !names.includes(c.name)) {
+        if (c && c.name && !names.includes(c.name) && c.name !== '🔥 Ofertas') {
           names.push(c.name);
         }
       });
     }
     products.forEach(p => {
       const catName = p.category || 'Outros';
-      if (!names.includes(catName)) {
+      if (!names.includes(catName) && catName !== '🔥 Ofertas') {
         names.push(catName);
       }
     });
     return names;
-  }, [products, categories]);
+  }, [products, categories, hasOffers]);
 
   const handleProductClick = (product: Product) => {
     if (store.is_open === false) {
@@ -241,6 +248,12 @@ export default function StoreFrontClient({
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (store.is_open === false) {
+      alert(`O estabelecimento ${store.name} está fechado no momento e não está aceitando pedidos.`);
+      return;
+    }
+
     setIsSubmitting(true);
 
     let fullAddress = null;
@@ -497,12 +510,6 @@ export default function StoreFrontClient({
                 {category}
               </button>
             ))}
-            <button
-              onClick={() => setIsProfileOpen(true)}
-              className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${theme.bg} ${theme.primaryText} hover:opacity-80 border ${theme.border}`}
-            >
-              Perfil da Loja
-            </button>
           </div>
         </div>
       </div>
@@ -519,7 +526,10 @@ export default function StoreFrontClient({
             {categoryTabs
               .filter(category => selectedCategory === 'Todos' || selectedCategory === category)
               .map(category => {
-                const categoryProducts = products.filter(p => (p.category || 'Outros') === category);
+                const categoryProducts = category === '🔥 Ofertas'
+                  ? products.filter(p => p.is_promotional || (p.discount_price && Number(p.discount_price) > 0))
+                  : products.filter(p => (p.category || 'Outros') === category);
+
                 if (categoryProducts.length === 0) return null;
                 return (
                   <section key={category} className="space-y-4">
@@ -1038,21 +1048,21 @@ export default function StoreFrontClient({
                   
                   {checkoutStep === 'cart' ? (
                     <button
-                      disabled={cart.length === 0}
+                      disabled={cart.length === 0 || store.is_open === false}
                       onClick={() => setCheckoutStep('checkout')}
                       className={`w-full ${theme.primaryBg} ${theme.primaryHover} disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 text-lg shadow-lg`}
                     >
-                      Continuar para Pagamento
+                      {store.is_open === false ? 'Loja Fechada para Pedidos' : 'Continuar para Pagamento'}
                       <ArrowRight className="w-5 h-5" />
                     </button>
                   ) : (
                     <button
                       type="submit"
                       form="checkout-form"
-                      disabled={isSubmitting}
-                      className={`w-full ${theme.primaryBg} ${theme.primaryHover} disabled:opacity-50 text-white py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 text-lg shadow-lg`}
+                      disabled={isSubmitting || store.is_open === false}
+                      className={`w-full ${theme.primaryBg} ${theme.primaryHover} disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 text-lg shadow-lg`}
                     >
-                      {isSubmitting ? 'Processando...' : 'Confirmar Pedido'}
+                      {isSubmitting ? 'Processando...' : store.is_open === false ? 'Loja Fechada' : 'Confirmar Pedido'}
                       <Check className="w-5 h-5" />
                     </button>
                   )}
