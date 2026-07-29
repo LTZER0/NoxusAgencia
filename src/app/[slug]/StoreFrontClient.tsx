@@ -312,21 +312,20 @@ export default function StoreFrontClient({
       <div className="fixed inset-0 z-50 overflow-hidden flex items-end sm:items-center justify-center">
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedProduct(null)} />
         <div className={`relative w-full max-w-lg ${theme.cartBg} rounded-t-2xl sm:rounded-2xl max-h-[90vh] flex flex-col animate-in slide-in-from-bottom-8 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200`}>
-          {selectedProduct.image_url ? (
-            <div className="relative h-48 sm:h-56 shrink-0 bg-gray-100 rounded-t-2xl overflow-hidden">
+          <div className="relative h-48 sm:h-56 shrink-0 rounded-t-2xl overflow-hidden">
+            {selectedProduct.image_url ? (
               <img src={selectedProduct.image_url} alt={selectedProduct.name} className="w-full h-full object-cover" />
-              <button onClick={() => setSelectedProduct(null)} className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-md">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between px-5 pt-5">
-              <div />
-              <button onClick={() => setSelectedProduct(null)} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          )}
+            ) : (
+              <div className="w-full h-full" style={{
+                backgroundColor: '#f0eeeb',
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='%23d5d0c8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2'/%3E%3Cpath d='M7 2v20'/%3E%3Cpath d='M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7'/%3E%3C/svg%3E")`,
+                backgroundSize: '36px 36px',
+              }} />
+            )}
+            <button onClick={() => setSelectedProduct(null)} className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-md">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
           
           <div className="p-5 flex-1 overflow-y-auto">
             <h2 className="text-2xl font-bold mb-1">{selectedProduct.name}</h2>
@@ -589,14 +588,20 @@ export default function StoreFrontClient({
                               )}
                             </div>
                           </div>
-                          {product.image_url && (
-                            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden shrink-0 bg-gray-100 relative group-hover:scale-[1.02] transition-transform">
+                          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden shrink-0 relative group-hover:scale-[1.02] transition-transform">
+                            {product.image_url ? (
                               <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
-                              <div className={`absolute bottom-1.5 right-1.5 ${theme.primaryBg} text-white p-1.5 rounded-lg shadow-md flex items-center justify-center`}>
-                                <Plus className="w-4 h-4" />
-                              </div>
+                            ) : (
+                              <div className="w-full h-full" style={{
+                                backgroundColor: '#f0eeeb',
+                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='%23d5d0c8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2'/%3E%3Cpath d='M7 2v20'/%3E%3Cpath d='M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7'/%3E%3C/svg%3E")`,
+                                backgroundSize: '28px 28px',
+                              }} />
+                            )}
+                            <div className={`absolute bottom-1.5 right-1.5 ${theme.primaryBg} text-white p-1.5 rounded-lg shadow-md flex items-center justify-center`}>
+                              <Plus className="w-4 h-4" />
                             </div>
-                          )}
+                          </div>
                         </div>
                       ))}
                     </div>
