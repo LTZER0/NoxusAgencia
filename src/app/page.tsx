@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Store, ArrowRight, CheckCircle2, Star, Menu, X } from "lucide-react";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const proposals = [
   {
@@ -49,18 +49,23 @@ const reviews = [
   { name: "Beto", role: "Beto Pizzas", text: "Aquela parada de atualizar os preços sozinho salvou muito meu tempo. Recomendo demais o plano PRO." }
 ];
 
-import { useEffect } from "react";
 import { createClient } from '@/lib/supabase/client'
+import { isAdminEmail } from '@/lib/admins'
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [trialUsed, setTrialUsed] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   useEffect(() => {
     async function checkTrial() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        if (isAdminEmail(user.email)) {
+          setIsAdmin(true);
+        }
+
         const { data: store } = await supabase
           .from('stores')
           .select('trial_used')
@@ -250,15 +255,20 @@ export default function Home() {
                 viewport={{ once: true }}
                 className="bg-white border border-gray-200 p-8 md:p-10 rounded-3xl relative flex flex-col shadow-sm md:my-8"
               >
-                {!trialUsed && (
+                {!trialUsed && !isAdmin && (
                   <div className="absolute -top-4 -right-4 bg-green-500 text-white px-4 py-2 rounded-xl text-lg font-black tracking-wide shadow-lg rotate-3">
                     14 DIAS GRÁTIS
+                  </div>
+                )}
+                {isAdmin && (
+                  <div className="absolute -top-4 -right-4 bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-bold tracking-wide shadow-lg">
+                    EQUIPE
                   </div>
                 )}
                 <div className="mb-8">
                   <h3 className="text-xl font-bold text-slate-500 mb-2 uppercase tracking-wide">Plano Plus</h3>
                   <div className="flex flex-col gap-1">
-                    {!trialUsed ? (
+                    {!trialUsed && !isAdmin ? (
                        <>
                          <span className="text-2xl font-bold text-slate-400 line-through decoration-red-500 decoration-2">R$ 49,90</span>
                          <div className="flex items-baseline gap-1">
@@ -294,8 +304,8 @@ export default function Home() {
                   </li>
                 </ul>
                 
-                <Link href={trialUsed ? "/dashboard/plans" : "/register"} className="w-full block text-center bg-slate-100 hover:bg-slate-200 text-slate-900 py-4 rounded-xl font-bold transition-colors border border-slate-300">
-                  {trialUsed ? "Começar com o Plus" : "Começar teste Grátis"}
+                <Link href={isAdmin || trialUsed ? "/dashboard/plans" : "/register"} className="w-full block text-center bg-slate-100 hover:bg-slate-200 text-slate-900 py-4 rounded-xl font-bold transition-colors border border-slate-300">
+                  {isAdmin ? "Acesso Admin" : (trialUsed ? "Começar com o Plus" : "Começar teste Grátis")}
                 </Link>
               </motion.div>
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Briefcase, CalendarDays, Settings, Menu, X, LogOut, Store, ShoppingBag, MapPin, Tag, Layers } from 'lucide-react'
+import { LayoutDashboard, Briefcase, CalendarDays, Settings, Menu, X, LogOut, Store, ShoppingBag, MapPin, Tag, Layers, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const navigation = [
@@ -16,7 +16,7 @@ const navigation = [
   { name: 'Configurações', href: '/dashboard/settings', icon: Settings },
 ]
 
-export default function ClientShell({ children, hasActivePlan }: { children: React.ReactNode, hasActivePlan?: boolean }) {
+export default function ClientShell({ children, hasActivePlan, isAdmin }: { children: React.ReactNode, hasActivePlan?: boolean, isAdmin?: boolean }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
@@ -62,6 +62,16 @@ export default function ClientShell({ children, hasActivePlan }: { children: Rea
             <X className="h-6 w-6" />
           </button>
         </div>
+        
+        {isAdmin && (
+          <div className="px-4 py-3 border-b border-gray-100 bg-purple-50">
+            <div className="flex items-center justify-center gap-2 text-purple-700">
+              <ShieldCheck className="h-5 w-5" />
+              <span className="text-sm font-bold uppercase tracking-wider">Acesso Admin</span>
+            </div>
+          </div>
+        )}
+
         <nav className="flex flex-1 flex-col px-4 py-4 space-y-1">
           {navigation.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`) && item.href !== '/dashboard'

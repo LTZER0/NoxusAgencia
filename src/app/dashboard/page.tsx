@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import DashboardClient from "./DashboardClient";
+import { isAdminEmail } from "@/lib/admins";
 
 export default async function DashboardOverviewPage() {
   const supabase = await createClient();
@@ -11,6 +12,8 @@ export default async function DashboardOverviewPage() {
   if (!user) {
     redirect('/login');
   }
+  
+  const isAdmin = isAdminEmail(user.email);
 
   // Check if store exists
   const { data: store } = await supabase
@@ -47,17 +50,27 @@ export default async function DashboardOverviewPage() {
 
   return (
     <div className="max-w-6xl mx-auto w-full">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-          <LayoutDashboard className="w-6 h-6" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-            Visão Geral
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Acompanhe o desempenho das suas vendas e os produtos mais populares.
-          </p>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+            <LayoutDashboard className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+                Visão Geral
+              </h1>
+              {isAdmin && (
+                <span className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
+                  <ShieldCheck className="w-4 h-4" />
+                  Equipe Noxus
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-gray-500 mt-1">
+              Acompanhe o desempenho das suas vendas e os produtos mais populares.
+            </p>
+          </div>
         </div>
       </div>
 
