@@ -1,53 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Store, ArrowRight, CheckCircle2, Star, Menu, X } from "lucide-react";
-import { motion } from "motion/react";
-import { useState } from "react";
-
-const proposals = [
-  {
-    title: "Açaiteria",
-    color: "from-fuchsia-600 to-purple-800",
-    shadow: "shadow-fuchsia-500/50",
-    image: "/images/acaiteria.jpg",
-    desc: "Cores vibrantes para combinar com o frescor e a energia do açaí. Personalização completa de adicionais."
-  },
-  {
-    title: "Lanchonete",
-    color: "from-indigo-500 to-blue-800",
-    shadow: "shadow-indigo-500/50",
-    image: "/images/lanchonete.jpg",
-    desc: "Um ambiente dinâmico e rápido. Facilite o pedido do seu cliente de forma clara e objetiva."
-  },
-  {
-    title: "Pizzaria",
-    color: "from-red-600 to-rose-900",
-    shadow: "shadow-red-500/50",
-    image: "/images/pizzaria.jpg",
-    desc: "Tons quentes que remetem ao calor do forno. Interface perfeita para montagem de pizzas meio a meio."
-  },
-  {
-    title: "Hamburgueria",
-    color: "from-amber-500 to-yellow-700",
-    shadow: "shadow-amber-500/50",
-    image: "/images/hamburgueria.jpg",
-    desc: "Apetite e descontração para o melhor hambúrguer artesanal. Adicionais ilimitados e fáceis de escolher."
-  },
-  {
-    title: "Restaurante",
-    color: "from-orange-800 to-amber-950",
-    shadow: "shadow-orange-700/50",
-    image: "/images/restaurante.jpg",
-    desc: "Elegância e aconchego. Layout sofisticado para valorizar pratos requintados e a tradição do seu local."
-  }
-];
-
-const reviews = [
-  { name: "Carlos Silva", role: "Dono de Hamburgueria", text: "O sistema da NOXUS revolucionou nossos pedidos. A interface é linda e super fácil de usar!" },
-  { name: "Mariana Costa", role: "Proprietária de Açaiteria", text: "Meus clientes elogiam muito o cardápio digital. Além de rápido, as cores combinaram perfeitamente com minha marca." },
-  { name: "Roberto Almeida", role: "Gerente de Pizzaria", text: "A facilidade de atualizar os preços e gerenciar o estoque nos salvou muito tempo. Recomendo o plano PRO!" }
-];
+import { Store, ArrowRight, CheckCircle2 } from "lucide-react";
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -309,7 +263,6 @@ export default function Home() {
         </section>
       </main>
 
-      {/* Footer */}
       <footer className="bg-slate-950 border-t border-slate-900 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">

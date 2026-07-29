@@ -2,9 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import { PackageOpen } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import ServicesClient from "./ServicesClient";
+import ComplementGroupsManager from "./ComplementGroupsManager";
 
-export default async function ServicesPage() {
+export default async function ComplementGroupsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -15,7 +15,7 @@ export default async function ServicesPage() {
   // Check if store exists
   const { data: store } = await supabase
     .from('stores')
-    .select('id')
+    .select('id, complement_groups')
     .eq('owner_id', user.id)
     .single();
 
@@ -25,7 +25,7 @@ export default async function ServicesPage() {
         <PackageOpen className="w-12 h-12 text-gray-400 mb-4" />
         <h2 className="text-xl font-bold text-gray-900 mb-2">Loja não configurada</h2>
         <p className="text-gray-500 mb-6">
-          Você precisa configurar as informações da sua loja antes de gerenciar o catálogo.
+          Você precisa configurar as informações da sua loja antes de gerenciar complementos.
         </p>
         <Link 
           href="/dashboard/settings" 
@@ -37,34 +37,11 @@ export default async function ServicesPage() {
     );
   }
 
-  // Fetch existing products
-  const { data: products } = await supabase
-    .from('products_services')
-    .select('*')
-    .eq('store_id', store.id)
-    .order('created_at', { ascending: false });
-
-  // Fetch existing categories
-  const { data: categories } = await supabase
-    .from('categories')
-    .select('*')
-    .eq('store_id', store.id)
-    .order('created_at', { ascending: true });
-
-  // Fetch store complement_groups
-  const { data: storeData } = await supabase
-    .from('stores')
-    .select('complement_groups')
-    .eq('id', store.id)
-    .single();
-
   return (
     <div className="max-w-5xl mx-auto w-full">
-      <ServicesClient 
+      <ComplementGroupsManager 
         storeId={store.id} 
-        initialProducts={products || []} 
-        initialCategories={categories || []}
-        complementGroups={storeData?.complement_groups || []}
+        initialGroups={store.complement_groups || []} 
       />
     </div>
   );

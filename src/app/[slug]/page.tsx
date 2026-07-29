@@ -38,11 +38,20 @@ export default async function StoreFrontPage(props: { params: Promise<{ slug: st
     .eq("store_id", store.id)
     .order("neighborhood_name", { ascending: true });
 
+  // Buscar as categorias independentes da loja
+  const { data: categories } = await supabase
+    .from("categories")
+    .select("*")
+    .eq("store_id", store.id)
+    .order("created_at", { ascending: true });
+
   return (
     <StoreFrontClient 
       store={store} 
       products={products || []} 
       deliveryZones={deliveryZones || []}
+      categories={categories || []}
+      complementGroups={store.complement_groups || []}
     />
   );
 }

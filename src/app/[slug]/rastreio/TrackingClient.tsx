@@ -37,20 +37,33 @@ export default function TrackingClient({ store }: { store: any }) {
     setIsLoading(true);
     setHasSearched(true);
 
-    const { data, error } = await supabase
-      .from('appointments_orders')
-      .select('*')
-      .eq('store_id', store.id)
-      .or(`client_whatsapp.eq.${identifier},customer_cpf.eq.${identifier}`)
-      .order('created_at', { ascending: false });
+    try {
+      const response = await fetch('/api/store/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storeId: store.id,
+          identifier: identifier
+        })
+      });
 
-    if (data) {
-      setOrders(data);
-    } else {
+      if (!response.ok) {
+        throw new Error('Erro ao buscar pedidos');
+      }
+
+      const { orders: data } = await response.json();
+      
+      if (data) {
+        setOrders(data);
+      } else {
+        setOrders([]);
+      }
+    } catch (err) {
+      console.error(err);
       setOrders([]);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const getStatusDisplay = (status: string) => {
@@ -144,12 +157,29 @@ export default function TrackingClient({ store }: { store: any }) {
                     <div className="border-t border-gray-100 pt-4 mb-4">
                       <p className="text-sm font-semibold text-gray-900 mb-3">Itens do Pedido</p>
                       <div className="space-y-2">
-                        {order.cart_items?.map((item: any) => (
-                          <div key={item.id} className="flex justify-between text-sm">
-                            <span className="text-gray-700">{item.quantity}x {item.product?.name}</span>
-                            <span className="font-medium text-gray-900">
-                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.unitPrice * item.quantity)}
-                            </span>
+                        {order.cart_items?.map((item: any, idx: number) => (
+                          <div key={item.id || idx} className="flex flex-col text-sm border-b border-gray-50 pb-2 last:border-0 last:pb-0">
+                            <div className="flex justify-between">
+                              <span className="text-gray-700 font-medium">{item.quantity}x {item.product?.name}</span>
+                              <span className="font-medium text-gray-900">
+                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.unitPrice * item.quantity)}
+                              </span>
+                            </div>
+                            
+                            {item.selectedComplements && item.selectedComplements.length > 0 && (
+                              <div className="text-xs text-gray-500 mt-1 pl-2 border-l border-gray-200">
+                                {item.selectedComplements.map((comp: any, cIdx: number) => (
+                                  comp.items.map((ci: any, ciIdx: number) => (
+                                    <span key={`${cIdx}-${ciIdx}`} className="block">
+                                      + {ci.quantity > 1 ? `${ci.quantity}x ` : ''}{ci.name}
+                                    </span>
+                                  ))
+                                ))}
+                              </div>
+                            )}
+                            {item.observations && (
+                              <p className="text-xs text-gray-400 italic mt-0.5">Obs: {item.observations}</p>
+                            )}
                           </div>
                         ))}
                       </div>

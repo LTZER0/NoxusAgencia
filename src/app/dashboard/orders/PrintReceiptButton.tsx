@@ -106,6 +106,7 @@ export default function PrintReceiptButton({ order, storeName }: { order: OrderD
                     <td className="pt-1">{item.quantity}x</td>
                     <td className="pt-1 break-words max-w-[150px]">
                       {item.product?.name || 'Item'}
+                      {/* Legado */}
                       {((item.removedIngredients && item.removedIngredients.length > 0) || (item.extraIngredients && Object.keys(item.extraIngredients).length > 0)) && (
                         <div className="text-xs pl-1 mt-1">
                           {item.removedIngredients?.map((id: string) => {
@@ -117,6 +118,24 @@ export default function PrintReceiptButton({ order, storeName }: { order: OrderD
                             return ing ? <div key={id}>+ {String(qty)}x {ing.name}</div> : null;
                           })}
                         </div>
+                      )}
+                      
+                      {/* Novo */}
+                      {item.selectedComplements && item.selectedComplements.length > 0 && (
+                        <div className="text-xs pl-1 mt-1">
+                          {item.selectedComplements.map((comp: any, cIdx: number) => (
+                            <div key={cIdx}>
+                              <div className="font-bold">{comp.groupName}:</div>
+                              {comp.items.map((ci: any, ciIdx: number) => (
+                                <div key={ciIdx}>+ {ci.quantity > 1 ? `${ci.quantity}x ` : ''}{ci.name}{ci.price > 0 ? ` R$${(ci.price * ci.quantity).toFixed(2)}` : ''}</div>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {item.observations && (
+                        <div className="text-xs pl-1 mt-1 italic">OBS: {item.observations}</div>
                       )}
                     </td>
                     <td className="pt-1 text-right">{formatCurrency(Number(item.unitPrice) * Number(item.quantity))}</td>

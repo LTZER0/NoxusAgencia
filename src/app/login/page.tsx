@@ -5,12 +5,14 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Store, Loader2, AlertCircle } from 'lucide-react'
+import { Turnstile } from '@marsidev/react-turnstile'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -20,9 +22,16 @@ export default function Login() {
     setError(null)
 
     try {
+      if (!captchaToken) {
+        throw new Error('Por favor, confirme que você não é um robô.')
+      }
+
       const { error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: {
+          captchaToken,
+        }
       })
 
       if (authError) throw authError
@@ -91,9 +100,17 @@ export default function Login() {
             />
           </div>
 
+          <div className="flex justify-center mt-2 mb-4">
+            <Turnstile 
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''} 
+              onSuccess={(token) => setCaptchaToken(token)}
+              options={{ theme: 'light' }}
+            />
+          </div>
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !captchaToken}
             className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Entrar'}

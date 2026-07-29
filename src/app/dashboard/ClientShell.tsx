@@ -3,13 +3,15 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Briefcase, CalendarDays, Settings, Menu, X, LogOut, Store, ShoppingBag, MapPin } from 'lucide-react'
+import { LayoutDashboard, Briefcase, CalendarDays, Settings, Menu, X, LogOut, Store, ShoppingBag, MapPin, Tag, Layers } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const navigation = [
   { name: 'Visão Geral', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Pedidos', href: '/dashboard/orders', icon: ShoppingBag },
+  { name: 'Categorias', href: '/dashboard/categories', icon: Tag },
   { name: 'Meus Produtos', href: '/dashboard/services', icon: Briefcase },
+  { name: 'Complementos', href: '/dashboard/complementos', icon: Layers },
   { name: 'Áreas de Entrega', href: '/dashboard/delivery', icon: MapPin },
   { name: 'Configurações', href: '/dashboard/settings', icon: Settings },
 ]

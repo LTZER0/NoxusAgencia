@@ -116,8 +116,11 @@ CREATE POLICY "Store owners can manage their own appointments/orders"
     USING (store_id IN (SELECT id FROM stores WHERE owner_id = auth.uid()))
     WITH CHECK (store_id IN (SELECT id FROM stores WHERE owner_id = auth.uid()));
 
-CREATE POLICY "Public can insert appointments/orders"
+CREATE POLICY "Public can insert orders for existing stores"
     ON appointments_orders
     FOR INSERT
     TO public
-    WITH CHECK (true);
+    WITH CHECK (store_id IN (SELECT id FROM stores WHERE active = true));
+
+-- Permite leitura pela public key (para rastreio)
+GRANT SELECT ON appointments_orders TO anon;
