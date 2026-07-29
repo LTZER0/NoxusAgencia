@@ -271,7 +271,7 @@ export default function StoreFrontClient({
   const theme = getThemeClasses();
 
   const hasOffers = useMemo(() => {
-    return products.some(p => p.is_promotional || (p.discount_price && Number(p.discount_price) > 0));
+    return products.some(p => p.is_promotional && p.discount_price !== null);
   }, [products]);
 
   const categoryTabs = useMemo(() => {
@@ -322,8 +322,11 @@ export default function StoreFrontClient({
 
   const currentItemPrice = useMemo(() => {
     if (!selectedProduct) return 0;
-    let price = Number(selectedProduct.discount_price || selectedProduct.price);
     
+    let price = selectedProduct.is_promotional && selectedProduct.discount_price !== null 
+      ? Number(selectedProduct.discount_price) 
+      : Number(selectedProduct.price);
+      
     Object.entries(selectedComplements).forEach(([groupId, items]) => {
       const group = productGroups.find(g => g.id === groupId);
       if (!group) return;
@@ -796,7 +799,7 @@ export default function StoreFrontClient({
               .filter(category => selectedCategory === 'Todos' || selectedCategory === category)
               .map(category => {
                 const categoryProducts = category === 'Ofertas'
-                  ? products.filter(p => p.is_promotional || (p.discount_price && Number(p.discount_price) > 0))
+                  ? products.filter(p => p.is_promotional && p.discount_price !== null)
                   : products.filter(p => (p.category || 'Outros') === category);
 
                 if (categoryProducts.length === 0) return null;
@@ -821,7 +824,7 @@ export default function StoreFrontClient({
                                 <h4 className={`font-bold text-base sm:text-lg ${theme.hoverText} transition-colors leading-snug`} style={{ fontFamily: "var(--font-poppins), sans-serif" }}>
                                   {product.name}
                                 </h4>
-                                {(product.is_promotional || product.discount_price) && (
+                                {(product.is_promotional && product.discount_price !== null) && (
                                   <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-gradient-to-r from-red-500 to-orange-500 text-white flex items-center gap-0.5 uppercase tracking-wider shadow-sm">
                                     <Percent className="w-2.5 h-2.5" /> Oferta
                                   </span>
@@ -832,18 +835,18 @@ export default function StoreFrontClient({
                               </p>
                             </div>
                             <div className="flex items-center gap-2 mt-2 flex-wrap">
-                              {product.discount_price ? (
-                                <div className="flex items-center gap-2">
+                              {(product.is_promotional && product.discount_price !== null) ? (
+                                <div className="flex flex-col items-start">
                                   <span className="line-through text-gray-400 text-xs font-medium">
-                                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
+                                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(product.price))}
                                   </span>
                                   <span className="font-extrabold text-base sm:text-lg text-black">
-                                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.discount_price)}
+                                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(product.discount_price))}
                                   </span>
                                 </div>
                               ) : (
                                 <span className="font-extrabold text-base sm:text-lg text-black">
-                                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
+                                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(product.price))}
                                 </span>
                               )}
 
