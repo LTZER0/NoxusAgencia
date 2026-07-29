@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import crypto from 'crypto';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -100,6 +101,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Request deletion error:', error);
-    return NextResponse.json({ error: 'Erro interno no servidor.' }, { status: 500 });
+    return NextResponse.json({ error: 'Erro interno: ' + (error.message || String(error)) }, { status: 500 });
   }
 }
