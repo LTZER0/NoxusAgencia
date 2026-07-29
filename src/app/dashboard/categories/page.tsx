@@ -29,7 +29,7 @@ export default async function CategoriesPage() {
         </p>
         <Link 
           href="/dashboard/settings" 
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-md transition-colors"
+          className="bg-purple-800 hover:bg-purple-900 text-white font-medium py-2 px-6 rounded-md transition-colors"
         >
           Ir para Configurações
         </Link>
@@ -46,7 +46,7 @@ export default async function CategoriesPage() {
   return (
     <div className="flex flex-col gap-8 max-w-4xl mx-auto w-full">
       <div className="flex items-center gap-3">
-        <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+        <div className="p-2 bg-purple-50 text-purple-800 rounded-lg">
           <Tag className="w-6 h-6" />
         </div>
         <div>

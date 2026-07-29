@@ -24,7 +24,7 @@ export default async function SettingsPage() {
   return (
     <div className="flex flex-col gap-8 max-w-4xl mx-auto w-full">
       <div className="flex items-center gap-3">
-        <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+        <div className="p-2 bg-purple-50 text-purple-800 rounded-lg">
           <Settings className="w-6 h-6" />
         </div>
         <div>

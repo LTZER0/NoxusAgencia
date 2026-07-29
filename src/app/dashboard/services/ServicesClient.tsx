@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, AlertCircle, PackageOpen, X, Edit, Image as ImageIcon, Check, Tag, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { motion } from 'motion/react';
 
 
 
@@ -157,7 +158,12 @@ export default function ServicesClient({
   };
 
   return (
-    <div className="space-y-8">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-8"
+    >
       {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -169,13 +175,15 @@ export default function ServicesClient({
           </p>
         </div>
         {!isAdding && (
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => { resetForm(); setIsAdding(true); }}
-            className="inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors bg-indigo-600 text-white hover:bg-indigo-700 h-10 px-4 py-2 shadow-sm"
+            className="inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors bg-purple-800 text-white hover:bg-purple-900 h-10 px-4 py-2 shadow-sm"
           >
             <Plus className="mr-2 h-4 w-4" />
             Adicionar Produto
-          </button>
+          </motion.button>
         )}
       </div>
 
@@ -184,7 +192,7 @@ export default function ServicesClient({
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
             <div className="flex items-center gap-2">
-              <span className={`p-2 rounded-lg ${editingId ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-600'}`}>
+              <span className={`p-2 rounded-lg ${editingId ? 'bg-amber-50 text-amber-600' : 'bg-purple-50 text-purple-800'}`}>
                 {editingId ? <Edit className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
               </span>
               <h2 className="text-lg font-bold text-gray-900">
@@ -215,7 +223,7 @@ export default function ServicesClient({
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-purple-800 sm:text-sm sm:leading-6"
                     placeholder="Ex: X-Tudo Burger"
                   />
                 </div>
@@ -232,7 +240,7 @@ export default function ServicesClient({
                       required
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
-                      className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-purple-800 sm:text-sm sm:leading-6"
                       placeholder="25.00"
                     />
                   </div>
@@ -257,14 +265,14 @@ export default function ServicesClient({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center pt-2">
                   <div>
                     <label className="block text-sm font-semibold text-gray-900 mb-1.5 flex items-center gap-1.5">
-                      <Tag className="w-4 h-4 text-indigo-500" />
+                      <Tag className="w-4 h-4 text-purple-600" />
                       Categoria
                     </label>
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
                       disabled={initialCategories.length === 0}
-                      className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                      className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-purple-800 sm:text-sm sm:leading-6 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                     >
                       <option value="">
                         {initialCategories.length > 0 ? 'Selecione a categoria...' : 'Nenhuma categoria criada (Crie em Categorias)'}
@@ -299,27 +307,27 @@ export default function ServicesClient({
                   <label className="block text-sm font-semibold text-gray-900 mb-1.5">
                     Descrição do Produto
                   </label>
-                  <textarea
-                    rows={3}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 resize-none"
-                    placeholder="Descreva os ingredientes, tamanho e sabor..."
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-1.5 flex items-center gap-2">
-                    <ImageIcon className="w-4 h-4 text-gray-400" />
-                    URL da Imagem
-                  </label>
-                  <input
-                    type="url"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    placeholder="https://exemplo.com/imagem.jpg"
-                  />
+                    <textarea
+                      rows={3}
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-purple-800 sm:text-sm sm:leading-6 resize-none"
+                      placeholder="Descreva os ingredientes, tamanho e sabor..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-1.5 flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4 text-gray-400" />
+                      URL da Imagem
+                    </label>
+                    <input
+                      type="url"
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-purple-800 sm:text-sm sm:leading-6"
+                      placeholder="https://exemplo.com/imagem.jpg"
+                    />
                 </div>
               </div>
             </div>
@@ -345,7 +353,7 @@ export default function ServicesClient({
                       <label 
                         key={group.id} 
                         className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
-                          isSelected ? 'bg-indigo-50/50 border-indigo-200 ring-1 ring-indigo-600' : 'bg-white border-gray-200 hover:border-gray-300'
+                          isSelected ? 'bg-purple-50/50 border-purple-200 ring-1 ring-purple-800' : 'bg-white border-gray-200 hover:border-gray-300'
                         }`}
                       >
                         <div className="flex items-center h-5 mt-0.5">
@@ -359,11 +367,11 @@ export default function ServicesClient({
                                 setSelectedGroupIds(selectedGroupIds.filter(id => id !== group.id));
                               }
                             }}
-                            className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                            className="w-4 h-4 rounded border-gray-300 text-purple-800 focus:ring-purple-800"
                           />
                         </div>
                         <div className="flex flex-col flex-1">
-                          <span className={`text-sm font-semibold ${isSelected ? 'text-indigo-900' : 'text-gray-900'}`}>
+                          <span className={`text-sm font-semibold ${isSelected ? 'text-purple-900' : 'text-gray-900'}`}>
                             {group.name}
                           </span>
                           <div className="flex items-center gap-2 mt-1">
@@ -399,7 +407,7 @@ export default function ServicesClient({
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 transition-colors"
+                className="inline-flex items-center rounded-xl bg-purple-800 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-800 disabled:opacity-50 transition-colors"
               >
                 {loading ? 'Salvando...' : editingId ? 'Salvar Alterações' : 'Cadastrar Produto'}
               </button>
@@ -422,13 +430,19 @@ export default function ServicesClient({
             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
               <PackageOpen className="w-8 h-8 text-gray-300" />
             </div>
-            <p className="font-medium text-gray-900 mb-1">Nenhum produto cadastrado.</p>
-            <p className="text-sm">Clique em "Adicionar Produto" para começar a montar seu cardápio.</p>
+            <p className="font-medium text-gray-900 mb-1">Sua vitrine está vazia.</p>
+            <p className="text-sm">Que tal adicionar seu primeiro produto e começar a vender?</p>
           </div>
         ) : (
           <ul className="divide-y divide-gray-100">
-            {products.map((product) => (
-              <li key={product.id} className="p-6 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-gray-50/50 transition-colors gap-4">
+            {products.map((product, index) => (
+              <motion.li 
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                key={product.id} 
+                className="p-6 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-gray-50/50 transition-colors gap-4"
+              >
                 <div className="flex items-start gap-4 flex-1">
                   {product.image_url ? (
                     <div className="w-16 h-16 rounded-xl bg-gray-100 shrink-0 overflow-hidden border border-gray-200">
@@ -444,7 +458,7 @@ export default function ServicesClient({
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <h3 className="font-bold text-gray-900">{product.name}</h3>
                       {product.category && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-600 uppercase tracking-wider">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-800 uppercase tracking-wider">
                           {product.category}
                         </span>
                       )}
@@ -486,7 +500,7 @@ export default function ServicesClient({
                 <div className="flex items-center gap-2 sm:self-center self-end">
                   <button
                     onClick={() => handleEditProduct(product)}
-                    className="p-2.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all border border-transparent hover:border-indigo-100"
+                    className="p-2.5 text-gray-400 hover:text-purple-800 hover:bg-purple-50 rounded-xl transition-all border border-transparent hover:border-purple-100"
                     title="Editar produto"
                   >
                     <Edit className="w-5 h-5" />
@@ -499,11 +513,11 @@ export default function ServicesClient({
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
-              </li>
+              </motion.li>
             ))}
           </ul>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

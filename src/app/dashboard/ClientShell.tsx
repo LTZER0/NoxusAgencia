@@ -52,8 +52,10 @@ export default function ClientShell({ children, hasActivePlan, isAdmin }: { chil
       `}>
         <div className="flex h-16 shrink-0 items-center justify-between px-6 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <Store className="h-6 w-6 text-blue-600" />
-            <span className="text-xl font-bold text-gray-900">Localiza<span className="text-blue-600">SaaS</span></span>
+            <div className="bg-purple-900 p-1.5 rounded-lg">
+              <Store className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-xl font-bold tracking-tight text-gray-900">Agência <span className="text-purple-800">NOXUS</span></span>
           </div>
           <button 
             onClick={() => setSidebarOpen(false)}
@@ -83,12 +85,12 @@ export default function ClientShell({ children, hasActivePlan, isAdmin }: { chil
                 className={`
                   group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors
                   ${isActive 
-                    ? 'bg-blue-50 text-blue-700' 
+                    ? 'bg-purple-50 text-purple-800' 
                     : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }
                 `}
               >
-                <item.icon className={`mr-3 h-5 w-5 flex-shrink-0 ${isActive ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-500'}`} />
+                <item.icon className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors ${isActive ? 'text-purple-800' : 'text-gray-400 group-hover:text-gray-500'}`} />
                 {item.name}
               </Link>
             )
@@ -99,7 +101,7 @@ export default function ClientShell({ children, hasActivePlan, isAdmin }: { chil
               onClick={handleLogout}
               className="group flex w-full items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors"
             >
-              <LogOut className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-red-600" />
+              <LogOut className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-red-600 transition-colors" />
               Sair da conta
             </button>
           </div>

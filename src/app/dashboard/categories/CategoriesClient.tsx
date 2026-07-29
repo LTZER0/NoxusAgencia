@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Tag, Plus, Trash2, AlertCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { motion } from 'motion/react';
 
 export default function CategoriesClient({
   storeId,
@@ -68,7 +69,12 @@ export default function CategoriesClient({
   };
 
   return (
-    <div className="space-y-8">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-8"
+    >
       {/* Formulário de adição */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Criar Nova Categoria</h2>
@@ -97,19 +103,21 @@ export default function CategoriesClient({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Ex: Combos, Lanches, Bebidas, Sobremesas..."
-              className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border"
+              className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm p-2.5 border"
               required
             />
           </div>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading || !name.trim()}
-            className="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-6 py-2.5 bg-purple-800 text-white font-medium rounded-lg hover:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
           >
             <Plus className="w-5 h-5" />
             <span>{loading ? 'Salvando...' : 'Adicionar'}</span>
-          </button>
+          </motion.button>
         </form>
       </div>
 
@@ -120,17 +128,23 @@ export default function CategoriesClient({
         </div>
 
         {categories.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            <Tag className="w-12 h-12 mx-auto text-gray-300 mb-2" />
-            <p className="font-medium">Nenhuma categoria cadastrada ainda.</p>
-            <p className="text-sm text-gray-400 mt-1">Crie sua primeira categoria acima para organizar seus produtos.</p>
+          <div className="p-8 text-center text-gray-500 flex flex-col items-center justify-center">
+            <Tag className="w-12 h-12 text-gray-300 mb-3" />
+            <p className="text-lg font-medium text-gray-800">Seu cardápio ainda não tem categorias.</p>
+            <p className="text-sm text-gray-500 mt-1 max-w-sm">Que tal começar criando categorias como "Lanches", "Bebidas" ou "Combos" para organizar seus produtos?</p>
           </div>
         ) : (
           <ul className="divide-y divide-gray-100">
-            {categories.map((category) => (
-              <li key={category.id} className="p-4 sm:px-6 flex items-center justify-between hover:bg-gray-50/50 transition-colors">
+            {categories.map((category, index) => (
+              <motion.li 
+                key={category.id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                className="p-4 sm:px-6 flex items-center justify-between hover:bg-gray-50/50 transition-colors"
+              >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                  <div className="p-2 bg-purple-50 text-purple-800 rounded-lg">
                     <Tag className="w-5 h-5" />
                   </div>
                   <div>
@@ -145,11 +159,11 @@ export default function CategoriesClient({
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
-              </li>
+              </motion.li>
             ))}
           </ul>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

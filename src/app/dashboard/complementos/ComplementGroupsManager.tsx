@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, AlertCircle, X, Edit, Check, Layers, PackageOpen } from 'lucide-react';
+import { motion } from 'motion/react';
 
 type ComplementItem = {
   name: string;
@@ -171,11 +172,16 @@ export default function ComplementGroupsManager({
   };
 
   return (
-    <div className="space-y-8">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-8"
+    >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
-            <Layers className="w-7 h-7 text-indigo-600" />
+            <Layers className="w-7 h-7 text-purple-800" />
             Grupos de Complementos
           </h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -183,13 +189,15 @@ export default function ComplementGroupsManager({
           </p>
         </div>
         {!isAdding && (
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => { resetForm(); setIsAdding(true); }}
-            className="inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors bg-indigo-600 text-white hover:bg-indigo-700 h-10 px-4 py-2 shadow-sm"
+            className="inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors bg-purple-800 text-white hover:bg-purple-900 h-10 px-4 py-2 shadow-sm"
           >
             <Plus className="mr-2 h-4 w-4" />
             Adicionar Grupo
-          </button>
+          </motion.button>
         )}
       </div>
 
@@ -197,7 +205,7 @@ export default function ComplementGroupsManager({
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
             <div className="flex items-center gap-2">
-              <span className={`p-2 rounded-lg ${editingId ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-600'}`}>
+              <span className={`p-2 rounded-lg ${editingId ? 'bg-amber-50 text-amber-600' : 'bg-purple-50 text-purple-800'}`}>
                 {editingId ? <Edit className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
               </span>
               <h2 className="text-lg font-bold text-gray-900">
@@ -227,7 +235,7 @@ export default function ComplementGroupsManager({
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-purple-800 sm:text-sm sm:leading-6"
                   placeholder="Ex: Escolha sua bebida"
                 />
               </div>
@@ -240,7 +248,7 @@ export default function ComplementGroupsManager({
                     onChange={(e) => setIsMandatory(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-800"></div>
                   <span className="text-sm font-semibold text-gray-900">
                     Obrigatório (O cliente deve escolher)
                   </span>
@@ -256,7 +264,7 @@ export default function ComplementGroupsManager({
                   min="0"
                   value={minChoices}
                   onChange={(e) => setMinChoices(parseInt(e.target.value) || 0)}
-                  className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-purple-800 sm:text-sm sm:leading-6"
                 />
               </div>
 
@@ -269,7 +277,7 @@ export default function ComplementGroupsManager({
                   min="1"
                   value={maxChoices}
                   onChange={(e) => setMaxChoices(parseInt(e.target.value) || 1)}
-                  className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-purple-800 sm:text-sm sm:leading-6"
                 />
               </div>
             </div>
@@ -283,7 +291,7 @@ export default function ComplementGroupsManager({
                 <button
                   type="button"
                   onClick={handleAddItem}
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+                  className="text-sm font-medium text-purple-800 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
                 >
                   <Plus className="w-4 h-4" />
                   Novo Item
@@ -305,7 +313,7 @@ export default function ComplementGroupsManager({
                             placeholder="Nome (ex: Coca-Cola, Extra Bacon)"
                             value={item.name}
                             onChange={(e) => handleUpdateItem(index, 'name', e.target.value)}
-                            className="block w-full rounded-lg border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
+                            className="block w-full rounded-lg border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-purple-800 sm:text-sm"
                             required
                           />
                         </div>
@@ -317,7 +325,7 @@ export default function ComplementGroupsManager({
                             placeholder="Preço Adicional (R$ 0,00)"
                             value={item.price || ''}
                             onChange={(e) => handleUpdateItem(index, 'price', parseFloat(e.target.value) || 0)}
-                            className="block w-full rounded-lg border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
+                            className="block w-full rounded-lg border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-purple-800 sm:text-sm"
                           />
                         </div>
                       </div>
@@ -345,7 +353,7 @@ export default function ComplementGroupsManager({
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 transition-colors"
+                className="inline-flex items-center rounded-xl bg-purple-800 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-800 disabled:opacity-50 transition-colors"
               >
                 {loading ? 'Salvando...' : editingId ? 'Salvar Alterações' : 'Cadastrar Grupo'}
               </button>
@@ -367,13 +375,19 @@ export default function ComplementGroupsManager({
             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
               <PackageOpen className="w-8 h-8 text-gray-300" />
             </div>
-            <p className="font-medium text-gray-900 mb-1">Nenhum grupo cadastrado.</p>
-            <p className="text-sm">Clique em "Adicionar Grupo" para criar opções de complementos.</p>
+            <p className="font-medium text-gray-900 mb-1">Seus produtos não possuem complementos.</p>
+            <p className="text-sm">Ofereça escolhas adicionais como "Adicional de Bacon" ou "Tamanho da Bebida".</p>
           </div>
         ) : (
           <ul className="divide-y divide-gray-100">
-            {groups.map((group) => (
-              <li key={group.id} className="p-6 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-gray-50/50 transition-colors gap-4">
+            {groups.map((group, index) => (
+              <motion.li 
+                key={group.id} 
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                className="p-6 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-gray-50/50 transition-colors gap-4"
+              >
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h3 className="font-bold text-gray-900">{group.name}</h3>
@@ -403,7 +417,7 @@ export default function ComplementGroupsManager({
                 <div className="flex items-center gap-2 sm:self-center self-end">
                   <button
                     onClick={() => handleEditGroup(group)}
-                    className="p-2.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all border border-transparent hover:border-indigo-100"
+                    className="p-2.5 text-gray-400 hover:text-purple-800 hover:bg-purple-50 rounded-xl transition-all border border-transparent hover:border-purple-100"
                     title="Editar grupo"
                   >
                     <Edit className="w-5 h-5" />
@@ -416,11 +430,11 @@ export default function ComplementGroupsManager({
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
-              </li>
+              </motion.li>
             ))}
           </ul>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

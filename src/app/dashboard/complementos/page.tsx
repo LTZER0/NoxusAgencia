@@ -29,7 +29,7 @@ export default async function ComplementGroupsPage() {
         </p>
         <Link 
           href="/dashboard/settings" 
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-md transition-colors"
+          className="bg-purple-800 hover:bg-purple-900 text-white font-medium py-2 px-6 rounded-md transition-colors"
         >
           Ir para Configurações
         </Link>

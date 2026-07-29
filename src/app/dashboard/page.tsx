@@ -52,7 +52,7 @@ export default async function DashboardOverviewPage() {
     <div className="max-w-6xl mx-auto w-full">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+          <div className="p-2 bg-purple-50 text-purple-800 rounded-lg">
             <LayoutDashboard className="w-6 h-6" />
           </div>
           <div>
@@ -61,7 +61,7 @@ export default async function DashboardOverviewPage() {
                 Visão Geral
               </h1>
               {isAdmin && (
-                <span className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
+                <span className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
                   <ShieldCheck className="w-4 h-4" />
                   Equipe Noxus
                 </span>

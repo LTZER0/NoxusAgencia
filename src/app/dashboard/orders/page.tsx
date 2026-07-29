@@ -13,6 +13,7 @@ import {
 import PrintReceiptButton from "./PrintReceiptButton";
 import ViewReceiptModal from "./ViewReceiptModal";
 import ConfirmAndNotifyButton from "./ConfirmAndNotifyButton";
+import { MotionDiv } from "@/components/MotionDiv";
 
 export default async function OrdersPage() {
   const supabase = await createClient();
@@ -141,7 +142,12 @@ export default async function OrdersPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8">
+    <MotionDiv 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="flex flex-col gap-8"
+    >
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-gray-900">
           Gestão de Pedidos
@@ -156,14 +162,14 @@ export default async function OrdersPage() {
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white mb-4 shadow-sm border border-gray-100">
             <ClipboardList className="h-8 w-8 text-gray-400" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900">Nenhum pedido ainda</h3>
+          <h3 className="text-lg font-medium text-gray-900">Nenhum pedido na fila</h3>
           <p className="mt-2 text-sm text-gray-500 max-w-sm mx-auto">
-            Quando seus clientes fizerem pedidos, eles aparecerão neste painel.
+            Assim que seus clientes começarem a comprar, os pedidos chegarão aqui em tempo real.
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {orderList.map((order) => {
+          {orderList.map((order, index) => {
             const statusDetails = getStatusDetails(order.status);
             const StatusIcon = statusDetails.icon;
 
@@ -176,8 +182,11 @@ export default async function OrdersPage() {
             }).format(new Date(order.created_at));
 
             return (
-              <div 
+              <MotionDiv 
                 key={order.id} 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
                 className="flex flex-col bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
               >
                 <div className="p-5 flex-1">
@@ -241,7 +250,7 @@ export default async function OrdersPage() {
                       <form action={updateOrderStatus.bind(null, order.id, statusDetails.nextStatus)}>
                         <button 
                           type="submit"
-                          className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
+                          className="w-full flex items-center justify-center gap-2 bg-purple-800 hover:bg-purple-900 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-purple-800 focus:ring-offset-1"
                         >
                           {statusDetails.nextLabel}
                           <ArrowRight className="w-4 h-4" />
@@ -260,11 +269,11 @@ export default async function OrdersPage() {
                     )}
                   </div>
                 )}
-              </div>
+              </MotionDiv>
             );
           })}
         </div>
       )}
-    </div>
+    </MotionDiv>
   );
 }

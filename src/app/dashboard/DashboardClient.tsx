@@ -5,6 +5,7 @@ import { TrendingUp, Package, DollarSign, Calendar, BarChart2 } from 'lucide-rea
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
 } from 'recharts';
+import { motion } from 'motion/react';
 
 type Order = {
   id: string;
@@ -91,30 +92,35 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
   }, [filteredOrders, timeFilter]);
 
   return (
-    <div className="space-y-6">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-6"
+    >
       {/* Filters */}
       <div className="flex bg-gray-100 p-1 rounded-lg w-fit">
         <button 
           onClick={() => setTimeFilter('day')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${timeFilter === 'day' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${timeFilter === 'day' ? 'bg-white shadow-sm text-purple-900' : 'text-gray-500 hover:text-purple-900'}`}
         >
           Hoje
         </button>
         <button 
           onClick={() => setTimeFilter('week')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${timeFilter === 'week' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${timeFilter === 'week' ? 'bg-white shadow-sm text-purple-900' : 'text-gray-500 hover:text-purple-900'}`}
         >
           Últimos 7 dias
         </button>
         <button 
           onClick={() => setTimeFilter('month')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${timeFilter === 'month' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${timeFilter === 'month' ? 'bg-white shadow-sm text-purple-900' : 'text-gray-500 hover:text-purple-900'}`}
         >
           Este Mês
         </button>
         <button 
           onClick={() => setTimeFilter('all')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${timeFilter === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${timeFilter === 'all' ? 'bg-white shadow-sm text-purple-900' : 'text-gray-500 hover:text-purple-900'}`}
         >
           Todo o período
         </button>
@@ -122,7 +128,7 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
 
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+        <motion.div whileHover={{ y: -4 }} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm transition-transform">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-green-50 text-green-600 rounded-lg">
               <DollarSign className="w-6 h-6" />
@@ -134,9 +140,9 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
               </h3>
             </div>
           </div>
-        </div>
+        </motion.div>
         
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+        <motion.div whileHover={{ y: -4 }} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm transition-transform">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
               <Package className="w-6 h-6" />
@@ -146,11 +152,11 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
               <h3 className="text-2xl font-bold text-gray-900">{totalOrders}</h3>
             </div>
           </div>
-        </div>
+        </motion.div>
         
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+        <motion.div whileHover={{ y: -4 }} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm transition-transform">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-purple-50 text-purple-600 rounded-lg">
+            <div className="p-3 bg-purple-50 text-purple-800 rounded-lg">
               <TrendingUp className="w-6 h-6" />
             </div>
             <div>
@@ -160,7 +166,7 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
               </h3>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Chart & Top Products */}
@@ -184,16 +190,18 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
                     cursor={{ fill: '#F3F4F6' }}
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                   />
-                  <Bar dataKey="value" fill="#4F46E5" radius={[4, 4, 0, 0]}>
+                  <Bar dataKey="value" fill="#6b21a8" radius={[4, 4, 0, 0]}>
                     {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill="#4F46E5" />
+                      <Cell key={`cell-${index}`} fill="#6b21a8" />
                     ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex h-full items-center justify-center text-gray-500">
-                Sem dados para o período selecionado.
+              <div className="flex flex-col h-full items-center justify-center text-gray-500 space-y-2">
+                <BarChart2 className="w-10 h-10 text-gray-300" />
+                <p>Nenhuma venda registrada neste período.</p>
+                <p className="text-sm text-gray-400">Divulgue o seu link para começar a ver os gráficos!</p>
               </div>
             )}
           </div>
@@ -208,7 +216,7 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
               productStats.slice(0, 5).map((stat, idx) => (
                 <div key={idx} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
+                    <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center font-bold text-sm">
                       {idx + 1}
                     </div>
                     <div>
@@ -222,14 +230,15 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
                 </div>
               ))
             ) : (
-              <div className="text-center text-gray-500 py-8">
-                Nenhuma venda no período.
+              <div className="text-center text-gray-500 py-8 flex flex-col items-center gap-2">
+                <Package className="w-8 h-8 text-gray-300" />
+                <p>O seu pódio está vazio.</p>
               </div>
             )}
           </div>
         </div>
         
       </div>
-    </div>
+    </motion.div>
   );
 }

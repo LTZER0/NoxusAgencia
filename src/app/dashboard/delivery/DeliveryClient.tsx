@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { MapPin, Plus, Trash2, AlertCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { motion } from 'motion/react';
 
 export default function DeliveryClient({
   storeId,
@@ -71,7 +72,12 @@ export default function DeliveryClient({
   };
 
   return (
-    <div className="space-y-8">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-8"
+    >
       {/* Formulário de adição */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Adicionar Nova Área</h2>
@@ -99,7 +105,7 @@ export default function DeliveryClient({
               id="neighborhood"
               value={neighborhood}
               onChange={(e) => setNeighborhood(e.target.value)}
-              className="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-3"
+              className="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-purple-800 sm:text-sm sm:leading-6 px-3"
               placeholder="Ex: Centro"
               required
             />
@@ -116,21 +122,23 @@ export default function DeliveryClient({
               min="0"
               value={fee}
               onChange={(e) => setFee(e.target.value)}
-              className="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-3"
+              className="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-purple-800 sm:text-sm sm:leading-6 px-3"
               placeholder="5.00"
               required
             />
           </div>
           
           <div className="md:col-span-2">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-purple-800 hover:bg-purple-900 disabled:bg-gray-300 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2"
             >
               <Plus className="w-4 h-4" />
               Adicionar
-            </button>
+            </motion.button>
           </div>
         </form>
       </div>
@@ -142,17 +150,23 @@ export default function DeliveryClient({
         </div>
         
         {zones.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            <MapPin className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-            <p>Nenhuma área de entrega cadastrada.</p>
-            <p className="text-sm mt-1">Adicione os bairros onde você realiza entregas.</p>
+          <div className="p-12 text-center text-gray-500 flex flex-col items-center">
+            <MapPin className="w-12 h-12 text-gray-300 mb-3" />
+            <p className="font-medium text-gray-900 mb-1">Nenhuma área de entrega cadastrada.</p>
+            <p className="text-sm">Adicione os bairros onde você realiza entregas para que os clientes saibam a taxa.</p>
           </div>
         ) : (
           <ul className="divide-y divide-gray-100">
-            {zones.map((zone) => (
-              <li key={zone.id} className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors">
+            {zones.map((zone, index) => (
+              <motion.li 
+                key={zone.id} 
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors"
+              >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                  <div className="p-2 bg-purple-50 text-purple-800 rounded-lg">
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div>
@@ -169,11 +183,11 @@ export default function DeliveryClient({
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
-              </li>
+              </motion.li>
             ))}
           </ul>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
