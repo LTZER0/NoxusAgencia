@@ -49,8 +49,31 @@ const reviews = [
   { name: "Beto", role: "Beto Pizzas", text: "Aquela parada de atualizar os preços sozinho salvou muito meu tempo. Recomendo demais o plano PRO." }
 ];
 
+import { useEffect } from "react";
+import { createClient } from '@/lib/supabase/client'
+
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [trialUsed, setTrialUsed] = useState(false);
+  
+  useEffect(() => {
+    async function checkTrial() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: store } = await supabase
+          .from('stores')
+          .select('trial_used')
+          .eq('owner_id', user.id)
+          .single();
+        
+        if (store && store.trial_used) {
+          setTrialUsed(true);
+        }
+      }
+    }
+    checkTrial();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white text-slate-800 font-sans selection:bg-purple-600 selection:text-white">
@@ -81,8 +104,8 @@ export default function Home() {
               <Link href="/login" className="text-slate-600 hover:text-purple-600 font-medium transition-colors ml-4 border-l border-gray-200 pl-4">
                 Entrar
               </Link>
-              <Link href="/register" className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-full font-semibold transition-all shadow-md shadow-purple-200">
-                Criar minha conta
+              <Link href={trialUsed ? "/dashboard/plans" : "/register"} className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-full font-semibold transition-all shadow-md shadow-purple-200">
+                {trialUsed ? "Meu Painel" : "Criar minha conta"}
               </Link>
             </motion.div>
 
@@ -103,7 +126,9 @@ export default function Home() {
               <Link href="#avaliacoes" onClick={() => setMenuOpen(false)} className="text-slate-600 font-medium">O que dizem</Link>
               <Link href="#planos" onClick={() => setMenuOpen(false)} className="text-slate-600 font-medium">Valores</Link>
               <Link href="/login" onClick={() => setMenuOpen(false)} className="text-slate-600 font-medium">Entrar</Link>
-              <Link href="/register" onClick={() => setMenuOpen(false)} className="bg-purple-600 text-center text-white px-4 py-3 rounded-xl font-bold">Criar minha conta</Link>
+              <Link href={trialUsed ? "/dashboard/plans" : "/register"} onClick={() => setMenuOpen(false)} className="bg-purple-600 text-center text-white px-4 py-3 rounded-xl font-bold">
+                {trialUsed ? "Meu Painel" : "Criar minha conta"}
+              </Link>
             </div>
           </div>
         )}
@@ -225,11 +250,28 @@ export default function Home() {
                 viewport={{ once: true }}
                 className="bg-white border border-gray-200 p-8 md:p-10 rounded-3xl relative flex flex-col shadow-sm md:my-8"
               >
+                {!trialUsed && (
+                  <div className="absolute -top-4 -right-4 bg-green-500 text-white px-4 py-2 rounded-xl text-lg font-black tracking-wide shadow-lg rotate-3">
+                    14 DIAS GRÁTIS
+                  </div>
+                )}
                 <div className="mb-8">
                   <h3 className="text-xl font-bold text-slate-500 mb-2 uppercase tracking-wide">Plano Plus</h3>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-black text-slate-900">R$ 49,90</span>
-                    <span className="text-slate-500 font-medium">/mês</span>
+                  <div className="flex flex-col gap-1">
+                    {!trialUsed ? (
+                       <>
+                         <span className="text-2xl font-bold text-slate-400 line-through decoration-red-500 decoration-2">R$ 49,90</span>
+                         <div className="flex items-baseline gap-1">
+                           <span className="text-4xl font-black text-green-600">R$ 0,00</span>
+                           <span className="text-slate-500 font-medium">/14 dias</span>
+                         </div>
+                       </>
+                    ) : (
+                       <div className="flex items-baseline gap-1">
+                         <span className="text-4xl font-black text-slate-900">R$ 49,90</span>
+                         <span className="text-slate-500 font-medium">/mês</span>
+                       </div>
+                    )}
                   </div>
                 </div>
                 
@@ -252,8 +294,8 @@ export default function Home() {
                   </li>
                 </ul>
                 
-                <Link href="/register" className="w-full block text-center bg-slate-100 hover:bg-slate-200 text-slate-900 py-4 rounded-xl font-bold transition-colors">
-                  Começar com o Plus
+                <Link href={trialUsed ? "/dashboard/plans" : "/register"} className="w-full block text-center bg-slate-100 hover:bg-slate-200 text-slate-900 py-4 rounded-xl font-bold transition-colors border border-slate-300">
+                  {trialUsed ? "Começar com o Plus" : "Começar teste Grátis"}
                 </Link>
               </motion.div>
 

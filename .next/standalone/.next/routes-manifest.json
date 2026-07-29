@@ -144,6 +144,12 @@
       "namedRegex": "^/dashboard/orders(?:/)?$"
     },
     {
+      "page": "/dashboard/plans",
+      "regex": "^/dashboard/plans(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/plans(?:/)?$"
+    },
+    {
       "page": "/dashboard/services",
       "regex": "^/dashboard/services(?:/)?$",
       "routeKeys": {},

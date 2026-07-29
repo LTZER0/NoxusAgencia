@@ -12,6 +12,7 @@
   "/dashboard/delivery/page": "app/dashboard/delivery/page.js",
   "/dashboard/orders/page": "app/dashboard/orders/page.js",
   "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/plans/page": "app/dashboard/plans/page.js",
   "/dashboard/services/page": "app/dashboard/services/page.js",
   "/dashboard/settings/page": "app/dashboard/settings/page.js",
   "/login/page": "app/login/page.js",

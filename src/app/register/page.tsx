@@ -46,10 +46,17 @@ export default function Register() {
         const baseSlug = storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
         const slug = `${baseSlug}-${Math.floor(Math.random() * 10000)}`
 
+        // 14 days from now
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 14);
+
         const { error: storeError } = await supabase.from('stores').insert({
           owner_id: data.user.id,
           name: storeName,
-          slug: slug
+          slug: slug,
+          plan: 'plus',
+          plan_expires_at: expiresAt.toISOString(),
+          trial_used: true
         })
 
         if (storeError) {

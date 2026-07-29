@@ -12,6 +12,7 @@
   "/dashboard/delivery/page": "/dashboard/delivery",
   "/dashboard/orders/page": "/dashboard/orders",
   "/dashboard/page": "/dashboard",
+  "/dashboard/plans/page": "/dashboard/plans",
   "/dashboard/services/page": "/dashboard/services",
   "/dashboard/settings/page": "/dashboard/settings",
   "/login/page": "/login",

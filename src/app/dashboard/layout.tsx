@@ -14,5 +14,18 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
-  return <ClientShell>{children}</ClientShell>
+  const { data: store } = await supabase
+    .from('stores')
+    .select('plan, plan_expires_at')
+    .eq('owner_id', user.id)
+    .single()
+
+  let hasActivePlan = false;
+  if (store && store.plan && store.plan !== 'none' && store.plan_expires_at) {
+    if (new Date(store.plan_expires_at) > new Date()) {
+      hasActivePlan = true;
+    }
+  }
+
+  return <ClientShell hasActivePlan={hasActivePlan}>{children}</ClientShell>
 }

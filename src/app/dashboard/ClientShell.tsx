@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { LayoutDashboard, Briefcase, CalendarDays, Settings, Menu, X, LogOut, Store, ShoppingBag, MapPin, Tag, Layers } from 'lucide-react'
@@ -16,11 +16,19 @@ const navigation = [
   { name: 'Configurações', href: '/dashboard/settings', icon: Settings },
 ]
 
-export default function ClientShell({ children }: { children: React.ReactNode }) {
+export default function ClientShell({ children, hasActivePlan }: { children: React.ReactNode, hasActivePlan?: boolean }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+
+  useEffect(() => {
+    if (hasActivePlan === false) {
+      if (pathname !== '/dashboard' && pathname !== '/dashboard/plans') {
+        router.push('/dashboard/plans')
+      }
+    }
+  }, [hasActivePlan, pathname, router])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
