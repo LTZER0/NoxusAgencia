@@ -106,8 +106,8 @@ export default function StoreFrontClient({
         const m = now.getMinutes().toString().padStart(2, '0');
         const currentHourStr = `${h}:${m}`;
         
-        const openTime = store.open_time.substring(0, 5);
-        const closeTime = store.close_time.substring(0, 5);
+        const openTime = (store.open_time || '18:00').substring(0, 5);
+        const closeTime = (store.close_time || '23:30').substring(0, 5);
         
         let isOpenNow = false;
 
