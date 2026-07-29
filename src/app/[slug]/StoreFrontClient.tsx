@@ -81,6 +81,52 @@ export default function StoreFrontClient({
   const [address, setAddress] = useState({ street: '', number: '', neighborhood: '', complement: '' });
   const [changeFor, setChangeFor] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isStoreOpen, setIsStoreOpen] = useState(store.is_open !== false);
+
+  useEffect(() => {
+    const checkStatus = () => {
+      // Se fechado manualmente, prevalece
+      if (store.is_open === false) {
+        setIsStoreOpen(false);
+        return;
+      }
+      
+      // Se possui configuração inteligente de dias e horários
+      if (store.open_days && Array.isArray(store.open_days) && store.open_time && store.close_time) {
+        const now = new Date();
+        const currentDay = now.getDay();
+        
+        if (!store.open_days.includes(currentDay)) {
+          setIsStoreOpen(false);
+          return;
+        }
+
+        const currentHourStr = now.toLocaleTimeString('pt-BR', { hour12: false, hour: '2-digit', minute: '2-digit' });
+        
+        if (store.open_time <= store.close_time) {
+          if (currentHourStr >= store.open_time && currentHourStr <= store.close_time) {
+            setIsStoreOpen(true);
+          } else {
+            setIsStoreOpen(false);
+          }
+        } else {
+          // Vira a madrugada
+          if (currentHourStr >= store.open_time || currentHourStr <= store.close_time) {
+            setIsStoreOpen(true);
+          } else {
+            setIsStoreOpen(false);
+          }
+        }
+      } else {
+        // Sem configuração inteligente, usa o manual
+        setIsStoreOpen(store.is_open !== false);
+      }
+    };
+
+    checkStatus();
+    const interval = setInterval(checkStatus, 60000);
+    return () => clearInterval(interval);
+  }, [store.is_open, store.open_days, store.open_time, store.close_time]);
 
   useEffect(() => {
     const savedName = localStorage.getItem('@delivery_client_name');
@@ -203,7 +249,7 @@ export default function StoreFrontClient({
   }, [products, categories, hasOffers]);
 
   const handleProductClick = (product: Product) => {
-    if (store.is_open === false) {
+    if (!isStoreOpen) {
       alert(`O estabelecimento ${store.name} está fechado no momento e não está aceitando pedidos.`);
       return;
     }
@@ -318,7 +364,7 @@ export default function StoreFrontClient({
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (store.is_open === false) {
+    if (!isStoreOpen) {
       alert(`O estabelecimento ${store.name} está fechado no momento e não está aceitando pedidos.`);
       return;
     }
@@ -612,7 +658,7 @@ export default function StoreFrontClient({
         </div>
       </div>
 
-      {store.is_open === false && (
+      {!isStoreOpen && (
         <div className="bg-red-50 border-y border-red-200 py-3 px-4 text-center">
           <p className="text-sm font-bold text-red-800 flex items-center justify-center gap-2">
             O estabelecimento está fechado para pedidos no momento. {store.opening_hours ? `Horário de atendimento: ${store.opening_hours}` : ''}
@@ -706,12 +752,12 @@ export default function StoreFrontClient({
                                   <span className="line-through text-gray-400 text-xs font-medium">
                                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
                                   </span>
-                                  <span className="font-extrabold text-base sm:text-lg text-emerald-600">
+                                  <span className="font-extrabold text-base sm:text-lg text-black">
                                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.discount_price)}
                                   </span>
                                 </div>
                               ) : (
-                                <span className={`font-extrabold text-base sm:text-lg ${theme.priceText}`}>
+                                <span className="font-extrabold text-base sm:text-lg text-black">
                                   {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
                                 </span>
                               )}
@@ -1188,21 +1234,21 @@ export default function StoreFrontClient({
                   
                   {checkoutStep === 'cart' ? (
                     <button
-                      disabled={cart.length === 0 || store.is_open === false}
+                      disabled={cart.length === 0 || !isStoreOpen}
                       onClick={() => setCheckoutStep('checkout')}
                       className={`w-full ${theme.primaryBg} ${theme.primaryHover} disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 text-lg shadow-lg`}
                     >
-                      {store.is_open === false ? 'Loja Fechada para Pedidos' : 'Continuar para Pagamento'}
+                      {!isStoreOpen ? 'Loja Fechada para Pedidos' : 'Continuar para Pagamento'}
                       <ArrowRight className="w-5 h-5" />
                     </button>
                   ) : (
                     <button
                       type="submit"
                       form="checkout-form"
-                      disabled={isSubmitting || store.is_open === false}
+                      disabled={isSubmitting || !isStoreOpen}
                       className={`w-full ${theme.primaryBg} ${theme.primaryHover} disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 text-lg shadow-lg`}
                     >
-                      {isSubmitting ? 'Processando...' : store.is_open === false ? 'Loja Fechada' : 'Confirmar Pedido'}
+                      {isSubmitting ? 'Processando...' : !isStoreOpen ? 'Loja Fechada' : 'Confirmar Pedido'}
                       <Check className="w-5 h-5" />
                     </button>
                   )}

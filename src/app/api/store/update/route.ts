@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
     const { 
       userId, name, slug, phone, street, block, lot, neighborhood, 
       store_category, is_open, opening_hours, logo_url, cover_url, isUpdate,
+      open_days, open_time, close_time,
       accepts_pix, accepts_card, accepts_cash, pix_key, pix_receipt_phone
     } = body;
 
@@ -60,6 +61,15 @@ export async function POST(req: NextRequest) {
     }
     if (opening_hours !== undefined) {
       storeData.opening_hours = opening_hours || null;
+    }
+    if (open_days !== undefined) {
+      storeData.open_days = open_days;
+    }
+    if (open_time !== undefined) {
+      storeData.open_time = open_time;
+    }
+    if (close_time !== undefined) {
+      storeData.close_time = close_time;
     }
     if (logo_url !== undefined) {
       storeData.logo_url = logo_url || null;

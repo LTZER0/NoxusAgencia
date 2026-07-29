@@ -26,6 +26,9 @@ export default function SettingsForm({
   const [storeCategory, setStoreCategory] = useState(initialStore?.store_category || 'lanchonete');
   const [isOpen, setIsOpen] = useState<boolean>(initialStore?.is_open ?? true);
   const [openingHours, setOpeningHours] = useState(initialStore?.opening_hours || '08:00 às 23:00');
+  const [openDays, setOpenDays] = useState<number[]>(initialStore?.open_days || [0, 1, 2, 3, 4, 5, 6]);
+  const [openTime, setOpenTime] = useState(initialStore?.open_time || '18:00');
+  const [closeTime, setCloseTime] = useState(initialStore?.close_time || '23:30');
   const [logoUrl, setLogoUrl] = useState(initialStore?.logo_url || '');
   const [coverUrl, setCoverUrl] = useState(initialStore?.cover_url || '');
 
@@ -66,6 +69,9 @@ export default function SettingsForm({
           store_category: storeCategory,
           is_open: isOpen,
           opening_hours: openingHours,
+          open_days: openDays,
+          open_time: openTime,
+          close_time: closeTime,
           logo_url: logoUrl,
           cover_url: coverUrl,
           accepts_pix: acceptsPix,
@@ -164,6 +170,76 @@ export default function SettingsForm({
                 className="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                 placeholder="Ex: Terça a Domingo das 18:00 às 23:30"
               />
+            </div>
+          </div>
+
+          <div className="mt-6 border-t border-gray-100 pt-6">
+            <h3 className="text-sm font-medium leading-6 text-gray-900 mb-4">Bloqueio Automático da Loja</h3>
+            <p className="text-xs text-gray-500 mb-4">Selecione os dias e horários reais em que você atende. Fora desses horários, a loja aparecerá como "Fechada" automaticamente e bloqueará pedidos.</p>
+            
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium leading-6 text-gray-900 mb-2">
+                  Dias de Funcionamento
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: 0, label: 'Domingo', short: 'Dom' },
+                    { id: 1, label: 'Segunda', short: 'Seg' },
+                    { id: 2, label: 'Terça', short: 'Ter' },
+                    { id: 3, label: 'Quarta', short: 'Qua' },
+                    { id: 4, label: 'Quinta', short: 'Qui' },
+                    { id: 5, label: 'Sexta', short: 'Sex' },
+                    { id: 6, label: 'Sábado', short: 'Sáb' },
+                  ].map(day => (
+                    <button
+                      key={day.id}
+                      type="button"
+                      onClick={() => {
+                        if (openDays.includes(day.id)) {
+                          setOpenDays(openDays.filter(d => d !== day.id));
+                        } else {
+                          setOpenDays([...openDays, day.id]);
+                        }
+                      }}
+                      className={`px-3 py-1.5 text-sm font-medium rounded-md border transition-colors ${
+                        openDays.includes(day.id) 
+                          ? 'bg-indigo-50 border-indigo-200 text-indigo-700' 
+                          : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      {day.short}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex-1 max-w-[150px]">
+                  <label htmlFor="openTime" className="block text-sm font-medium leading-6 text-gray-900">
+                    Abre às
+                  </label>
+                  <input
+                    type="time"
+                    id="openTime"
+                    value={openTime}
+                    onChange={(e) => setOpenTime(e.target.value)}
+                    className="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  />
+                </div>
+                <div className="flex-1 max-w-[150px]">
+                  <label htmlFor="closeTime" className="block text-sm font-medium leading-6 text-gray-900">
+                    Fecha às
+                  </label>
+                  <input
+                    type="time"
+                    id="closeTime"
+                    value={closeTime}
+                    onChange={(e) => setCloseTime(e.target.value)}
+                    className="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
