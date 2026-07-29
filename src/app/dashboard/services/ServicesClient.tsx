@@ -5,22 +5,18 @@ import { useRouter } from 'next/navigation';
 import { Plus, Trash2, AlertCircle, PackageOpen, X, Edit, Image as ImageIcon, Check, Tag, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
-type Ingredient = {
-  id: string;
-  name: string;
-  price: number;
-  can_remove: boolean;
-  can_add: boolean;
-};
+
 
 export default function ServicesClient({
   storeId,
   initialProducts,
-  initialCategories = []
+  initialCategories = [],
+  complementGroups = []
 }: {
   storeId: string;
   initialProducts: any[];
   initialCategories?: any[];
+  complementGroups?: any[];
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -38,7 +34,7 @@ export default function ServicesClient({
   const [isPromotional, setIsPromotional] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [category, setCategory] = useState('');
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
 
   const resetForm = () => {
     setName('');
@@ -48,7 +44,7 @@ export default function ServicesClient({
     setIsPromotional(false);
     setImageUrl('');
     setCategory('');
-    setIngredients([]);
+    setSelectedGroupIds([]);
     setEditingId(null);
     setIsAdding(false);
     setError(null);
@@ -63,42 +59,13 @@ export default function ServicesClient({
     setImageUrl(product.image_url || '');
     setCategory(product.category || '');
     
-    // Garantir que cada ingrediente tenha um id local se vier do banco sem
-    const formattedIngs = (product.ingredients || []).map((ing: any, idx: number) => ({
-      id: ing.id || Math.random().toString(36).substring(7),
-      name: ing.name || '',
-      price: Number(ing.price) || 0,
-      can_remove: ing.can_remove !== false,
-      can_add: ing.can_add === true
-    }));
-    setIngredients(formattedIngs);
+    setSelectedGroupIds(product.complement_group_ids || []);
     setEditingId(product.id);
     setIsAdding(true);
     setError(null);
   };
 
-  const handleAddIngredient = () => {
-    setIngredients([
-      ...ingredients,
-      {
-        id: Math.random().toString(36).substring(7),
-        name: '',
-        price: 0,
-        can_remove: true,
-        can_add: false,
-      }
-    ]);
-  };
 
-  const handleUpdateIngredient = (id: string, field: keyof Ingredient, value: any) => {
-    setIngredients(ingredients.map(ing => 
-      ing.id === id ? { ...ing, [field]: value } : ing
-    ));
-  };
-
-  const handleRemoveIngredient = (id: string) => {
-    setIngredients(ingredients.filter(ing => ing.id !== id));
-  };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,7 +89,7 @@ export default function ServicesClient({
         discount_price: parsedDiscountPrice,
         is_promotional: isPromotional,
         image_url: imageUrl,
-        ingredients: ingredients.map(({ id, ...rest }) => rest)
+        complement_group_ids: selectedGroupIds
       };
 
       if (category) {
@@ -357,83 +324,66 @@ export default function ServicesClient({
               </div>
             </div>
 
-            {/* Seção de Ingredientes */}
+            {/* Seção de Grupos de Complemento */}
             <div className="pt-6 border-t border-gray-100">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-sm font-bold text-gray-900">Ingredientes e Adicionais</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">Defina o que o cliente pode remover ou pedir como extra.</p>
+                  <h3 className="text-sm font-bold text-gray-900">Grupos de Complemento</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Selecione os grupos de opcionais/adicionais para este produto.</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleAddIngredient}
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
-                >
-                  <Plus className="w-4 h-4" />
-                  Novo Ingrediente
-                </button>
               </div>
 
-              {ingredients.length === 0 ? (
+              {complementGroups.length === 0 ? (
                 <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                  <p className="text-sm text-gray-500">Nenhum ingrediente configurado. O produto será vendido sem opções de customização.</p>
+                  <p className="text-sm text-gray-500">Nenhum grupo de complemento criado. Crie em Complementos.</p>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {ingredients.map((ingredient) => (
-                    <div key={ingredient.id} className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                      <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-                        <div className="sm:col-span-5">
-                          <input
-                            type="text"
-                            placeholder="Nome (ex: Bacon, Queijo)"
-                            value={ingredient.name}
-                            onChange={(e) => handleUpdateIngredient(ingredient.id, 'name', e.target.value)}
-                            className="block w-full rounded-lg border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
-                            required
-                          />
-                        </div>
-                        <div className="sm:col-span-3">
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            placeholder="Preço extra (R$)"
-                            value={ingredient.price || ''}
-                            onChange={(e) => handleUpdateIngredient(ingredient.id, 'price', parseFloat(e.target.value) || 0)}
-                            className="block w-full rounded-lg border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
-                          />
-                        </div>
-                        <div className="sm:col-span-4 flex items-center gap-4 text-sm">
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={ingredient.can_remove}
-                              onChange={(e) => handleUpdateIngredient(ingredient.id, 'can_remove', e.target.checked)}
-                              className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 w-4 h-4"
-                            />
-                            <span className="text-gray-700 font-medium">Pode remover?</span>
-                          </label>
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={ingredient.can_add}
-                              onChange={(e) => handleUpdateIngredient(ingredient.id, 'can_add', e.target.checked)}
-                              className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 w-4 h-4"
-                            />
-                            <span className="text-gray-700 font-medium">Extra?</span>
-                          </label>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveIngredient(ingredient.id)}
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {complementGroups.map((group) => {
+                    const isSelected = selectedGroupIds.includes(group.id);
+                    return (
+                      <label 
+                        key={group.id} 
+                        className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
+                          isSelected ? 'bg-indigo-50/50 border-indigo-200 ring-1 ring-indigo-600' : 'bg-white border-gray-200 hover:border-gray-300'
+                        }`}
                       >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
-                  ))}
+                        <div className="flex items-center h-5 mt-0.5">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedGroupIds([...selectedGroupIds, group.id]);
+                              } else {
+                                setSelectedGroupIds(selectedGroupIds.filter(id => id !== group.id));
+                              }
+                            }}
+                            className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                          />
+                        </div>
+                        <div className="flex flex-col flex-1">
+                          <span className={`text-sm font-semibold ${isSelected ? 'text-indigo-900' : 'text-gray-900'}`}>
+                            {group.name}
+                          </span>
+                          <div className="flex items-center gap-2 mt-1">
+                            {group.is_mandatory ? (
+                              <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded uppercase">
+                                Obrigatório
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded uppercase">
+                                Opcional
+                              </span>
+                            )}
+                            <span className="text-xs text-gray-500">
+                              {group.items?.length || 0} itens
+                            </span>
+                          </div>
+                        </div>
+                      </label>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -523,10 +473,10 @@ export default function ServicesClient({
                         </span>
                       )}
 
-                      {product.ingredients && product.ingredients.length > 0 && (
+                      {product.complement_group_ids && product.complement_group_ids.length > 0 && (
                         <span className="text-gray-500 text-xs font-medium flex items-center gap-1.5">
                           <Check className="w-3.5 h-3.5 text-green-500" />
-                          {product.ingredients.length} {product.ingredients.length === 1 ? 'ingrediente personalizável' : 'ingredientes personalizáveis'}
+                          {product.complement_group_ids.length} {product.complement_group_ids.length === 1 ? 'grupo' : 'grupos'}
                         </span>
                       )}
                     </div>

@@ -1,15 +1,21 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, MapPin, CreditCard, User, Phone, CheckCircle2, Clock, Sparkles, Utensils, Home, Percent } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, MapPin, CreditCard, User, Phone, CheckCircle2, Clock, Sparkles, Utensils, Home, Percent, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-type Ingredient = {
-  id: string;
+type ComplementItem = {
   name: string;
   price: number;
-  can_remove: boolean;
-  can_add: boolean;
+};
+
+type ComplementGroup = {
+  id: string;
+  name: string;
+  is_mandatory: boolean;
+  min_choices: number;
+  max_choices: number;
+  items: ComplementItem[];
 };
 
 type Product = {
@@ -21,15 +27,20 @@ type Product = {
   is_promotional?: boolean;
   image_url: string;
   category: string;
-  ingredients?: Ingredient[];
+  complement_group_ids?: string[];
+};
+
+type SelectedComplement = {
+  groupName: string;
+  items: { name: string; price: number; quantity: number }[];
 };
 
 type CartItem = {
   id: string; // unique id for this cart item instance
   product: Product;
   quantity: number;
-  removedIngredients: string[];
-  extraIngredients: Record<string, number>; // ingredientId -> quantity
+  selectedComplements: SelectedComplement[];
+  observations: string;
   unitPrice: number; // calculated base on extras
 };
 
@@ -37,12 +48,14 @@ export default function StoreFrontClient({
   store, 
   products, 
   deliveryZones = [],
-  categories = [] 
+  categories = [],
+  complementGroups = []
 }: { 
   store: any; 
   products: Product[]; 
   deliveryZones?: any[]; 
   categories?: any[]; 
+  complementGroups?: ComplementGroup[];
 }) {
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -53,9 +66,11 @@ export default function StoreFrontClient({
   
   // Customization Modal State
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [removedIngs, setRemovedIngs] = useState<string[]>([]);
-  const [extraIngs, setExtraIngs] = useState<Record<string, number>>({});
+  // groupId -> { itemName -> quantity }
+  const [selectedComplements, setSelectedComplements] = useState<Record<string, Record<string, number>>>({});
+  const [observations, setObservations] = useState('');
   const [itemQuantity, setItemQuantity] = useState(1);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
   // Checkout Form State
   const [clientName, setClientName] = useState('');
@@ -193,34 +208,88 @@ export default function StoreFrontClient({
       return;
     }
     setSelectedProduct(product);
-    setRemovedIngs([]);
-    setExtraIngs({});
+    setSelectedComplements({});
+    setObservations('');
     setItemQuantity(1);
+    
+    // Initialize expanded groups (all open by default)
+    if (product.complement_group_ids) {
+      const initialExpanded: Record<string, boolean> = {};
+      product.complement_group_ids.forEach(id => {
+        initialExpanded[id] = true;
+      });
+      setExpandedGroups(initialExpanded);
+    }
   };
+
+  const productGroups = useMemo(() => {
+    if (!selectedProduct || !selectedProduct.complement_group_ids) return [];
+    return complementGroups.filter(g => selectedProduct.complement_group_ids!.includes(g.id));
+  }, [selectedProduct, complementGroups]);
 
   const currentItemPrice = useMemo(() => {
     if (!selectedProduct) return 0;
     let price = Number(selectedProduct.discount_price || selectedProduct.price);
-    if (selectedProduct.ingredients) {
-      Object.entries(extraIngs).forEach(([ingId, qty]) => {
-        const ing = selectedProduct.ingredients?.find((i, idx) => (i.id || `ing-${idx}`) === ingId);
-        if (ing && ing.price) {
-          price += (Number(ing.price) * qty);
+    
+    Object.entries(selectedComplements).forEach(([groupId, items]) => {
+      const group = productGroups.find(g => g.id === groupId);
+      if (!group) return;
+      
+      Object.entries(items).forEach(([itemName, qty]) => {
+        const item = group.items.find(i => i.name === itemName);
+        if (item && item.price) {
+          price += (Number(item.price) * qty);
         }
       });
-    }
+    });
+    
     return price;
-  }, [selectedProduct, extraIngs]);
+  }, [selectedProduct, selectedComplements, productGroups]);
+
+  const isAddToCartDisabled = useMemo(() => {
+    if (!selectedProduct) return true;
+    for (const group of productGroups) {
+      if (group.is_mandatory) {
+        const selectedInGroup = selectedComplements[group.id] || {};
+        const totalSelected = Object.values(selectedInGroup).reduce((sum, qty) => sum + qty, 0);
+        if (totalSelected < group.min_choices) {
+          return true; // Missing mandatory selections
+        }
+      }
+    }
+    return false;
+  }, [productGroups, selectedComplements, selectedProduct]);
 
   const handleAddToCart = () => {
-    if (!selectedProduct) return;
+    if (!selectedProduct || isAddToCartDisabled) return;
+    
+    // Format selected complements for the cart item
+    const formattedComplements: SelectedComplement[] = [];
+    Object.entries(selectedComplements).forEach(([groupId, items]) => {
+      const group = productGroups.find(g => g.id === groupId);
+      if (!group) return;
+      
+      const selectedItems = Object.entries(items)
+        .filter(([_, qty]) => qty > 0)
+        .map(([name, qty]) => {
+          const item = group.items.find(i => i.name === name);
+          return { name, price: Number(item?.price || 0), quantity: qty };
+        });
+        
+      if (selectedItems.length > 0) {
+        formattedComplements.push({
+          groupName: group.name,
+          items: selectedItems
+        });
+      }
+    });
     
     const newItem: CartItem = {
       id: Math.random().toString(36).substring(7),
       product: selectedProduct,
       quantity: itemQuantity,
-      removedIngredients: removedIngs,
-      extraIngredients: extraIngs,
+      selectedComplements: formattedComplements,
+      observations: observations,
       unitPrice: currentItemPrice
     };
 
@@ -331,64 +400,128 @@ export default function StoreFrontClient({
             <h2 className="text-2xl font-bold mb-1">{selectedProduct.name}</h2>
             <p className="text-sm opacity-70 mb-4">{selectedProduct.description}</p>
             
-            {selectedProduct.ingredients && selectedProduct.ingredients.length > 0 && (
-              <div className="space-y-5 border-t border-gray-200/20 pt-4">
-                <h3 className="font-semibold text-lg flex items-center gap-2">Customização</h3>
-                
-                {selectedProduct.ingredients.map((ing, idx) => {
-                  const ingKey = ing.id || `ing-${idx}`;
+            {productGroups.length > 0 && (
+              <div className="space-y-4 border-t border-gray-200/20 pt-4">
+                {productGroups.map((group) => {
+                  const isExpanded = expandedGroups[group.id] !== false;
+                  const groupSelections = selectedComplements[group.id] || {};
+                  const totalSelected = Object.values(groupSelections).reduce((sum, qty) => sum + qty, 0);
+                  const isSatisfied = group.is_mandatory ? totalSelected >= group.min_choices : true;
+
                   return (
-                  <div key={ingKey} className="flex flex-col gap-2 p-3 rounded-xl bg-gray-500/5">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">{ing.name}</span>
-                      {ing.price > 0 && <span className="text-sm font-semibold opacity-70">+ {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ing.price)}</span>}
-                    </div>
-                    <div className="flex items-center gap-4 mt-1">
-                      {ing.can_remove && (
-                        <label className="flex items-center gap-2 text-sm cursor-pointer opacity-80 hover:opacity-100">
-                          <input 
-                            type="checkbox" 
-                            className="rounded border-gray-300 text-red-500 focus:ring-red-500"
-                            checked={removedIngs.includes(ingKey)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setRemovedIngs([...removedIngs, ingKey]);
-                                setExtraIngs({ ...extraIngs, [ingKey]: 0 }); // reset extra if removed
-                              } else {
-                                setRemovedIngs(removedIngs.filter(id => id !== ingKey));
-                              }
-                            }}
-                          />
-                          <span>Remover</span>
-                        </label>
-                      )}
-                      
-                      {ing.can_add && (
-                        <div className="flex items-center gap-3 bg-gray-500/10 rounded-full px-2 py-1 ml-auto">
-                          <button 
-                            type="button"
-                            disabled={!extraIngs[ingKey] || removedIngs.includes(ingKey)}
-                            onClick={() => setExtraIngs({...extraIngs, [ingKey]: Math.max(0, (extraIngs[ingKey] || 0) - 1)})}
-                            className="p-1 rounded-full hover:bg-gray-500/20 disabled:opacity-30"
-                          >
-                            <Minus className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="text-sm font-medium w-4 text-center">{extraIngs[ingKey] || 0}</span>
-                          <button 
-                            type="button"
-                            disabled={removedIngs.includes(ingKey)}
-                            onClick={() => setExtraIngs({...extraIngs, [ingKey]: (extraIngs[ingKey] || 0) + 1})}
-                            className="p-1 rounded-full hover:bg-gray-500/20 disabled:opacity-30"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
+                    <div key={group.id} className="border border-gray-200/20 rounded-xl overflow-hidden bg-gray-500/5">
+                      <button 
+                        onClick={() => setExpandedGroups({...expandedGroups, [group.id]: !isExpanded})}
+                        className="w-full flex items-center justify-between p-4 bg-black/5 hover:bg-black/10 transition-colors"
+                      >
+                        <div className="flex flex-col items-start text-left">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">{group.name}</span>
+                            {group.is_mandatory ? (
+                              <span className="text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 px-1.5 py-0.5 rounded uppercase">
+                                Obrigatório
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-bold bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 px-1.5 py-0.5 rounded uppercase">
+                                Opcional
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-xs text-gray-500 mt-1">
+                            {group.is_mandatory ? `Escolha de ${group.min_choices} até ${group.max_choices} opções` : `Escolha até ${group.max_choices} opções`}
+                          </span>
+                        </div>
+                        {isExpanded ? <ChevronUp className="w-5 h-5 opacity-50" /> : <ChevronDown className="w-5 h-5 opacity-50" />}
+                      </button>
+
+                      {isExpanded && (
+                        <div className="p-2 space-y-1">
+                          {group.items.map((item, idx) => {
+                            const qty = groupSelections[item.name] || 0;
+                            const canAddMore = totalSelected < group.max_choices;
+                            
+                            return (
+                              <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-white/50 dark:hover:bg-black/20 transition-colors">
+                                <div className="flex flex-col">
+                                  <span className="font-medium text-sm">{item.name}</span>
+                                  {Number(item.price) > 0 && (
+                                    <span className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold mt-0.5">
+                                      + {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                {group.max_choices === 1 ? (
+                                  <input 
+                                    type="radio" 
+                                    name={`group-${group.id}`}
+                                    checked={qty > 0}
+                                    onChange={() => {
+                                      setSelectedComplements({
+                                        ...selectedComplements,
+                                        [group.id]: { [item.name]: 1 }
+                                      });
+                                    }}
+                                    className="w-5 h-5 border-gray-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer"
+                                  />
+                                ) : (
+                                  <div className="flex items-center gap-3 bg-gray-200/50 dark:bg-gray-700/50 rounded-full px-2 py-1">
+                                    <button 
+                                      type="button"
+                                      disabled={qty === 0}
+                                      onClick={() => {
+                                        setSelectedComplements({
+                                          ...selectedComplements,
+                                          [group.id]: {
+                                            ...groupSelections,
+                                            [item.name]: Math.max(0, qty - 1)
+                                          }
+                                        });
+                                      }}
+                                      className="p-1 rounded-full hover:bg-gray-300/50 dark:hover:bg-gray-600/50 disabled:opacity-30 transition-colors"
+                                    >
+                                      <Minus className="w-3.5 h-3.5" />
+                                    </button>
+                                    <span className="text-sm font-medium w-4 text-center">{qty}</span>
+                                    <button 
+                                      type="button"
+                                      disabled={!canAddMore}
+                                      onClick={() => {
+                                        setSelectedComplements({
+                                          ...selectedComplements,
+                                          [group.id]: {
+                                            ...groupSelections,
+                                            [item.name]: qty + 1
+                                          }
+                                        });
+                                      }}
+                                      className="p-1 rounded-full hover:bg-gray-300/50 dark:hover:bg-gray-600/50 disabled:opacity-30 transition-colors"
+                                    >
+                                      <Plus className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
-                  </div>
-                )})}
+                  );
+                })}
               </div>
             )}
+
+            <div className="mt-6">
+              <label className="block text-sm font-semibold mb-2">Alguma observação?</label>
+              <textarea 
+                rows={3}
+                placeholder="Ex: Tirar cebola, maionese à parte..."
+                value={observations}
+                onChange={(e) => setObservations(e.target.value)}
+                className={`w-full rounded-xl p-3 ${theme.inputBg} focus:ring-2 focus:ring-${theme.primaryText.split('-')[1]}-500 resize-none`}
+              />
+            </div>
           </div>
           
           <div className="p-5 border-t border-gray-200/20">
@@ -408,10 +541,11 @@ export default function StoreFrontClient({
             </div>
             <button 
               onClick={handleAddToCart}
-              className={`w-full ${theme.primaryBg} ${theme.primaryHover} text-white py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2`}
+              disabled={isAddToCartDisabled}
+              className={`w-full ${isAddToCartDisabled ? 'bg-gray-300 cursor-not-allowed opacity-70 text-gray-500' : `${theme.primaryBg} ${theme.primaryHover} text-white`} py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2`}
             >
               <ShoppingCart className="w-5 h-5" />
-              Adicionar ao Pedido
+              {isAddToCartDisabled ? 'Selecione os itens obrigatórios' : 'Adicionar ao Pedido'}
             </button>
           </div>
         </div>
@@ -900,18 +1034,23 @@ export default function StoreFrontClient({
                               </p>
                             </div>
                             
-                            {(item.removedIngredients.length > 0 || Object.keys(item.extraIngredients).length > 0) && (
-                              <div className="text-sm opacity-70 space-y-1">
-                                {item.removedIngredients.map(id => {
-                                  const ing = item.product.ingredients?.find((i, idx) => (i.id || `ing-${idx}`) === id);
-                                  return ing ? <p key={id}>Sem: {ing.name}</p> : null;
-                                })}
-                                {Object.entries(item.extraIngredients).map(([id, qty]) => {
-                                  if (qty === 0) return null;
-                                  const ing = item.product.ingredients?.find((i, idx) => (i.id || `ing-${idx}`) === id);
-                                  return ing ? <p key={id}>Extra: {qty}x {ing.name}</p> : null;
-                                })}
+                            {item.selectedComplements && item.selectedComplements.length > 0 && (
+                              <div className="text-xs opacity-80 space-y-1.5 mt-1 border-l-2 pl-2 border-current/20">
+                                {item.selectedComplements.map((comp, cIdx) => (
+                                  <div key={cIdx}>
+                                    <p className="font-semibold">{comp.groupName}:</p>
+                                    {comp.items.map((ci, ciIdx) => (
+                                      <p key={ciIdx} className="ml-1 opacity-90">
+                                        + {ci.quantity > 1 ? `${ci.quantity}x ` : ''}{ci.name}
+                                        {ci.price > 0 && ` (+${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ci.price * ci.quantity)})`}
+                                      </p>
+                                    ))}
+                                  </div>
+                                ))}
                               </div>
+                            )}
+                            {item.observations && (
+                              <p className="text-xs italic opacity-70 mt-1">Obs: {item.observations}</p>
                             )}
                             
                             <button onClick={() => removeFromCart(item.id)} className="text-sm text-red-500 self-start mt-2 font-medium">Remover item</button>

@@ -145,7 +145,7 @@ export default function ViewReceiptModal({ order, storeName }: { order: OrderDat
                         </span>
                       </div>
                       
-                      {/* Adicionais e Remoções */}
+                      {/* Adicionais e Remoções (Legado) */}
                       {((item.removedIngredients && item.removedIngredients.length > 0) || (item.extraIngredients && Object.keys(item.extraIngredients).length > 0)) && (
                         <div className="mt-2 text-xs space-y-1 pl-2 border-l-2 border-indigo-200">
                           {item.removedIngredients?.map((id: string) => {
@@ -157,6 +157,26 @@ export default function ViewReceiptModal({ order, storeName }: { order: OrderDat
                             return ing ? <p key={id} className="text-emerald-700 font-medium">+ {String(qty)}x {ing.name}</p> : null;
                           })}
                         </div>
+                      )}
+                      
+                      {/* Complementos (Novo) */}
+                      {item.selectedComplements && item.selectedComplements.length > 0 && (
+                        <div className="mt-2 text-xs space-y-1 pl-2 border-l-2 border-indigo-200">
+                          {item.selectedComplements.map((comp: any, cIdx: number) => (
+                            <div key={cIdx}>
+                              <p className="font-semibold text-gray-600">{comp.groupName}:</p>
+                              {comp.items.map((ci: any, ciIdx: number) => (
+                                <p key={ciIdx} className="text-emerald-700 font-medium">
+                                  + {ci.quantity > 1 ? `${ci.quantity}x ` : ''}{ci.name}{ci.price > 0 ? ` (+${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ci.price * ci.quantity)})` : ''}
+                                </p>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {item.observations && (
+                        <p className="mt-1 text-xs text-gray-500 italic">Obs: {item.observations}</p>
                       )}
                     </div>
                   ))}
