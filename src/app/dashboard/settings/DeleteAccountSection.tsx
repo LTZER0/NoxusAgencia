@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { AlertTriangle, Lock, Loader2, Mail } from 'lucide-react';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function DeleteAccountSection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -9,11 +10,16 @@ export default function DeleteAccountSection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const handleRequestDeletion = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!password) {
       setError('Por favor, digite sua senha.');
+      return;
+    }
+    if (!captchaToken) {
+      setError('Por favor, confirme que você não é um robô.');
       return;
     }
 
@@ -25,7 +31,7 @@ export default function DeleteAccountSection() {
       const response = await fetch('/api/user/request-deletion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password })
+        body: JSON.stringify({ password, captchaToken })
       });
 
       const data = await response.json();
@@ -103,6 +109,14 @@ export default function DeleteAccountSection() {
                     </div>
                   </div>
 
+                  <div className="flex justify-center mb-6">
+                    <Turnstile 
+                      siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''} 
+                      onSuccess={(token) => setCaptchaToken(token)}
+                      options={{ theme: 'light' }}
+                    />
+                  </div>
+
                   {error && (
                     <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-100 mb-6">
                       {error}
@@ -120,7 +134,7 @@ export default function DeleteAccountSection() {
                     </button>
                     <button
                       type="submit"
-                      disabled={loading || !password}
+                      disabled={loading || !password || !captchaToken}
                       className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors flex items-center"
                     >
                       {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}

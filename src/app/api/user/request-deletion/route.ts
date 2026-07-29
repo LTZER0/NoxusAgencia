@@ -7,10 +7,14 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
   try {
-    const { password } = await request.json();
+    const { password, captchaToken } = await request.json();
 
     if (!password) {
       return NextResponse.json({ error: 'Senha não fornecida.' }, { status: 400 });
+    }
+    
+    if (!captchaToken) {
+      return NextResponse.json({ error: 'Validação de segurança pendente (CAPTCHA).' }, { status: 400 });
     }
 
     const supabase = await createClient();
@@ -26,6 +30,9 @@ export async function POST(request: Request) {
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: user.email!,
       password: password,
+      options: {
+        captchaToken,
+      }
     });
 
     if (signInError) {
