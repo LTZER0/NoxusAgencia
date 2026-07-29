@@ -544,7 +544,7 @@ export default function StoreFrontClient({
                                 <div className="flex flex-col">
                                   <span className="font-medium text-sm text-gray-900">{item.name}</span>
                                   {Number(item.price) > 0 && (
-                                    <span className="text-xs text-indigo-600 font-semibold mt-0.5">
+                                    <span className="text-xs text-gray-500 font-semibold mt-0.5">
                                       + {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
                                     </span>
                                   )}
