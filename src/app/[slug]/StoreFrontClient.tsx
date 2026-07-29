@@ -147,6 +147,32 @@ export default function StoreFrontClient({
     return () => clearInterval(interval);
   }, [store.is_open, store.open_days, store.open_time, store.close_time]);
 
+  // Derived values for UI
+  const formatTimeStr = (t?: string) => t ? t.substring(0, 5) : '';
+  const displayHours = (store.open_time && store.close_time) 
+    ? `${formatTimeStr(store.open_time)} às ${formatTimeStr(store.close_time)}`
+    : (store.opening_hours || '18:00 às 23:30');
+
+  const daysOfWeek = [
+    { id: 0, name: 'Domingo' },
+    { id: 1, name: 'Segunda-feira' },
+    { id: 2, name: 'Terça-feira' },
+    { id: 3, name: 'Quarta-feira' },
+    { id: 4, name: 'Quinta-feira' },
+    { id: 5, name: 'Sexta-feira' },
+    { id: 6, name: 'Sábado' },
+  ];
+  let openDaysArr = [0, 1, 2, 3, 4, 5, 6];
+  if (store.open_days) {
+    let arr = store.open_days;
+    if (typeof arr === 'string') {
+      try { arr = JSON.parse(arr); } catch(e) {}
+    }
+    if (Array.isArray(arr)) {
+      openDaysArr = arr;
+    }
+  }
+
   useEffect(() => {
     const savedName = localStorage.getItem('@delivery_client_name');
     const savedPhone = localStorage.getItem('@delivery_client_whatsapp');
@@ -673,7 +699,7 @@ export default function StoreFrontClient({
             )}
             <span className="text-gray-500 hidden sm:inline">•</span>
             <span className="text-gray-600">
-              {store.opening_hours ? `Horários: ${store.opening_hours}` : 'Horários a partir das 18h'} • Sem pedido mínimo
+              Horários: {displayHours} • Sem pedido mínimo
             </span>
           </div>
           <button 
@@ -688,7 +714,7 @@ export default function StoreFrontClient({
       {!isStoreOpen && (
         <div className="bg-red-50 border-y border-red-200 py-3 px-4 text-center">
           <p className="text-sm font-bold text-red-800 flex items-center justify-center gap-2">
-            O estabelecimento está fechado para pedidos no momento. {store.opening_hours ? `Horário de atendimento: ${store.opening_hours}` : ''}
+            O estabelecimento está fechado para pedidos no momento. Horário de atendimento: {displayHours}
           </p>
         </div>
       )}
@@ -902,7 +928,7 @@ export default function StoreFrontClient({
               {isStoreOpen ? 'Loja aberta para pedidos!' : 'Loja fechada no momento'}
             </p>
             <p className="text-xs text-amber-900/70 font-medium">
-              {store.opening_hours ? `Horários: ${store.opening_hours}` : 'Horários a partir das 18h'} • Sem pedido mínimo
+              Horários: {displayHours} • Sem pedido mínimo
             </p>
           </div>
 
@@ -912,18 +938,12 @@ export default function StoreFrontClient({
             <section>
               <h2 className="text-xl font-extrabold text-[#2d2926] mb-4">Horário de atendimento</h2>
               <div className="divide-y divide-gray-100 border-t border-b border-gray-100">
-                {[
-                  { day: 'Domingo', hours: store.opening_hours || '18h às 23h' },
-                  { day: 'Segunda-feira', hours: 'Fechado' },
-                  { day: 'Terça-feira', hours: store.opening_hours || '18h às 23h' },
-                  { day: 'Quarta-feira', hours: store.opening_hours || '18h às 23h' },
-                  { day: 'Quinta-feira', hours: store.opening_hours || '18h às 23h' },
-                  { day: 'Sexta-feira', hours: store.opening_hours || '18h às 23h' },
-                  { day: 'Sábado', hours: store.opening_hours || '18h às 23h' }
-                ].map((item, idx) => (
-                  <div key={idx} className="py-3 flex justify-between items-center text-sm">
-                    <span className="font-bold text-gray-800">{item.day}:</span>
-                    <span className="text-gray-500 font-medium">{item.hours}</span>
+                {daysOfWeek.map((item) => (
+                  <div key={item.id} className="py-3 flex justify-between items-center text-sm">
+                    <span className="font-bold text-gray-800">{item.name}:</span>
+                    <span className={`font-medium ${openDaysArr.includes(item.id) ? 'text-gray-500' : 'text-red-500'}`}>
+                      {openDaysArr.includes(item.id) ? displayHours : 'Fechado'}
+                    </span>
                   </div>
                 ))}
               </div>

@@ -47,10 +47,7 @@ export default function SettingsForm({
 
   const generateOpeningHoursText = () => {
     if (openDays.length === 0) return 'Fechado';
-    if (openDays.length === 7) return `Todos os dias das ${openTime} às ${closeTime}`;
-    const sortedDays = [...openDays].sort((a, b) => (a === 0 ? 7 : a) - (b === 0 ? 7 : b));
-    const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    return `${sortedDays.map(d => dayNames[d]).join(', ')} das ${openTime} às ${closeTime}`;
+    return `${openTime} às ${closeTime}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
