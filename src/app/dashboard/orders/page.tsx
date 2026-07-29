@@ -8,12 +8,12 @@ import {
   Truck, 
   ArrowRight,
   ClipboardList,
-  MapPin
+  Archive
 } from "lucide-react";
 import PrintReceiptButton from "./PrintReceiptButton";
 import ViewReceiptModal from "./ViewReceiptModal";
-import ConfirmAndNotifyButton from "./ConfirmAndNotifyButton";
 import { MotionDiv } from "@/components/MotionDiv";
+import OrdersAccordion from "./OrdersAccordion";
 
 export default async function OrdersPage() {
   const supabase = await createClient();
@@ -48,11 +48,12 @@ export default async function OrdersPage() {
     );
   }
 
-  // Obter pedidos da loja
+  // Obter pedidos não arquivados da loja
   const { data: orders, error } = await supabase
     .from('appointments_orders')
     .select('*')
     .eq('store_id', store.id)
+    .or('is_archived.is.null,is_archived.eq.false')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -61,22 +62,26 @@ export default async function OrdersPage() {
 
   const orderList = orders || [];
 
+  // Categorizar pedidos
+  const pendingOrders = orderList.filter(o => o.status === 'pending');
+  const confirmedOrders = orderList.filter(o => o.status === 'confirmed');
+  const completedOrders = orderList.filter(o => o.status === 'completed');
+  // Include cancel_requested inside pending or canceled. The user asked for "cancellation_requested" to be visible.
+  const canceledOrders = orderList.filter(o => o.status === 'canceled' || o.status === 'cancellation_requested');
+
   // Server Action para atualizar o status do pedido
   async function updateOrderStatus(orderId: string, newStatus: string) {
     "use server";
     const supabaseServer = await createClient();
     
-    // 🔒 SEGURANÇA [VULN-3]: Extrair userId do token
     const { data: { user } } = await supabaseServer.auth.getUser();
     if (!user) throw new Error('Não autorizado');
 
-    // 🔒 SEGURANÇA [VULN-3]: Validar enum de status
-    const VALID_STATUSES = ['pending', 'confirmed', 'completed', 'canceled'];
+    const VALID_STATUSES = ['pending', 'confirmed', 'completed', 'canceled', 'cancellation_requested'];
     if (!VALID_STATUSES.includes(newStatus)) {
       throw new Error('Status inválido');
     }
 
-    // 🔒 SEGURANÇA [VULN-3]: Verificar que o pedido pertence a uma loja do usuário
     const { data: storeOwner } = await supabaseServer
       .from('stores')
       .select('id')
@@ -85,7 +90,6 @@ export default async function OrdersPage() {
 
     if (!storeOwner) throw new Error('Loja não encontrada');
 
-    // 🔒 SEGURANÇA [VULN-3]: Update com filtro duplo (orderId + store_id)
     await supabaseServer
       .from('appointments_orders')
       .update({ status: newStatus })
@@ -95,51 +99,30 @@ export default async function OrdersPage() {
     revalidatePath('/dashboard/orders');
   }
 
-  // Função auxiliar para definir os detalhes de cada status
-  const getStatusDetails = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'pending':
-        return { 
-          label: 'Novo', 
-          color: 'bg-blue-100 text-blue-700 border-blue-200',
-          icon: Clock,
-          nextStatus: 'confirmed',
-          nextLabel: 'Confirmar'
-        };
-      case 'confirmed':
-        return { 
-          label: 'Confirmado', 
-          color: 'bg-amber-100 text-amber-700 border-amber-200',
-          icon: Package,
-          nextStatus: 'completed',
-          nextLabel: 'Finalizar'
-        };
-      case 'completed':
-        return { 
-          label: 'Finalizado', 
-          color: 'bg-green-100 text-green-700 border-green-200',
-          icon: CheckCircle,
-          nextStatus: null,
-          nextLabel: null
-        };
-      case 'canceled':
-        return { 
-          label: 'Cancelado', 
-          color: 'bg-red-100 text-red-700 border-red-200',
-          icon: Truck,
-          nextStatus: null,
-          nextLabel: null
-        };
-      default:
-        return { 
-          label: status === 'novo' ? 'Novo' : status || 'Desconhecido', 
-          color: 'bg-gray-100 text-gray-700 border-gray-200',
-          icon: ShoppingBag,
-          nextStatus: null,
-          nextLabel: null
-        };
-    }
-  };
+  // Server Action para arquivar o pedido
+  async function archiveOrder(orderId: string) {
+    "use server";
+    const supabaseServer = await createClient();
+    
+    const { data: { user } } = await supabaseServer.auth.getUser();
+    if (!user) throw new Error('Não autorizado');
+
+    const { data: storeOwner } = await supabaseServer
+      .from('stores')
+      .select('id')
+      .eq('owner_id', user.id)
+      .single();
+
+    if (!storeOwner) throw new Error('Loja não encontrada');
+
+    await supabaseServer
+      .from('appointments_orders')
+      .update({ is_archived: true })
+      .eq('id', orderId)
+      .eq('store_id', storeOwner.id);
+      
+    revalidatePath('/dashboard/orders');
+  }
 
   return (
     <MotionDiv 
@@ -168,110 +151,39 @@ export default async function OrdersPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {orderList.map((order, index) => {
-            const statusDetails = getStatusDetails(order.status);
-            const StatusIcon = statusDetails.icon;
-
-            // Format date
-            const formattedDate = new Intl.DateTimeFormat('pt-BR', {
-              day: '2-digit',
-              month: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit'
-            }).format(new Date(order.created_at));
-
-            return (
-              <MotionDiv 
-                key={order.id} 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="flex flex-col bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="p-5 flex-1">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <p className="text-xs font-medium text-gray-500 mb-1">
-                        Pedido #{String(order.id).substring(0, 8)}
-                      </p>
-                      <h3 className="text-base font-semibold text-gray-900">
-                        {order.client_name || 'Cliente Não Identificado'}
-                      </h3>
-                      {order.client_whatsapp && (
-                        <p className="text-sm text-gray-500 mt-1">
-                          WhatsApp: {order.client_whatsapp}
-                        </p>
-                      )}
-                    </div>
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${statusDetails.color}`}>
-                      <StatusIcon className="w-3.5 h-3.5 mr-1" />
-                      {statusDetails.label}
-                    </span>
-                  </div>
-
-                  <div className="space-y-2 mt-4 mb-4">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-500">Data:</span>
-                      <span className="text-gray-900">{formattedDate}</span>
-                    </div>
-                  </div>
-                  
-                  {order.order_type === 'delivery' && order.delivery_address && (
-                    <div className="mb-3">
-                      <a 
-                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.delivery_address + ", Luziânia, Goiás")}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none"
-                      >
-                        <MapPin className="w-4 h-4" />
-                        Ver no Mapa
-                      </a>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-2 mt-2">
-                    <ViewReceiptModal order={order} storeName={store.name || 'Loja'} />
-                    <PrintReceiptButton order={order} storeName={store.name || 'Loja'} />
-                  </div>
-                </div>
-
-                {(statusDetails.nextStatus || (order.status !== 'canceled' && order.status !== 'completed')) && (
-                  <div className="bg-gray-50 border-t border-gray-100 p-4 flex flex-col gap-2">
-                    {statusDetails.nextStatus && statusDetails.nextStatus === 'confirmed' ? (
-                      <ConfirmAndNotifyButton 
-                        orderId={order.id} 
-                        clientWhatsapp={order.client_whatsapp || ''} 
-                        clientName={order.client_name || ''}
-                        updateAction={updateOrderStatus}
-                      />
-                    ) : statusDetails.nextStatus ? (
-                      <form action={updateOrderStatus.bind(null, order.id, statusDetails.nextStatus)}>
-                        <button 
-                          type="submit"
-                          className="w-full flex items-center justify-center gap-2 bg-purple-800 hover:bg-purple-900 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-purple-800 focus:ring-offset-1"
-                        >
-                          {statusDetails.nextLabel}
-                          <ArrowRight className="w-4 h-4" />
-                        </button>
-                      </form>
-                    ) : null}
-                    {(order.status !== 'canceled' && order.status !== 'completed') && (
-                      <form action={updateOrderStatus.bind(null, order.id, 'canceled')}>
-                        <button 
-                          type="submit"
-                          className="w-full flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
-                        >
-                          Cancelar Pedido
-                        </button>
-                      </form>
-                    )}
-                  </div>
-                )}
-              </MotionDiv>
-            );
-          })}
+        <div className="flex flex-col gap-4">
+          <OrdersAccordion 
+            title="Pendentes e Novos" 
+            orders={pendingOrders} 
+            storeName={store.name || ''} 
+            updateAction={updateOrderStatus} 
+            archiveAction={archiveOrder}
+            defaultOpen={true}
+          />
+          <OrdersAccordion 
+            title="Confirmados / Em Preparo" 
+            orders={confirmedOrders} 
+            storeName={store.name || ''} 
+            updateAction={updateOrderStatus} 
+            archiveAction={archiveOrder}
+            defaultOpen={true}
+          />
+          <OrdersAccordion 
+            title="Finalizados / Entregues" 
+            orders={completedOrders} 
+            storeName={store.name || ''} 
+            updateAction={updateOrderStatus} 
+            archiveAction={archiveOrder}
+            defaultOpen={false}
+          />
+          <OrdersAccordion 
+            title="Cancelados" 
+            orders={canceledOrders} 
+            storeName={store.name || ''} 
+            updateAction={updateOrderStatus} 
+            archiveAction={archiveOrder}
+            defaultOpen={false}
+          />
         </div>
       )}
     </MotionDiv>

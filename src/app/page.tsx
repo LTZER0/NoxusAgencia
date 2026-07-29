@@ -56,12 +56,14 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [trialUsed, setTrialUsed] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   
   useEffect(() => {
     async function checkTrial() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        setIsLoggedIn(true);
         if (isAdminEmail(user.email)) {
           setIsAdmin(true);
         }
@@ -106,12 +108,20 @@ export default function Home() {
               <Link href="#solucoes" className="text-slate-600 hover:text-purple-600 font-medium transition-colors">Para seu negócio</Link>
               <Link href="#avaliacoes" className="text-slate-600 hover:text-purple-600 font-medium transition-colors">O que dizem</Link>
               <Link href="#planos" className="text-slate-600 hover:text-purple-600 font-medium transition-colors">Valores</Link>
-              <Link href="/login" className="text-slate-600 hover:text-purple-600 font-medium transition-colors ml-4 border-l border-gray-200 pl-4">
-                Entrar
-              </Link>
-              <Link href={trialUsed ? "/dashboard/plans" : "/register"} className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-full font-semibold transition-all shadow-md shadow-purple-200">
-                {trialUsed ? "Meu Painel" : "Criar minha conta"}
-              </Link>
+              {isLoggedIn ? (
+                <Link href="/dashboard" className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-full font-semibold transition-all shadow-md shadow-purple-200">
+                  Meu Painel
+                </Link>
+              ) : (
+                <>
+                  <Link href="/login" className="text-slate-600 hover:text-purple-600 font-medium transition-colors ml-4 border-l border-gray-200 pl-4">
+                    Entrar
+                  </Link>
+                  <Link href="/register" className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-full font-semibold transition-all shadow-md shadow-purple-200">
+                    Criar minha conta
+                  </Link>
+                </>
+              )}
             </motion.div>
 
             {/* Mobile Menu Button */}
@@ -130,10 +140,18 @@ export default function Home() {
               <Link href="#solucoes" onClick={() => setMenuOpen(false)} className="text-slate-600 font-medium">Para seu negócio</Link>
               <Link href="#avaliacoes" onClick={() => setMenuOpen(false)} className="text-slate-600 font-medium">O que dizem</Link>
               <Link href="#planos" onClick={() => setMenuOpen(false)} className="text-slate-600 font-medium">Valores</Link>
-              <Link href="/login" onClick={() => setMenuOpen(false)} className="text-slate-600 font-medium">Entrar</Link>
-              <Link href={trialUsed ? "/dashboard/plans" : "/register"} onClick={() => setMenuOpen(false)} className="bg-purple-600 text-center text-white px-4 py-3 rounded-xl font-bold">
-                {trialUsed ? "Meu Painel" : "Criar minha conta"}
-              </Link>
+              {isLoggedIn ? (
+                <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="bg-purple-600 text-center text-white px-4 py-3 rounded-xl font-bold">
+                  Meu Painel
+                </Link>
+              ) : (
+                <>
+                  <Link href="/login" onClick={() => setMenuOpen(false)} className="text-slate-600 font-medium">Entrar</Link>
+                  <Link href="/register" onClick={() => setMenuOpen(false)} className="bg-purple-600 text-center text-white px-4 py-3 rounded-xl font-bold">
+                    Criar minha conta
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}

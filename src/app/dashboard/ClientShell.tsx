@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Briefcase, CalendarDays, Settings, Menu, X, LogOut, Store, ShoppingBag, MapPin, Tag, Layers, ShieldCheck } from 'lucide-react'
+import { LayoutDashboard, Briefcase, CalendarDays, Settings, Menu, X, LogOut, Store, ShoppingBag, MapPin, Tag, Layers, ShieldCheck, Home } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const navigation = [
@@ -25,7 +25,7 @@ export default function ClientShell({ children, hasActivePlan, isAdmin }: { chil
   useEffect(() => {
     if (hasActivePlan === false) {
       if (pathname !== '/dashboard' && pathname !== '/dashboard/plans') {
-        router.push('/dashboard/plans')
+        router.push('/dashboard')
       }
     }
   }, [hasActivePlan, pathname, router])
@@ -96,7 +96,15 @@ export default function ClientShell({ children, hasActivePlan, isAdmin }: { chil
             )
           })}
           
-          <div className="pt-4 mt-4 border-t border-gray-200">
+          <div className="pt-4 mt-4 border-t border-gray-200 space-y-1">
+            <Link
+              href="/"
+              onClick={() => setSidebarOpen(false)}
+              className="group flex w-full items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+            >
+              <Home className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-gray-500 transition-colors" />
+              Menu Principal
+            </Link>
             <button
               onClick={handleLogout}
               className="group flex w-full items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors"

@@ -4,6 +4,7 @@
   "/_global-error/page": "app/_global-error/page.js",
   "/_not-found/page": "app/_not-found/page.js",
   "/api/store/complement-groups/route": "app/api/store/complement-groups/route.js",
+  "/api/store/order/cancel/route": "app/api/store/order/cancel/route.js",
   "/api/store/order/route": "app/api/store/order/route.js",
   "/api/store/track/route": "app/api/store/track/route.js",
   "/api/store/update/route": "app/api/store/update/route.js",

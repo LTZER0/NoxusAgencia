@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Eye, X, User, Phone, MapPin, CreditCard, Calendar, ShoppingBag, DollarSign } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 type OrderData = {
   id: string;
@@ -57,22 +58,29 @@ export default function ViewReceiptModal({ order, storeName }: { order: OrderDat
       <button 
         type="button"
         onClick={() => setIsOpen(true)}
-        className="w-full flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 mt-2 border border-indigo-200"
+        className="w-full flex items-center justify-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-800 py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-purple-800 focus:ring-offset-1 mt-2 border border-purple-200"
       >
         <Eye className="w-4 h-4" />
         Ver Comanda Digital
       </button>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-            
-            {/* Header */}
-            <div className="px-6 py-4 bg-gray-900 text-white flex items-center justify-between">
-              <div>
-                <span className="text-xs text-indigo-400 font-mono font-bold uppercase tracking-wider">{storeName}</span>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <ShoppingBag className="w-5 h-5 text-indigo-400" />
+      <AnimatePresence>
+        {isOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]"
+            >
+              
+              {/* Header */}
+              <div className="px-6 py-4 bg-gray-900 text-white flex items-center justify-between border-b-4 border-purple-800">
+                <div>
+                  <span className="text-xs text-purple-400 font-mono font-bold uppercase tracking-wider">{storeName}</span>
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <ShoppingBag className="w-5 h-5 text-purple-400" />
                   Comanda Digital #{String(order.id).substring(0, 8)}
                 </h3>
               </div>
@@ -95,7 +103,7 @@ export default function ViewReceiptModal({ order, storeName }: { order: OrderDat
                 </div>
                 <div className="flex justify-between items-center text-xs text-gray-500">
                   <span className="flex items-center gap-1.5"><ShoppingBag className="w-3.5 h-3.5" /> Tipo</span>
-                  <span className="font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                  <span className="font-bold text-purple-800 bg-purple-50 px-2 py-0.5 rounded border border-purple-100">
                     {getOrderTypeLabel(order.order_type)}
                   </span>
                 </div>
@@ -104,14 +112,14 @@ export default function ViewReceiptModal({ order, storeName }: { order: OrderDat
               {/* Dados do Cliente */}
               <div>
                 <h4 className="font-bold text-gray-900 mb-2 text-xs uppercase tracking-wider flex items-center gap-1.5 text-gray-500">
-                  <User className="w-4 h-4 text-indigo-600" /> Dados do Cliente
+                  <User className="w-4 h-4 text-purple-800" /> Dados do Cliente
                 </h4>
                 <div className="bg-gray-50 p-4 rounded-xl space-y-1.5 border border-gray-100">
                   <p><strong className="text-gray-900">Nome:</strong> {order.client_name || 'Não informado'}</p>
                   {order.client_whatsapp && (
                     <p className="flex items-center gap-1.5">
                       <strong className="text-gray-900">WhatsApp:</strong> 
-                      <span className="text-indigo-600 font-medium">{order.client_whatsapp}</span>
+                      <span className="text-purple-800 font-medium">{order.client_whatsapp}</span>
                     </p>
                   )}
                   {order.customer_cpf && <p><strong className="text-gray-900">CPF:</strong> {order.customer_cpf}</p>}
@@ -140,14 +148,14 @@ export default function ViewReceiptModal({ order, storeName }: { order: OrderDat
                     <div key={idx} className="bg-gray-50 p-3.5 rounded-xl border border-gray-100">
                       <div className="flex justify-between items-start font-semibold text-gray-900">
                         <span>{item.quantity}x {item.product?.name || 'Item'}</span>
-                        <span className="text-indigo-600">
+                        <span className="text-purple-800">
                           {formatCurrency(Number(item.unitPrice) * Number(item.quantity))}
                         </span>
                       </div>
                       
                       {/* Adicionais e Remoções (Legado) */}
                       {((item.removedIngredients && item.removedIngredients.length > 0) || (item.extraIngredients && Object.keys(item.extraIngredients).length > 0)) && (
-                        <div className="mt-2 text-xs space-y-1 pl-2 border-l-2 border-indigo-200">
+                        <div className="mt-2 text-xs space-y-1 pl-2 border-l-2 border-purple-200">
                           {item.removedIngredients?.map((id: string) => {
                             const ing = item.product?.ingredients?.find((i: any, index: number) => (i.id || `ing-${index}`) === id);
                             return ing ? <p key={id} className="text-red-600 font-medium">- Sem {ing.name}</p> : null;
@@ -161,7 +169,7 @@ export default function ViewReceiptModal({ order, storeName }: { order: OrderDat
                       
                       {/* Complementos (Novo) */}
                       {item.selectedComplements && item.selectedComplements.length > 0 && (
-                        <div className="mt-2 text-xs space-y-1 pl-2 border-l-2 border-indigo-200">
+                        <div className="mt-2 text-xs space-y-1 pl-2 border-l-2 border-purple-200">
                           {item.selectedComplements.map((comp: any, cIdx: number) => (
                             <div key={cIdx}>
                               <p className="font-semibold text-gray-600">{comp.groupName}:</p>
@@ -197,7 +205,7 @@ export default function ViewReceiptModal({ order, storeName }: { order: OrderDat
                 )}
                 <div className="flex justify-between text-base font-extrabold text-gray-900 pt-2 border-t border-gray-200">
                   <span>Valor Total</span>
-                  <span className="text-indigo-600 text-lg">{formatCurrency(totalAmount)}</span>
+                  <span className="text-purple-800 text-lg">{formatCurrency(totalAmount)}</span>
                 </div>
               </div>
 
@@ -207,7 +215,7 @@ export default function ViewReceiptModal({ order, storeName }: { order: OrderDat
                   <CreditCard className="w-5 h-5 text-gray-700" />
                   <span className="font-semibold text-gray-900">Forma de Pagamento</span>
                 </div>
-                <span className="font-bold text-indigo-700 uppercase bg-white px-3 py-1 rounded-lg border border-gray-200 text-xs">
+                <span className="font-bold text-purple-800 uppercase bg-white px-3 py-1 rounded-lg border border-gray-200 text-xs">
                   {order.payment_method || 'Não Informado'}
                 </span>
               </div>
@@ -225,9 +233,10 @@ export default function ViewReceiptModal({ order, storeName }: { order: OrderDat
               </button>
             </div>
 
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </>
   );
 }

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, MapPin, CreditCard, User, Phone, CheckCircle2, Clock, Sparkles, Utensils, Home, Percent, ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, MapPin, CreditCard, User, Phone, CheckCircle2, Clock, Sparkles, Utensils, Home, Percent, ChevronDown, ChevronUp, Search, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 
 type ComplementItem = {
@@ -82,6 +83,7 @@ export default function StoreFrontClient({
   const [changeFor, setChangeFor] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isStoreOpen, setIsStoreOpen] = useState(store.is_open !== false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const checkStatus = () => {
@@ -295,7 +297,7 @@ export default function StoreFrontClient({
 
   const handleProductClick = (product: Product) => {
     if (!isStoreOpen) {
-      alert(`O estabelecimento ${store.name} está fechado no momento e não está aceitando pedidos.`);
+      setToastMessage(`O estabelecimento ${store.name} está fechado no momento e não está aceitando pedidos.`);
       return;
     }
     setSelectedProduct(product);
@@ -410,7 +412,7 @@ export default function StoreFrontClient({
     e.preventDefault();
     
     if (!isStoreOpen) {
-      alert(`O estabelecimento ${store.name} está fechado no momento e não está aceitando pedidos.`);
+      setToastMessage(`O estabelecimento ${store.name} está fechado no momento e não está aceitando pedidos.`);
       return;
     }
 
@@ -447,6 +449,7 @@ export default function StoreFrontClient({
         })
       });
 
+      const data = await res.json();
       if (res.ok) {
         setCheckoutStep('success');
         setCart([]);
@@ -454,13 +457,14 @@ export default function StoreFrontClient({
         setPaymentMethod('');
         setChangeFor('');
       } else {
-        const data = await res.json();
-        alert(data.error || 'Erro ao processar pedido.');
+        if (data.error) {
+          setToastMessage(data.error || 'Erro ao processar pedido.');
+          setIsSubmitting(false);
+          return;
+        }
       }
     } catch (error) {
-      console.error(error);
-      alert('Erro de conexão ao enviar pedido.');
-    } finally {
+      setToastMessage('Erro de conexão ao enviar pedido.');
       setIsSubmitting(false);
     }
   };
@@ -645,7 +649,34 @@ export default function StoreFrontClient({
   };
 
   return (
-    <div className={`min-h-screen ${theme.bg} ${theme.text} transition-colors duration-300 pb-20`}>
+    <div className={`min-h-screen ${theme.bg} ${theme.text} transition-colors duration-300 pb-20 relative`}>
+      <AnimatePresence>
+        {toastMessage && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 10 }}
+              transition={{ type: "spring", bounce: 0.3 }}
+              className="bg-white rounded-3xl p-6 shadow-2xl max-w-sm w-full border border-purple-100 flex flex-col items-center text-center relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-purple-600"></div>
+              <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mb-4 border border-purple-100">
+                <AlertCircle className="w-8 h-8 text-purple-700" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Atenção</h3>
+              <p className="text-gray-600 mb-6 font-medium">{toastMessage}</p>
+              
+              <button 
+                onClick={() => setToastMessage(null)}
+                className="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md shadow-purple-200 focus:outline-none"
+              >
+                Entendi
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
       {/* 1. Cover & Store Header (Anota Aí style banner & logo) */}
       <div className="relative">
         <div className={`h-40 sm:h-48 w-full ${theme.primaryBg} bg-gradient-to-r from-black/40 via-transparent to-black/30 relative overflow-hidden flex items-center justify-center`}>
