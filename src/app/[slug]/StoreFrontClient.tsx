@@ -445,6 +445,7 @@ export default function StoreFrontClient({
           paymentMethod: paymentDetails,
           cartItems: cart,
           totalAmount: finalTotalValue,
+          deliveryFee: deliveryFee,
           deliveryAddress: fullAddress
         })
       });

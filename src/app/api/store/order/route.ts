@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
     const orderType = sanitizeString(body.orderType, 20);
     const paymentMethod = sanitizeString(body.paymentMethod, 50);
     const deliveryAddress = sanitizeString(body.deliveryAddress, 500);
+    const clientDeliveryFee = Math.max(0, Number(body.deliveryFee) || 0);
     
     const cartItems = Array.isArray(body.cartItems) ? body.cartItems.slice(0, 50) : []; // Max 50 itens
 
@@ -94,7 +95,9 @@ export async function POST(req: NextRequest) {
                  comp.items.forEach((cItem: any) => {
                     const priceKey = `${comp.groupName}-${cItem.name}`;
                     if (complementPriceMap.has(priceKey)) {
-                       complementsTotal += complementPriceMap.get(priceKey) * (Number(cItem.quantity) || 1);
+                       const actualPrice = complementPriceMap.get(priceKey);
+                       complementsTotal += actualPrice * (Number(cItem.quantity) || 1);
+                       cItem.price = actualPrice; // Atualiza para bater com o banco na comanda
                     }
                  });
               }
@@ -102,8 +105,15 @@ export async function POST(req: NextRequest) {
         }
         
         const itemQuantity = Math.max(1, Number(item.quantity) || 1);
-        totalAmount += (basePrice + complementsTotal) * itemQuantity;
+        const itemActualUnitPrice = basePrice + complementsTotal;
+        item.unitPrice = itemActualUnitPrice; // Atualiza para bater com o banco na comanda
+        
+        totalAmount += itemActualUnitPrice * itemQuantity;
       }
+      
+      // Adiciona a taxa de entrega ao total calculado
+      totalAmount += clientDeliveryFee;
+      
     } catch (calcError) {
       console.error('Calculation error:', calcError);
       return NextResponse.json({ error: 'Erro ao validar valores do pedido.' }, { status: 500 });
