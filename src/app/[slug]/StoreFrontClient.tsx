@@ -715,7 +715,7 @@ export default function StoreFrontClient({
                                   {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
                                 </span>
                               )}
-                              {product.ingredients && product.ingredients.length > 0 && (
+                              {product.complement_group_ids && product.complement_group_ids.length > 0 && (
                                 <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${theme.badgeBg}`}>
                                   Personalizável
                                 </span>
