@@ -72,9 +72,10 @@ export async function POST(request: Request) {
     }
 
     // 4. Enviar E-mail via Resend
-    // Nota: Estamos usando o onboarding@resend.dev para enviar, 
-    // mas o Resend de teste SÓ permite enviar para o mesmo e-mail cadastrado na conta do Resend.
-    const confirmUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/confirm-deletion?token=${token}`;
+    // Pegar o domínio dinamicamente da requisição atual (funciona no localhost e na Vercel)
+    const requestUrl = new URL(request.url);
+    const origin = requestUrl.origin;
+    const confirmUrl = `${origin}/confirm-deletion?token=${token}`;
 
     const { error: emailError } = await resend.emails.send({
       from: 'Acme <onboarding@resend.dev>',
