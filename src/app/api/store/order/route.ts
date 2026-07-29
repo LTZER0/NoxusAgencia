@@ -25,10 +25,6 @@ export async function POST(req: NextRequest) {
     const paymentMethod = sanitizeString(body.paymentMethod, 50);
     const deliveryAddress = sanitizeString(body.deliveryAddress, 500);
     
-    // 🔒 SEGURANÇA [VULN-11]: Em um sistema completo, totalAmount deveria ser recalculado no servidor.
-    // Aqui garantimos que seja pelo menos um número válido positivo para mitigar injeção de NaN ou negativo.
-    const totalAmount = Math.max(0, Number(body.totalAmount) || 0);
-    
     const cartItems = Array.isArray(body.cartItems) ? body.cartItems.slice(0, 50) : []; // Max 50 itens
 
     if (!isValidUUID(storeId)) {
@@ -40,8 +36,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Server-Side Validation: Never trust client-side data.
-    // Verify if the store exists and is currently open for orders.
-    // We use select('*') so that even if the new 'is_open' column hasn't been added via SQL migration yet in production, the query won't crash.
+    // Verify if the store exists, is open, and fetch complement groups
     const { data: store, error: storeError } = await supabase
       .from('stores')
       .select('*')
@@ -55,6 +50,63 @@ export async function POST(req: NextRequest) {
 
     if (store.is_open === false) {
       return NextResponse.json({ error: `O estabelecimento ${store.name || ''} está fechado no momento e não está aceitando novos pedidos.` }, { status: 403 });
+    }
+
+    // 🔒 SEGURANÇA [VULN-11]: Recalculando totalAmount no backend via Zero-Trust
+    let totalAmount = 0;
+    try {
+      const productIds = Array.from(new Set(cartItems.map((item: any) => item.product?.id).filter(Boolean)));
+      
+      const { data: dbProducts, error: dbErr } = await supabase
+        .from('products_services')
+        .select('id, price, discount_price, is_promotional')
+        .in('id', productIds)
+        .eq('store_id', storeId);
+        
+      if (dbErr || !dbProducts) throw new Error("Erro ao buscar preços dos produtos");
+      
+      const productMap = new Map(dbProducts.map(p => [p.id, p]));
+      
+      const storeComplementGroups = store.complement_groups || [];
+      const complementPriceMap = new Map();
+      storeComplementGroups.forEach((group: any) => {
+        if (Array.isArray(group.items)) {
+          group.items.forEach((item: any) => {
+             complementPriceMap.set(`${group.name}-${item.name}`, Number(item.price) || 0);
+          });
+        }
+      });
+
+      for (const item of cartItems) {
+        const dbProduct = productMap.get(item.product?.id);
+        if (!dbProduct) {
+           return NextResponse.json({ error: `Produto inválido: ${item.product?.name}` }, { status: 400 });
+        }
+        
+        let basePrice = dbProduct.is_promotional && dbProduct.discount_price !== null 
+            ? Number(dbProduct.discount_price) 
+            : Number(dbProduct.price);
+            
+        let complementsTotal = 0;
+        if (Array.isArray(item.selectedComplements)) {
+           item.selectedComplements.forEach((comp: any) => {
+              if (Array.isArray(comp.items)) {
+                 comp.items.forEach((cItem: any) => {
+                    const priceKey = `${comp.groupName}-${cItem.name}`;
+                    if (complementPriceMap.has(priceKey)) {
+                       complementsTotal += complementPriceMap.get(priceKey) * (Number(cItem.quantity) || 1);
+                    }
+                 });
+              }
+           });
+        }
+        
+        const itemQuantity = Math.max(1, Number(item.quantity) || 1);
+        totalAmount += (basePrice + complementsTotal) * itemQuantity;
+      }
+    } catch (calcError) {
+      console.error('Calculation error:', calcError);
+      return NextResponse.json({ error: 'Erro ao validar valores do pedido.' }, { status: 500 });
     }
 
     // Insert order. Use the first product's ID for product_id if it's required by the schema,
