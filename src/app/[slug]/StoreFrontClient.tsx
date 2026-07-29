@@ -416,13 +416,13 @@ export default function StoreFrontClient({
                       >
                         <div className="flex flex-col items-start text-left">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-gray-900 dark:text-gray-100">{group.name}</span>
+                            <span className="font-semibold text-gray-900">{group.name}</span>
                             {group.is_mandatory ? (
-                              <span className="text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 px-1.5 py-0.5 rounded uppercase">
+                              <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded uppercase">
                                 Obrigatório
                               </span>
                             ) : (
-                              <span className="text-[10px] font-bold bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 px-1.5 py-0.5 rounded uppercase">
+                              <span className="text-[10px] font-bold bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded uppercase">
                                 Opcional
                               </span>
                             )}
@@ -431,7 +431,7 @@ export default function StoreFrontClient({
                             {group.is_mandatory ? `Escolha de ${group.min_choices} até ${group.max_choices} opções` : `Escolha até ${group.max_choices} opções`}
                           </span>
                         </div>
-                        {isExpanded ? <ChevronUp className="w-5 h-5 opacity-50" /> : <ChevronDown className="w-5 h-5 opacity-50" />}
+                        {isExpanded ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
                       </button>
 
                       {isExpanded && (
@@ -441,11 +441,11 @@ export default function StoreFrontClient({
                             const canAddMore = totalSelected < group.max_choices;
                             
                             return (
-                              <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-white/50 dark:hover:bg-black/20 transition-colors">
+                              <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-black/5 transition-colors">
                                 <div className="flex flex-col">
-                                  <span className="font-medium text-sm">{item.name}</span>
+                                  <span className="font-medium text-sm text-gray-900">{item.name}</span>
                                   {Number(item.price) > 0 && (
-                                    <span className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold mt-0.5">
+                                    <span className="text-xs text-indigo-600 font-semibold mt-0.5">
                                       + {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
                                     </span>
                                   )}
@@ -465,7 +465,7 @@ export default function StoreFrontClient({
                                     className="w-5 h-5 border-gray-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer"
                                   />
                                 ) : (
-                                  <div className="flex items-center gap-3 bg-gray-200/50 dark:bg-gray-700/50 rounded-full px-2 py-1">
+                                  <div className="flex items-center gap-3 bg-gray-200/50 rounded-full px-2 py-1">
                                     <button 
                                       type="button"
                                       disabled={qty === 0}
