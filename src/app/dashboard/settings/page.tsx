@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Settings } from "lucide-react";
 import SettingsForm from "./SettingsForm";
+import DeleteAccountSection from "./DeleteAccountSection";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -38,6 +39,7 @@ export default async function SettingsPage() {
       </div>
 
       <SettingsForm initialStore={store} userId={user.id} />
+      <DeleteAccountSection />
     </div>
   );
 }

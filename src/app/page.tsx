@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Store, ArrowRight, CheckCircle2 } from "lucide-react";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
@@ -66,6 +67,8 @@ export default function Home() {
           </div>
         </div>
       </main>
+      
+      <Footer />
     </div>
   );
 }
