@@ -660,9 +660,17 @@ export default function StoreFrontClient({
       <div className="bg-[#fcf8f5] border-b border-amber-900/10 px-4 sm:px-6 py-2.5">
         <div className="max-w-4xl mx-auto flex items-center justify-between text-xs sm:text-sm">
           <div className="flex flex-wrap items-center gap-3 text-gray-700 font-medium">
-            <span className="bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded font-semibold text-[11px]">
-              Apenas pedidos agendados, Faça já o seu!
-            </span>
+            {isStoreOpen ? (
+              <span className="bg-green-100 text-green-800 px-2.5 py-0.5 rounded font-bold text-[11px] flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                Loja Aberta
+              </span>
+            ) : (
+              <span className="bg-red-100 text-red-800 px-2.5 py-0.5 rounded font-bold text-[11px] flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                Loja Fechada
+              </span>
+            )}
             <span className="text-gray-500 hidden sm:inline">•</span>
             <span className="text-gray-600">
               {store.opening_hours ? `Horários: ${store.opening_hours}` : 'Horários a partir das 18h'} • Sem pedido mínimo
@@ -890,7 +898,9 @@ export default function StoreFrontClient({
 
           {/* Sub-header Banner */}
           <div className="bg-[#f7f0e7] p-4 text-center border-b border-amber-900/10">
-            <p className="font-bold text-amber-950 text-sm mb-1">Apenas pedidos agendados, Faça já o seu!</p>
+            <p className={`font-bold text-sm mb-1 ${isStoreOpen ? 'text-green-800' : 'text-red-800'}`}>
+              {isStoreOpen ? 'Loja aberta para pedidos!' : 'Loja fechada no momento'}
+            </p>
             <p className="text-xs text-amber-900/70 font-medium">
               {store.opening_hours ? `Horários: ${store.opening_hours}` : 'Horários a partir das 18h'} • Sem pedido mínimo
             </p>
