@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Store, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Store, ArrowRight, CheckCircle2, Star, Menu, X } from "lucide-react";
+import { motion } from "motion/react";
+import { useState } from "react";
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
