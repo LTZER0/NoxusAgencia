@@ -91,34 +91,51 @@ export default function StoreFrontClient({
         return;
       }
       
+      let openDaysList = store.open_days;
+      if (typeof openDaysList === 'string') {
+        try { openDaysList = JSON.parse(openDaysList); } catch(e) {}
+      }
+
       // Se possui configuração inteligente de dias e horários
-      if (store.open_days && Array.isArray(store.open_days) && store.open_time && store.close_time) {
+      if (openDaysList && Array.isArray(openDaysList) && store.open_time && store.close_time) {
         const now = new Date();
         const currentDay = now.getDay();
+        const yesterdayDay = currentDay === 0 ? 6 : currentDay - 1;
         
-        if (!store.open_days.includes(currentDay)) {
-          setIsStoreOpen(false);
-          return;
-        }
+        const h = now.getHours().toString().padStart(2, '0');
+        const m = now.getMinutes().toString().padStart(2, '0');
+        const currentHourStr = `${h}:${m}`;
+        
+        const openTime = (store.open_time || '18:00').substring(0, 5);
+        const closeTime = (store.close_time || '23:30').substring(0, 5);
+        
+        let isOpenNow = false;
 
-        const currentHourStr = now.toLocaleTimeString('pt-BR', { hour12: false, hour: '2-digit', minute: '2-digit' });
-        const openTime = store.open_time.substring(0, 5);
-        const closeTime = store.close_time.substring(0, 5);
-        
         if (openTime <= closeTime) {
-          if (currentHourStr >= openTime && currentHourStr <= closeTime) {
-            setIsStoreOpen(true);
-          } else {
-            setIsStoreOpen(false);
+          // Horário comercial normal. Ex: 08:00 as 23:00 (mesmo dia)
+          if (openDaysList.includes(currentDay)) {
+            if (currentHourStr >= openTime && currentHourStr <= closeTime) {
+              isOpenNow = true;
+            }
           }
         } else {
-          // Vira a madrugada
-          if (currentHourStr >= openTime || currentHourStr <= closeTime) {
-            setIsStoreOpen(true);
-          } else {
-            setIsStoreOpen(false);
+          // Vira a madrugada. Ex: 18:00 as 02:00
+          
+          // Caso 1: Estamos antes da meia-noite (ex: 19:00). Pertence ao expediente de HOJE.
+          if (currentHourStr >= openTime) {
+            if (openDaysList.includes(currentDay)) {
+              isOpenNow = true;
+            }
+          }
+          // Caso 2: Estamos depois da meia-noite (ex: 01:00). Pertence ao expediente de ONTEM.
+          else if (currentHourStr <= closeTime) {
+            if (openDaysList.includes(yesterdayDay)) {
+              isOpenNow = true;
+            }
           }
         }
+
+        setIsStoreOpen(isOpenNow);
       } else {
         // Sem configuração inteligente, usa o manual
         setIsStoreOpen(store.is_open !== false);
@@ -643,9 +660,17 @@ export default function StoreFrontClient({
       <div className="bg-[#fcf8f5] border-b border-amber-900/10 px-4 sm:px-6 py-2.5">
         <div className="max-w-4xl mx-auto flex items-center justify-between text-xs sm:text-sm">
           <div className="flex flex-wrap items-center gap-3 text-gray-700 font-medium">
-            <span className="bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded font-semibold text-[11px]">
-              Apenas pedidos agendados, Faça já o seu!
-            </span>
+            {isStoreOpen ? (
+              <span className="bg-green-100 text-green-800 px-2.5 py-0.5 rounded font-bold text-[11px] flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                Loja Aberta
+              </span>
+            ) : (
+              <span className="bg-red-100 text-red-800 px-2.5 py-0.5 rounded font-bold text-[11px] flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                Loja Fechada
+              </span>
+            )}
             <span className="text-gray-500 hidden sm:inline">•</span>
             <span className="text-gray-600">
               {store.opening_hours ? `Horários: ${store.opening_hours}` : 'Horários a partir das 18h'} • Sem pedido mínimo
@@ -873,7 +898,9 @@ export default function StoreFrontClient({
 
           {/* Sub-header Banner */}
           <div className="bg-[#f7f0e7] p-4 text-center border-b border-amber-900/10">
-            <p className="font-bold text-amber-950 text-sm mb-1">Apenas pedidos agendados, Faça já o seu!</p>
+            <p className={`font-bold text-sm mb-1 ${isStoreOpen ? 'text-green-800' : 'text-red-800'}`}>
+              {isStoreOpen ? 'Loja aberta para pedidos!' : 'Loja fechada no momento'}
+            </p>
             <p className="text-xs text-amber-900/70 font-medium">
               {store.opening_hours ? `Horários: ${store.opening_hours}` : 'Horários a partir das 18h'} • Sem pedido mínimo
             </p>
