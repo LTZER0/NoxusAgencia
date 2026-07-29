@@ -1,0 +1,22 @@
+{
+  "/[slug]/page": "/[slug]",
+  "/[slug]/rastreio/page": "/[slug]/rastreio",
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/store/complement-groups/route": "/api/store/complement-groups",
+  "/api/store/order/route": "/api/store/order",
+  "/api/store/track/route": "/api/store/track",
+  "/api/store/update/route": "/api/store/update",
+  "/dashboard/categories/page": "/dashboard/categories",
+  "/dashboard/complementos/page": "/dashboard/complementos",
+  "/dashboard/delivery/page": "/dashboard/delivery",
+  "/dashboard/orders/page": "/dashboard/orders",
+  "/dashboard/page": "/dashboard",
+  "/dashboard/services/page": "/dashboard/services",
+  "/dashboard/settings/page": "/dashboard/settings",
+  "/login/page": "/login",
+  "/page": "/",
+  "/privacy/page": "/privacy",
+  "/register/page": "/register",
+  "/terms/page": "/terms"
+}

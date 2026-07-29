@@ -4,57 +4,58 @@ import Link from "next/link";
 import { Store, ArrowRight, CheckCircle2, Star, Menu, X } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
+
 const proposals = [
   {
     title: "Açaiteria",
-    color: "from-fuchsia-600 to-purple-800",
-    shadow: "shadow-fuchsia-500/50",
+    color: "text-purple-700",
+    shadow: "shadow-purple-100",
     image: "/images/acaiteria.jpg",
-    desc: "Cores vibrantes para combinar com o frescor e a energia do açaí. Personalização completa de adicionais."
+    desc: "Visual fresco e vibrante. Seus clientes vão poder montar o copo com os adicionais que quiserem, sem confusão."
   },
   {
     title: "Lanchonete",
-    color: "from-indigo-500 to-blue-800",
-    shadow: "shadow-indigo-500/50",
+    color: "text-indigo-700",
+    shadow: "shadow-indigo-100",
     image: "/images/lanchonete.jpg",
-    desc: "Um ambiente dinâmico e rápido. Facilite o pedido do seu cliente de forma clara e objetiva."
+    desc: "Cardápio direto ao ponto para quem tem fome e pressa. Receba os pedidos rápidos e bem organizados."
   },
   {
     title: "Pizzaria",
-    color: "from-red-600 to-rose-900",
-    shadow: "shadow-red-500/50",
+    color: "text-red-700",
+    shadow: "shadow-red-100",
     image: "/images/pizzaria.jpg",
-    desc: "Tons quentes que remetem ao calor do forno. Interface perfeita para montagem de pizzas meio a meio."
+    desc: "Cores quentes e um sistema inteligente para montar pizzas meio a meio com cálculo exato do preço."
   },
   {
     title: "Hamburgueria",
-    color: "from-amber-500 to-yellow-700",
-    shadow: "shadow-amber-500/50",
+    color: "text-amber-600",
+    shadow: "shadow-amber-100",
     image: "/images/hamburgueria.jpg",
-    desc: "Apetite e descontração para o melhor hambúrguer artesanal. Adicionais ilimitados e fáceis de escolher."
+    desc: "Deixe seu cliente com água na boca. Facilitamos a escolha de pontos da carne e acréscimos extras."
   },
   {
     title: "Restaurante",
-    color: "from-orange-800 to-amber-950",
-    shadow: "shadow-orange-700/50",
+    color: "text-orange-800",
+    shadow: "shadow-orange-100",
     image: "/images/restaurante.jpg",
-    desc: "Elegância e aconchego. Layout sofisticado para valorizar pratos requintados e a tradição do seu local."
+    desc: "Simples, elegante e prático. Mostre o prato do dia e venda mais marmitas no horário de pico."
   }
 ];
 
 const reviews = [
-  { name: "Carlos Silva", role: "Dono de Hamburgueria", text: "O sistema da NOXUS revolucionou nossos pedidos. A interface é linda e super fácil de usar!" },
-  { name: "Mariana Costa", role: "Proprietária de Açaiteria", text: "Meus clientes elogiam muito o cardápio digital. Além de rápido, as cores combinaram perfeitamente com minha marca." },
-  { name: "Roberto Almeida", role: "Gerente de Pizzaria", text: "A facilidade de atualizar os preços e gerenciar o estoque nos salvou muito tempo. Recomendo o plano PRO!" }
+  { name: "Carlos", role: "Hamburgueria do Carlão", text: "Cara, o sistema resolveu minha vida. Os pedidos chegam certinho no WhatsApp, não tem mais erro de anotação na correria." },
+  { name: "Mariana", role: "Puro Açaí", text: "Eu achava que ia ser complicado, mas o cardápio ficou a nossa cara. As vendas até aumentaram porque ficou mais fácil pro cliente." },
+  { name: "Beto", role: "Beto Pizzas", text: "Aquela parada de atualizar os preços sozinho salvou muito meu tempo. Recomendo demais o plano PRO." }
 ];
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 font-sans selection:bg-purple-600 selection:text-white">
+    <div className="min-h-screen bg-white text-slate-800 font-sans selection:bg-purple-600 selection:text-white">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-purple-900/50">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
             <motion.div 
@@ -62,9 +63,9 @@ export default function Home() {
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center gap-2"
             >
-              <Store className="h-8 w-8 text-purple-500" />
-              <span className="text-2xl font-black tracking-tighter text-white">
-                Agência <span className="text-purple-500">NOXUS</span>
+              <Store className="h-8 w-8 text-purple-600" />
+              <span className="text-2xl font-black tracking-tighter text-slate-900">
+                Agência <span className="text-purple-600">NOXUS</span>
               </span>
             </motion.div>
             
@@ -74,20 +75,20 @@ export default function Home() {
               animate={{ opacity: 1, x: 0 }}
               className="hidden md:flex items-center gap-6"
             >
-              <Link href="#solucoes" className="text-slate-300 hover:text-white font-medium transition-colors">Soluções</Link>
-              <Link href="#avaliacoes" className="text-slate-300 hover:text-white font-medium transition-colors">Avaliações</Link>
-              <Link href="#planos" className="text-slate-300 hover:text-white font-medium transition-colors">Planos</Link>
-              <Link href="/login" className="text-slate-300 hover:text-white font-medium transition-colors ml-4 border-l border-slate-700 pl-4">
+              <Link href="#solucoes" className="text-slate-600 hover:text-purple-600 font-medium transition-colors">Para seu negócio</Link>
+              <Link href="#avaliacoes" className="text-slate-600 hover:text-purple-600 font-medium transition-colors">O que dizem</Link>
+              <Link href="#planos" className="text-slate-600 hover:text-purple-600 font-medium transition-colors">Valores</Link>
+              <Link href="/login" className="text-slate-600 hover:text-purple-600 font-medium transition-colors ml-4 border-l border-gray-200 pl-4">
                 Entrar
               </Link>
-              <Link href="/register" className="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2.5 rounded-full font-semibold transition-all shadow-lg shadow-purple-600/30">
-                Criar conta
+              <Link href="/register" className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-full font-semibold transition-all shadow-md shadow-purple-200">
+                Criar minha conta
               </Link>
             </motion.div>
 
             {/* Mobile Menu Button */}
             <div className="md:hidden flex items-center">
-              <button onClick={() => setMenuOpen(!menuOpen)} className="text-slate-300 hover:text-white">
+              <button onClick={() => setMenuOpen(!menuOpen)} className="text-slate-600 hover:text-purple-600">
                 {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
@@ -96,13 +97,13 @@ export default function Home() {
 
         {/* Mobile Nav */}
         {menuOpen && (
-          <div className="md:hidden bg-slate-900 border-b border-purple-900/50 p-4 absolute top-20 left-0 right-0 shadow-xl">
+          <div className="md:hidden bg-white border-b border-gray-100 p-4 absolute top-20 left-0 right-0 shadow-lg">
             <div className="flex flex-col gap-4">
-              <Link href="#solucoes" onClick={() => setMenuOpen(false)} className="text-slate-300 hover:text-white font-medium">Soluções</Link>
-              <Link href="#avaliacoes" onClick={() => setMenuOpen(false)} className="text-slate-300 hover:text-white font-medium">Avaliações</Link>
-              <Link href="#planos" onClick={() => setMenuOpen(false)} className="text-slate-300 hover:text-white font-medium">Planos</Link>
-              <Link href="/login" onClick={() => setMenuOpen(false)} className="text-slate-300 hover:text-white font-medium">Entrar</Link>
-              <Link href="/register" onClick={() => setMenuOpen(false)} className="bg-purple-600 text-center text-white px-4 py-3 rounded-xl font-bold">Criar conta</Link>
+              <Link href="#solucoes" onClick={() => setMenuOpen(false)} className="text-slate-600 font-medium">Para seu negócio</Link>
+              <Link href="#avaliacoes" onClick={() => setMenuOpen(false)} className="text-slate-600 font-medium">O que dizem</Link>
+              <Link href="#planos" onClick={() => setMenuOpen(false)} className="text-slate-600 font-medium">Valores</Link>
+              <Link href="/login" onClick={() => setMenuOpen(false)} className="text-slate-600 font-medium">Entrar</Link>
+              <Link href="/register" onClick={() => setMenuOpen(false)} className="bg-purple-600 text-center text-white px-4 py-3 rounded-xl font-bold">Criar minha conta</Link>
             </div>
           </div>
         )}
@@ -110,25 +111,23 @@ export default function Home() {
 
       <main className="pt-20">
         {/* Hero Section */}
-        <section className="relative overflow-hidden py-24 sm:py-32 flex flex-col items-center justify-center text-center px-4">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/40 via-slate-950 to-slate-950 -z-10"></div>
-          
+        <section className="relative py-24 sm:py-32 flex flex-col items-center justify-center text-center px-4 bg-slate-50">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 max-w-4xl"
+            className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 max-w-3xl text-slate-900"
           >
-            A Presença Digital que o seu <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-600">Negócio Merece</span>
+            Venda mais no delivery sem pagar taxas absurdas
           </motion.h1>
           
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-lg md:text-2xl text-slate-400 max-w-2xl mb-12"
+            className="text-lg md:text-xl text-slate-600 max-w-2xl mb-10"
           >
-            Sistemas incríveis, cardápios online maravilhosos e tudo pensado para o seu restaurante faturar mais com elegância e facilidade.
+            A gente cria o sistema e o cardápio digital do seu jeito. Chega de complicação: seu cliente pede fácil e você recebe tudo organizado no seu WhatsApp ou painel.
           </motion.p>
           
           <motion.div 
@@ -137,18 +136,18 @@ export default function Home() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="flex flex-col sm:flex-row gap-4"
           >
-            <Link href="#planos" className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-[0_0_40px_-10px_rgba(147,51,234,0.7)] hover:shadow-[0_0_60px_-15px_rgba(147,51,234,0.9)] flex items-center justify-center gap-2">
-              Ver Planos <ArrowRight className="w-5 h-5" />
+            <Link href="#planos" className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-lg shadow-purple-200 flex items-center justify-center gap-2">
+              Quero conhecer <ArrowRight className="w-5 h-5" />
             </Link>
           </motion.div>
         </section>
 
         {/* Proposals Section */}
-        <section id="solucoes" className="py-24 bg-slate-900/50">
+        <section id="solucoes" className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold mb-4 text-white">Identidade Visual Própria</h2>
-              <p className="text-xl text-slate-400 max-w-2xl mx-auto">Adaptamos o design do seu sistema perfeitamente ao seu nicho. Cada detalhe importa para atrair os seus clientes.</p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-900">Feito para o <span className="text-purple-600">seu</span> negócio</h2>
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto">Não importa o que você vende. A gente adapta o cardápio pra ter a sua cara e as suas cores.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -159,17 +158,14 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ delay: idx * 0.1 }}
-                  className={`group relative overflow-hidden rounded-3xl ${prop.shadow} shadow-2xl transition-transform hover:-translate-y-2 border border-white/10`}
+                  className={`bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-xl ${prop.shadow} transition-transform hover:-translate-y-1 flex flex-col`}
                 >
-                  <div className="absolute inset-0">
-                    <img src={prop.image} alt={prop.title} className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
-                    <div className={`absolute inset-0 bg-gradient-to-t ${prop.color} mix-blend-multiply opacity-80`}></div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+                  <div className="h-48 overflow-hidden relative">
+                    <img src={prop.image} alt={prop.title} className="w-full h-full object-cover" />
                   </div>
-                  
-                  <div className="relative p-8 h-[320px] flex flex-col justify-end">
-                    <h3 className="text-3xl font-black text-white mb-2">{prop.title}</h3>
-                    <p className="text-slate-200 text-lg leading-relaxed">{prop.desc}</p>
+                  <div className="p-8 flex flex-col flex-1">
+                    <h3 className={`text-2xl font-bold mb-3 ${prop.color}`}>{prop.title}</h3>
+                    <p className="text-slate-600 leading-relaxed">{prop.desc}</p>
                   </div>
                 </motion.div>
               ))}
@@ -178,11 +174,11 @@ export default function Home() {
         </section>
 
         {/* Reviews Section */}
-        <section id="avaliacoes" className="py-24">
+        <section id="avaliacoes" className="py-24 bg-slate-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold mb-4 text-white">O que dizem nossos parceiros</h2>
-              <p className="text-xl text-slate-400 max-w-2xl mx-auto">Junte-se a centenas de negócios que já revolucionaram o seu delivery com a NOXUS.</p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-900">Quem usa, recomenda</h2>
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto">Várias lojas já saíram da dor de cabeça dos pedidos desorganizados.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -193,19 +189,19 @@ export default function Home() {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.1 }}
-                  className="bg-slate-900 border border-purple-900/30 p-8 rounded-3xl hover:border-purple-500/50 transition-colors"
+                  className="bg-white border border-gray-100 shadow-md p-8 rounded-3xl"
                 >
-                  <div className="flex gap-1 mb-6 text-yellow-500">
+                  <div className="flex gap-1 mb-6 text-purple-600">
                     <Star className="w-5 h-5 fill-current" />
                     <Star className="w-5 h-5 fill-current" />
                     <Star className="w-5 h-5 fill-current" />
                     <Star className="w-5 h-5 fill-current" />
                     <Star className="w-5 h-5 fill-current" />
                   </div>
-                  <p className="text-lg text-slate-300 italic mb-6">"{review.text}"</p>
+                  <p className="text-lg text-slate-700 italic mb-6">"{review.text}"</p>
                   <div>
-                    <h4 className="font-bold text-white text-lg">{review.name}</h4>
-                    <span className="text-purple-400 text-sm">{review.role}</span>
+                    <h4 className="font-bold text-slate-900 text-lg">{review.name}</h4>
+                    <span className="text-purple-600 text-sm font-medium">{review.role}</span>
                   </div>
                 </motion.div>
               ))}
@@ -214,11 +210,11 @@ export default function Home() {
         </section>
 
         {/* Plans Section */}
-        <section id="planos" className="py-24 bg-slate-900/50">
+        <section id="planos" className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold mb-4 text-white">Escolha o seu plano</h2>
-              <p className="text-xl text-slate-400 max-w-2xl mx-auto">Sem taxas escondidas ou surpresas no fim do mês. Comece a crescer hoje mesmo.</p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-900">Preço justo e sem surpresas</h2>
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto">Escolha o plano que cabe no seu bolso. Zero taxas escondidas.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-center">
@@ -227,37 +223,37 @@ export default function Home() {
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                className="bg-slate-900 border border-slate-800 p-8 md:p-10 rounded-3xl relative flex flex-col md:my-8"
+                className="bg-white border border-gray-200 p-8 md:p-10 rounded-3xl relative flex flex-col shadow-sm md:my-8"
               >
                 <div className="mb-8">
-                  <h3 className="text-2xl font-bold text-slate-300 mb-2">Plus</h3>
+                  <h3 className="text-xl font-bold text-slate-500 mb-2 uppercase tracking-wide">Plano Plus</h3>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-black text-white">R$ 49,90</span>
-                    <span className="text-slate-400">/mês</span>
+                    <span className="text-4xl font-black text-slate-900">R$ 49,90</span>
+                    <span className="text-slate-500 font-medium">/mês</span>
                   </div>
                 </div>
                 
                 <ul className="space-y-4 mb-8 flex-1">
-                  <li className="flex items-start gap-3 text-slate-300">
-                    <CheckCircle2 className="w-6 h-6 text-purple-500 shrink-0" />
-                    <span>Primeiro cardápio montado por nós</span>
+                  <li className="flex items-start gap-3 text-slate-700">
+                    <CheckCircle2 className="w-6 h-6 text-purple-600 shrink-0" />
+                    <span>Nós montamos o seu primeiro cardápio</span>
                   </li>
-                  <li className="flex items-start gap-3 text-slate-300">
-                    <CheckCircle2 className="w-6 h-6 text-purple-500 shrink-0" />
-                    <span>URL própria exclusiva</span>
+                  <li className="flex items-start gap-3 text-slate-700">
+                    <CheckCircle2 className="w-6 h-6 text-purple-600 shrink-0" />
+                    <span>Link exclusivo para sua loja</span>
                   </li>
-                  <li className="flex items-start gap-3 text-slate-300">
-                    <CheckCircle2 className="w-6 h-6 text-purple-500 shrink-0" />
-                    <span>Suporte direto via WhatsApp</span>
+                  <li className="flex items-start gap-3 text-slate-700">
+                    <CheckCircle2 className="w-6 h-6 text-purple-600 shrink-0" />
+                    <span>Suporte de verdade via WhatsApp</span>
                   </li>
-                  <li className="flex items-start gap-3 text-slate-300">
-                    <CheckCircle2 className="w-6 h-6 text-purple-500 shrink-0" />
-                    <span>2 atualizações de cardápio por mês</span>
+                  <li className="flex items-start gap-3 text-slate-700">
+                    <CheckCircle2 className="w-6 h-6 text-purple-600 shrink-0" />
+                    <span>2 atualizações de cardápio todo mês</span>
                   </li>
                 </ul>
                 
-                <Link href="/register" className="w-full block text-center bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-bold transition-colors">
-                  Assinar Plus
+                <Link href="/register" className="w-full block text-center bg-slate-100 hover:bg-slate-200 text-slate-900 py-4 rounded-xl font-bold transition-colors">
+                  Começar com o Plus
                 </Link>
               </motion.div>
 
@@ -266,41 +262,41 @@ export default function Home() {
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                className="bg-gradient-to-b from-purple-900 to-slate-900 border-2 border-purple-500 p-8 md:p-10 rounded-3xl relative flex flex-col shadow-2xl shadow-purple-900/30 z-10"
+                className="bg-white border-2 border-purple-600 p-8 md:p-10 rounded-3xl relative flex flex-col shadow-2xl shadow-purple-100 z-10"
               >
-                <div className="absolute top-0 right-8 -translate-y-1/2 bg-purple-500 text-white px-4 py-1 rounded-full text-sm font-bold tracking-wide">
-                  RECOMENDADO
+                <div className="absolute top-0 right-8 -translate-y-1/2 bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-bold tracking-wide">
+                  MAIS ESCOLHIDO
                 </div>
                 
                 <div className="mb-8">
-                  <h3 className="text-2xl font-bold text-purple-300 mb-2">PRO</h3>
+                  <h3 className="text-xl font-bold text-purple-600 mb-2 uppercase tracking-wide">Plano PRO</h3>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-black text-white">R$ 99,90</span>
-                    <span className="text-slate-400">/mês</span>
+                    <span className="text-4xl font-black text-slate-900">R$ 99,90</span>
+                    <span className="text-slate-500 font-medium">/mês</span>
                   </div>
                 </div>
                 
                 <ul className="space-y-4 mb-8 flex-1">
-                  <li className="flex items-start gap-3 text-white">
-                    <CheckCircle2 className="w-6 h-6 text-purple-400 shrink-0" />
-                    <span className="font-semibold">Todos os benefícios do plano Plus</span>
+                  <li className="flex items-start gap-3 text-slate-900 font-semibold">
+                    <CheckCircle2 className="w-6 h-6 text-purple-600 shrink-0" />
+                    <span>Tudo que tem no plano Plus</span>
                   </li>
-                  <li className="flex items-start gap-3 text-slate-200">
-                    <CheckCircle2 className="w-6 h-6 text-purple-400 shrink-0" />
-                    <span>1 atualização completa POR SEMANA</span>
+                  <li className="flex items-start gap-3 text-slate-700">
+                    <CheckCircle2 className="w-6 h-6 text-purple-600 shrink-0" />
+                    <span>1 atualização de cardápio POR SEMANA</span>
                   </li>
-                  <li className="flex items-start gap-3 text-slate-200">
-                    <CheckCircle2 className="w-6 h-6 text-purple-400 shrink-0" />
-                    <span>Cardápio Online completo para Deliverys</span>
+                  <li className="flex items-start gap-3 text-slate-700">
+                    <CheckCircle2 className="w-6 h-6 text-purple-600 shrink-0" />
+                    <span>Sistema de painel para controle dos pedidos</span>
                   </li>
-                  <li className="flex items-start gap-3 text-slate-200">
-                    <CheckCircle2 className="w-6 h-6 text-purple-400 shrink-0" />
-                    <span>Sistema de Controle de Estoque integrado</span>
+                  <li className="flex items-start gap-3 text-slate-700">
+                    <CheckCircle2 className="w-6 h-6 text-purple-600 shrink-0" />
+                    <span>Gerenciamento de estoque em tempo real</span>
                   </li>
                 </ul>
                 
-                <Link href="/register" className="w-full block text-center bg-purple-600 hover:bg-purple-500 text-white py-4 rounded-xl font-bold transition-colors shadow-lg shadow-purple-600/30">
-                  Assinar PRO
+                <Link href="/register" className="w-full block text-center bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-xl font-bold transition-colors shadow-lg shadow-purple-200">
+                  Começar com o PRO
                 </Link>
               </motion.div>
             </div>
@@ -308,15 +304,45 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="bg-slate-950 border-t border-slate-900 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <Store className="h-6 w-6 text-purple-500" />
-            <span className="text-xl font-black tracking-tighter text-white">
-              Agência <span className="text-purple-500">NOXUS</span>
-            </span>
+      <footer className="bg-gray-50 border-t border-gray-200 pt-16 pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-2 mb-4">
+                <Store className="h-6 w-6 text-purple-600" />
+                <span className="text-xl font-black tracking-tighter text-slate-900">
+                  Agência <span className="text-purple-600">NOXUS</span>
+                </span>
+              </div>
+              <p className="text-slate-500 max-w-sm mb-6">
+                Simplificamos o delivery do seu negócio com tecnologia acessível e focada em resultados reais.
+              </p>
+              <Link href="/register" className="inline-block bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">
+                Criar uma conta
+              </Link>
+            </div>
+            
+            <div>
+              <h4 className="font-bold text-slate-900 mb-4">Links Úteis</h4>
+              <ul className="space-y-3">
+                <li><Link href="/login" className="text-slate-500 hover:text-purple-600 transition-colors">Entrar no painel</Link></li>
+                <li><Link href="#solucoes" className="text-slate-500 hover:text-purple-600 transition-colors">Ver soluções</Link></li>
+                <li><Link href="#planos" className="text-slate-500 hover:text-purple-600 transition-colors">Preços</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-bold text-slate-900 mb-4">Legal</h4>
+              <ul className="space-y-3">
+                <li><Link href="/terms" className="text-slate-500 hover:text-purple-600 transition-colors">Termos de Uso</Link></li>
+                <li><Link href="/privacy" className="text-slate-500 hover:text-purple-600 transition-colors">Política de Privacidade</Link></li>
+              </ul>
+            </div>
           </div>
-          <p className="text-slate-500 text-sm">© 2026 Agência NOXUS. Todos os direitos reservados.</p>
+          
+          <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-slate-500 text-sm">© {new Date().getFullYear()} Agência NOXUS. Todos os direitos reservados.</p>
+          </div>
         </div>
       </footer>
     </div>
