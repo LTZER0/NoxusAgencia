@@ -51,6 +51,7 @@ export default async function StoreFrontPage(props: { params: Promise<{ slug: st
       products={products || []} 
       deliveryZones={deliveryZones || []}
       categories={categories || []}
+      complementGroups={store.complement_groups || []}
     />
   );
 }

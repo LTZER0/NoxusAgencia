@@ -715,11 +715,7 @@ export default function StoreFrontClient({
                                   {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
                                 </span>
                               )}
-                              {product.complement_group_ids && product.complement_group_ids.length > 0 && (
-                                <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${theme.badgeBg}`}>
-                                  Personalizável
-                                </span>
-                              )}
+
                             </div>
                           </div>
                           <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden shrink-0 relative group-hover:scale-[1.02] transition-transform">
