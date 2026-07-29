@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -41,7 +42,6 @@ export async function POST(request: Request) {
     // Ops, a policy que criamos no SQL não incluía INSERT para a tabela account_deletion_requests.
     // Como a API Server Action usa a role authenticated, ela precisa de permissão de INSERT.
     // Vamos usar a chave Service Role aqui para garantir.
-    import { createClient as createSupabaseClient } from '@supabase/supabase-js';
     const supabaseAdmin = createSupabaseClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
