@@ -102,16 +102,18 @@ export default function StoreFrontClient({
         }
 
         const currentHourStr = now.toLocaleTimeString('pt-BR', { hour12: false, hour: '2-digit', minute: '2-digit' });
+        const openTime = store.open_time.substring(0, 5);
+        const closeTime = store.close_time.substring(0, 5);
         
-        if (store.open_time <= store.close_time) {
-          if (currentHourStr >= store.open_time && currentHourStr <= store.close_time) {
+        if (openTime <= closeTime) {
+          if (currentHourStr >= openTime && currentHourStr <= closeTime) {
             setIsStoreOpen(true);
           } else {
             setIsStoreOpen(false);
           }
         } else {
           // Vira a madrugada
-          if (currentHourStr >= store.open_time || currentHourStr <= store.close_time) {
+          if (currentHourStr >= openTime || currentHourStr <= closeTime) {
             setIsStoreOpen(true);
           } else {
             setIsStoreOpen(false);

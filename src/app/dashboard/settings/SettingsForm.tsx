@@ -25,7 +25,7 @@ export default function SettingsForm({
   const [neighborhood, setNeighborhood] = useState(initialStore?.neighborhood || '');
   const [storeCategory, setStoreCategory] = useState(initialStore?.store_category || 'lanchonete');
   const [isOpen, setIsOpen] = useState<boolean>(initialStore?.is_open ?? true);
-  const [openingHours, setOpeningHours] = useState(initialStore?.opening_hours || '08:00 às 23:00');
+  // openingHours gerado dinamicamente
   const [openDays, setOpenDays] = useState<number[]>(initialStore?.open_days || [0, 1, 2, 3, 4, 5, 6]);
   const [openTime, setOpenTime] = useState(initialStore?.open_time || '18:00');
   const [closeTime, setCloseTime] = useState(initialStore?.close_time || '23:30');
@@ -43,6 +43,14 @@ export default function SettingsForm({
     // Apenas letras minúsculas, números e hífens
     const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
     setSlug(value);
+  };
+
+  const generateOpeningHoursText = () => {
+    if (openDays.length === 0) return 'Fechado';
+    if (openDays.length === 7) return `Todos os dias das ${openTime} às ${closeTime}`;
+    const sortedDays = [...openDays].sort((a, b) => (a === 0 ? 7 : a) - (b === 0 ? 7 : b));
+    const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    return `${sortedDays.map(d => dayNames[d]).join(', ')} das ${openTime} às ${closeTime}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,7 +76,7 @@ export default function SettingsForm({
           neighborhood,
           store_category: storeCategory,
           is_open: isOpen,
-          opening_hours: openingHours,
+          opening_hours: generateOpeningHoursText(),
           open_days: openDays,
           open_time: openTime,
           close_time: closeTime,
@@ -152,28 +160,7 @@ export default function SettingsForm({
         </div>
 
         <div className="p-6">
-          <div className="max-w-md">
-            <label htmlFor="openingHours" className="block text-sm font-medium leading-6 text-gray-900">
-              Horário de Funcionamento
-            </label>
-            <p className="text-xs text-gray-500 mb-2">Será exibido na vitrine do seu cardápio para os clientes.</p>
-            <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
-              <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm">
-                <Clock className="h-4 w-4 mr-2 text-indigo-500" />
-              </span>
-              <input
-                type="text"
-                name="openingHours"
-                id="openingHours"
-                value={openingHours}
-                onChange={(e) => setOpeningHours(e.target.value)}
-                className="block flex-1 border-0 bg-transparent py-2 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                placeholder="Ex: Terça a Domingo das 18:00 às 23:30"
-              />
-            </div>
-          </div>
-
-          <div className="mt-6 border-t border-gray-100 pt-6">
+          <div>
             <h3 className="text-sm font-medium leading-6 text-gray-900 mb-4">Bloqueio Automático da Loja</h3>
             <p className="text-xs text-gray-500 mb-4">Selecione os dias e horários reais em que você atende. Fora desses horários, a loja aparecerá como "Fechada" automaticamente e bloqueará pedidos.</p>
             
@@ -204,8 +191,8 @@ export default function SettingsForm({
                       }}
                       className={`px-3 py-1.5 text-sm font-medium rounded-md border transition-colors ${
                         openDays.includes(day.id) 
-                          ? 'bg-indigo-50 border-indigo-200 text-indigo-700' 
-                          : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                          ? 'bg-green-100 border-green-300 text-green-800 hover:bg-green-200' 
+                          : 'bg-red-100 border-red-300 text-red-800 hover:bg-red-200'
                       }`}
                     >
                       {day.short}
