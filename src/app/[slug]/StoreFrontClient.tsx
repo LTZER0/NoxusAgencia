@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, MapPin, CreditCard, User, Phone, CheckCircle2, Clock, Sparkles, Utensils, Home } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, MapPin, CreditCard, User, Phone, CheckCircle2, Clock, Sparkles, Utensils, Home, Percent } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 type Ingredient = {
@@ -169,18 +169,18 @@ export default function StoreFrontClient({
   const categoryTabs = useMemo(() => {
     const names: string[] = [];
     if (hasOffers) {
-      names.push('🔥 Ofertas');
+      names.push('Ofertas');
     }
     if (categories && categories.length > 0) {
       categories.forEach(c => {
-        if (c && c.name && !names.includes(c.name) && c.name !== '🔥 Ofertas') {
+        if (c && c.name && !names.includes(c.name) && c.name !== 'Ofertas') {
           names.push(c.name);
         }
       });
     }
     products.forEach(p => {
       const catName = p.category || 'Outros';
-      if (!names.includes(catName) && catName !== '🔥 Ofertas') {
+      if (!names.includes(catName) && catName !== 'Ofertas') {
         names.push(catName);
       }
     });
@@ -317,9 +317,9 @@ export default function StoreFrontClient({
               <img src={selectedProduct.image_url} alt={selectedProduct.name} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full" style={{
-                backgroundColor: '#f0eeeb',
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='%23d5d0c8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2'/%3E%3Cpath d='M7 2v20'/%3E%3Cpath d='M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7'/%3E%3C/svg%3E")`,
-                backgroundSize: '36px 36px',
+                backgroundColor: '#f5f4f2',
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%23e0ddd8' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2'/%3E%3Cpath d='M7 2v20'/%3E%3Cpath d='M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7'/%3E%3C/svg%3E")`,
+                backgroundSize: '40px 40px',
               }} />
             )}
             <button onClick={() => setSelectedProduct(null)} className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-md">
@@ -530,7 +530,7 @@ export default function StoreFrontClient({
             {categoryTabs
               .filter(category => selectedCategory === 'Todos' || selectedCategory === category)
               .map(category => {
-                const categoryProducts = category === '🔥 Ofertas'
+                const categoryProducts = category === 'Ofertas'
                   ? products.filter(p => p.is_promotional || (p.discount_price && Number(p.discount_price) > 0))
                   : products.filter(p => (p.category || 'Outros') === category);
 
@@ -553,16 +553,16 @@ export default function StoreFrontClient({
                           <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                             <div>
                               <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                                <h4 className={`font-bold text-base sm:text-lg ${theme.hoverText} transition-colors leading-snug`}>
+                                <h4 className={`font-bold text-base sm:text-lg ${theme.hoverText} transition-colors leading-snug`} style={{ fontFamily: "var(--font-poppins), sans-serif" }}>
                                   {product.name}
                                 </h4>
                                 {(product.is_promotional || product.discount_price) && (
-                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-0.5">
-                                    🔥 Oferta
+                                  <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-gradient-to-r from-red-500 to-orange-500 text-white flex items-center gap-0.5 uppercase tracking-wider shadow-sm">
+                                    <Percent className="w-2.5 h-2.5" /> Oferta
                                   </span>
                                 )}
                               </div>
-                              <p className={`text-xs sm:text-sm ${theme.mutedText} line-clamp-2 mb-3 leading-relaxed`}>
+                              <p className={`text-xs sm:text-sm ${theme.mutedText} line-clamp-2 mb-3 leading-relaxed`} style={{ fontFamily: "var(--font-poppins), sans-serif" }}>
                                 {product.description || 'Sem descrição.'}
                               </p>
                             </div>
@@ -593,8 +593,8 @@ export default function StoreFrontClient({
                               <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
                             ) : (
                               <div className="w-full h-full" style={{
-                                backgroundColor: '#f0eeeb',
-                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='%23d5d0c8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2'/%3E%3Cpath d='M7 2v20'/%3E%3Cpath d='M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7'/%3E%3C/svg%3E")`,
+                                backgroundColor: '#f5f4f2',
+                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%23e0ddd8' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2'/%3E%3Cpath d='M7 2v20'/%3E%3Cpath d='M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7'/%3E%3C/svg%3E")`,
                                 backgroundSize: '28px 28px',
                               }} />
                             )}
