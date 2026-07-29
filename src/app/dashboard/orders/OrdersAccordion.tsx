@@ -25,6 +25,7 @@ export default function OrdersAccordion({
   storeName,
   updateAction,
   archiveAction,
+  archiveMultipleAction,
   defaultOpen = false
 }: {
   title: string;
