@@ -21,6 +21,7 @@ export default function TrackingClient({ store }: { store: any }) {
   const [identifier, setIdentifier] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isCanceling, setIsCanceling] = useState<string | null>(null);
+  const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
@@ -78,8 +79,6 @@ export default function TrackingClient({ store }: { store: any }) {
   };
 
   const handleCancelOrder = async (orderId: string) => {
-    if (!confirm('Deseja realmente solicitar o cancelamento deste pedido?')) return;
-    
     setIsCanceling(orderId);
     try {
       const response = await fetch('/api/store/order/cancel', {
@@ -270,7 +269,7 @@ export default function TrackingClient({ store }: { store: any }) {
                         
                         {(order.status === 'pending' || order.status === 'confirmed') && (
                           <button
-                            onClick={() => handleCancelOrder(order.id)}
+                            onClick={() => setOrderToCancel(order.id)}
                             disabled={isCanceling === order.id}
                             className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-4 py-2 rounded-xl text-sm font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                           >
@@ -315,6 +314,32 @@ export default function TrackingClient({ store }: { store: any }) {
           )}
         </AnimatePresence>
       </main>
+
+      {orderToCancel && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-black text-gray-900 mb-2">Cancelar Pedido?</h3>
+            <p className="text-sm text-gray-600 mb-6 font-medium">Tem certeza que deseja cancelar seu pedido? Se o preparo já começou, o estabelecimento pode não aceitar.</p>
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setOrderToCancel(null)} 
+                className="px-4 py-2 text-gray-700 font-bold hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                Voltar
+              </button>
+              <button 
+                onClick={() => { 
+                  handleCancelOrder(orderToCancel); 
+                  setOrderToCancel(null); 
+                }} 
+                className="px-4 py-2 bg-red-600 text-white font-bold hover:bg-red-700 rounded-xl shadow-sm transition-colors"
+              >
+                Sim, cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

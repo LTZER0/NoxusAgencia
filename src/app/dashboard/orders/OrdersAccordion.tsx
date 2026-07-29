@@ -38,6 +38,7 @@ export default function OrdersAccordion({
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [isArchivingAll, setIsArchivingAll] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
 
   const getStatusDetails = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -225,7 +226,7 @@ export default function OrdersAccordion({
 
                           {(order.status !== 'canceled' && order.status !== 'completed' && order.status !== 'cancellation_requested') && (
                             <button 
-                              onClick={() => updateAction(order.id, 'canceled')}
+                              onClick={() => setOrderToCancel(order.id)}
                               className="w-full flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none"
                             >
                               Cancelar Pedido
@@ -242,6 +243,32 @@ export default function OrdersAccordion({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {orderToCancel && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Cancelar Pedido</h3>
+            <p className="text-sm text-gray-600 mb-6">Tem certeza que deseja cancelar este pedido? O cliente será notificado e esta ação não poderá ser desfeita.</p>
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setOrderToCancel(null)} 
+                className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Voltar
+              </button>
+              <button 
+                onClick={() => { 
+                  updateAction(orderToCancel, 'canceled'); 
+                  setOrderToCancel(null); 
+                }} 
+                className="px-4 py-2 bg-red-600 text-white font-medium hover:bg-red-700 rounded-lg shadow-sm transition-colors"
+              >
+                Sim, Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
