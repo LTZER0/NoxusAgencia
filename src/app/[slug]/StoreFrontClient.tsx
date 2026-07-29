@@ -91,34 +91,51 @@ export default function StoreFrontClient({
         return;
       }
       
+      let openDaysList = store.open_days;
+      if (typeof openDaysList === 'string') {
+        try { openDaysList = JSON.parse(openDaysList); } catch(e) {}
+      }
+
       // Se possui configuração inteligente de dias e horários
-      if (store.open_days && Array.isArray(store.open_days) && store.open_time && store.close_time) {
+      if (openDaysList && Array.isArray(openDaysList) && store.open_time && store.close_time) {
         const now = new Date();
         const currentDay = now.getDay();
+        const yesterdayDay = currentDay === 0 ? 6 : currentDay - 1;
         
-        if (!store.open_days.includes(currentDay)) {
-          setIsStoreOpen(false);
-          return;
-        }
-
-        const currentHourStr = now.toLocaleTimeString('pt-BR', { hour12: false, hour: '2-digit', minute: '2-digit' });
+        const h = now.getHours().toString().padStart(2, '0');
+        const m = now.getMinutes().toString().padStart(2, '0');
+        const currentHourStr = `${h}:${m}`;
+        
         const openTime = store.open_time.substring(0, 5);
         const closeTime = store.close_time.substring(0, 5);
         
+        let isOpenNow = false;
+
         if (openTime <= closeTime) {
-          if (currentHourStr >= openTime && currentHourStr <= closeTime) {
-            setIsStoreOpen(true);
-          } else {
-            setIsStoreOpen(false);
+          // Horário comercial normal. Ex: 08:00 as 23:00 (mesmo dia)
+          if (openDaysList.includes(currentDay)) {
+            if (currentHourStr >= openTime && currentHourStr <= closeTime) {
+              isOpenNow = true;
+            }
           }
         } else {
-          // Vira a madrugada
-          if (currentHourStr >= openTime || currentHourStr <= closeTime) {
-            setIsStoreOpen(true);
-          } else {
-            setIsStoreOpen(false);
+          // Vira a madrugada. Ex: 18:00 as 02:00
+          
+          // Caso 1: Estamos antes da meia-noite (ex: 19:00). Pertence ao expediente de HOJE.
+          if (currentHourStr >= openTime) {
+            if (openDaysList.includes(currentDay)) {
+              isOpenNow = true;
+            }
+          }
+          // Caso 2: Estamos depois da meia-noite (ex: 01:00). Pertence ao expediente de ONTEM.
+          else if (currentHourStr <= closeTime) {
+            if (openDaysList.includes(yesterdayDay)) {
+              isOpenNow = true;
+            }
           }
         }
+
+        setIsStoreOpen(isOpenNow);
       } else {
         // Sem configuração inteligente, usa o manual
         setIsStoreOpen(store.is_open !== false);
