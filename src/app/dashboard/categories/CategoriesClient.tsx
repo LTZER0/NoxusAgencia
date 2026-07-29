@@ -135,7 +135,6 @@ export default function CategoriesClient({
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">{category.name}</p>
-                    <p className="text-xs text-gray-400">ID: {category.id}</p>
                   </div>
                 </div>
 
