@@ -23,7 +23,6 @@ export default function SettingsForm({
   const [block, setBlock] = useState(initialStore?.block || '');
   const [lot, setLot] = useState(initialStore?.lot || '');
   const [neighborhood, setNeighborhood] = useState(initialStore?.neighborhood || '');
-  const [deliveryFee, setDeliveryFee] = useState(initialStore?.delivery_fee?.toString() || '');
   const [storeCategory, setStoreCategory] = useState(initialStore?.store_category || 'lanchonete');
   const [isOpen, setIsOpen] = useState<boolean>(initialStore?.is_open ?? true);
   const [openingHours, setOpeningHours] = useState(initialStore?.opening_hours || '08:00 às 23:00');
@@ -64,7 +63,6 @@ export default function SettingsForm({
           block,
           lot,
           neighborhood,
-          delivery_fee: deliveryFee,
           store_category: storeCategory,
           is_open: isOpen,
           opening_hours: openingHours,
@@ -244,28 +242,7 @@ export default function SettingsForm({
               </div>
             </div>
 
-            <div className="sm:col-span-3">
-              <label htmlFor="deliveryFee" className="block text-sm font-medium leading-6 text-gray-900">
-                Taxa de Entrega Padrão (R$)
-              </label>
-              <div className="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
-                <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm">
-                  R$
-                </span>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  name="deliveryFee"
-                  id="deliveryFee"
-                  value={deliveryFee}
-                  onChange={(e) => setDeliveryFee(e.target.value)}
-                  className="block flex-1 border-0 bg-transparent py-1.5 pl-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                  placeholder="5.00"
-                />
-              </div>
-              <p className="mt-1 text-xs text-gray-500">Será usada caso o cliente selecione um bairro não cadastrado nas áreas de entrega.</p>
-            </div>
+
 
             <div className="sm:col-span-3">
               <label htmlFor="storeCategory" className="block text-sm font-medium leading-6 text-gray-900">

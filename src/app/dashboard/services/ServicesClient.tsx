@@ -293,28 +293,21 @@ export default function ServicesClient({
                       <Tag className="w-4 h-4 text-indigo-500" />
                       Categoria
                     </label>
-                    {initialCategories.length > 0 ? (
-                      <select
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                      >
-                        <option value="">Selecione a categoria...</option>
-                        {initialCategories.map((cat) => (
-                          <option key={cat.id} value={cat.name}>
-                            {cat.name}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input
-                        type="text"
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        placeholder="Ex: Lanches, Bebidas (Crie em Categorias)"
-                      />
-                    )}
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      disabled={initialCategories.length === 0}
+                      className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                    >
+                      <option value="">
+                        {initialCategories.length > 0 ? 'Selecione a categoria...' : 'Nenhuma categoria criada (Crie em Categorias)'}
+                      </option>
+                      {initialCategories.map((cat) => (
+                        <option key={cat.id} value={cat.name}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="flex items-center pt-5">

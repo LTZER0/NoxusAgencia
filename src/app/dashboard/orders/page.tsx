@@ -11,6 +11,7 @@ import {
   MapPin
 } from "lucide-react";
 import PrintReceiptButton from "./PrintReceiptButton";
+import ViewReceiptModal from "./ViewReceiptModal";
 import ConfirmAndNotifyButton from "./ConfirmAndNotifyButton";
 
 export default async function OrdersPage() {
@@ -221,7 +222,10 @@ export default async function OrdersPage() {
                     </div>
                   )}
 
-                  <PrintReceiptButton order={order} storeName={store.name || 'Loja'} />
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    <ViewReceiptModal order={order} storeName={store.name || 'Loja'} />
+                    <PrintReceiptButton order={order} storeName={store.name || 'Loja'} />
+                  </div>
                 </div>
 
                 {(statusDetails.nextStatus || (order.status !== 'canceled' && order.status !== 'completed')) && (

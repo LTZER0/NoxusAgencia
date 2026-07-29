@@ -49,6 +49,7 @@ export default function StoreFrontClient({
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'success'>('cart');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   
   // Customization Modal State
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -440,34 +441,24 @@ export default function StoreFrontClient({
       </div>
 
       {/* 2. Operational Info Bar */}
-      <div className={`max-w-4xl mx-auto px-4 sm:px-6 py-3 border-b border-gray-200/10 flex flex-wrap items-center justify-center sm:justify-start gap-x-6 gap-y-2 text-xs sm:text-sm ${theme.mutedText}`}>
-        {store.is_open === false ? (
-          <div className="flex items-center gap-2 font-bold text-red-600 bg-red-100 px-3 py-1 rounded-full">
-            <span className="w-2 h-2 rounded-full bg-red-600"></span>
-            <span>Fechado no momento</span>
+      <div className="bg-[#fcf8f5] border-b border-amber-900/10 px-4 sm:px-6 py-2.5">
+        <div className="max-w-4xl mx-auto flex items-center justify-between text-xs sm:text-sm">
+          <div className="flex flex-wrap items-center gap-3 text-gray-700 font-medium">
+            <span className="bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded font-semibold text-[11px]">
+              Apenas pedidos agendados, Faça já o seu!
+            </span>
+            <span className="text-gray-500 hidden sm:inline">•</span>
+            <span className="text-gray-600">
+              {store.opening_hours ? `Horários: ${store.opening_hours}` : 'Horários a partir das 18h'} • Sem pedido mínimo
+            </span>
           </div>
-        ) : (
-          <div className="flex items-center gap-2 font-medium text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Aberto agora</span>
-          </div>
-        )}
-        {store.opening_hours && (
-          <div className="flex items-center gap-1.5">
-            <Clock className="w-4 h-4 opacity-70" />
-            <span>Horário: {store.opening_hours}</span>
-          </div>
-        )}
-        <div className="flex items-center gap-1.5">
-          <Clock className="w-4 h-4 opacity-70" />
-          <span>Entrega: 30 - 45 min</span>
+          <button 
+            onClick={() => setIsProfileOpen(true)}
+            className="text-amber-800 font-bold hover:underline shrink-0 text-xs sm:text-sm flex items-center gap-1"
+          >
+            Perfil da loja
+          </button>
         </div>
-        {store.neighborhood && (
-          <div className="flex items-center gap-1.5">
-            <MapPin className="w-4 h-4 opacity-70" />
-            <span>{store.neighborhood}{store.street ? `, ${store.street}` : ''}</span>
-          </div>
-        )}
       </div>
 
       {store.is_open === false && (
@@ -506,6 +497,12 @@ export default function StoreFrontClient({
                 {category}
               </button>
             ))}
+            <button
+              onClick={() => setIsProfileOpen(true)}
+              className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${theme.bg} ${theme.primaryText} hover:opacity-80 border ${theme.border}`}
+            >
+              Perfil da Loja
+            </button>
           </div>
         </div>
       </div>
@@ -666,6 +663,129 @@ export default function StoreFrontClient({
       )}
 
       {renderProductModal()}
+
+      {/* Modal / Tela de Perfil da Loja (Match idêntico aos 3 prints do Anota AI) */}
+      {isProfileOpen && (
+        <div className="fixed inset-0 z-50 bg-white overflow-y-auto animate-in slide-in-from-right duration-200">
+          {/* Header com botão voltar */}
+          <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3.5 flex items-center gap-4 z-10">
+            <button 
+              onClick={() => setIsProfileOpen(false)} 
+              className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <ArrowRight className="w-6 h-6 text-gray-700 rotate-180" />
+            </button>
+            <h1 className="text-lg font-bold text-gray-900">Perfil da loja</h1>
+          </div>
+
+          {/* Sub-header Banner */}
+          <div className="bg-[#f7f0e7] p-4 text-center border-b border-amber-900/10">
+            <p className="font-bold text-amber-950 text-sm mb-1">Apenas pedidos agendados, Faça já o seu!</p>
+            <p className="text-xs text-amber-900/70 font-medium">
+              {store.opening_hours ? `Horários: ${store.opening_hours}` : 'Horários a partir das 18h'} • Sem pedido mínimo
+            </p>
+          </div>
+
+          <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-8 pb-16">
+            
+            {/* Horário de Atendimento */}
+            <section>
+              <h2 className="text-xl font-extrabold text-[#2d2926] mb-4">Horário de atendimento</h2>
+              <div className="divide-y divide-gray-100 border-t border-b border-gray-100">
+                {[
+                  { day: 'Domingo', hours: store.opening_hours || '18h às 23h' },
+                  { day: 'Segunda-feira', hours: 'Fechado' },
+                  { day: 'Terça-feira', hours: store.opening_hours || '18h às 23h' },
+                  { day: 'Quarta-feira', hours: store.opening_hours || '18h às 23h' },
+                  { day: 'Quinta-feira', hours: store.opening_hours || '18h às 23h' },
+                  { day: 'Sexta-feira', hours: store.opening_hours || '18h às 23h' },
+                  { day: 'Sábado', hours: store.opening_hours || '18h às 23h' }
+                ].map((item, idx) => (
+                  <div key={idx} className="py-3 flex justify-between items-center text-sm">
+                    <span className="font-bold text-gray-800">{item.day}:</span>
+                    <span className="text-gray-500 font-medium">{item.hours}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Formas de Pagamento */}
+            <section className="space-y-6">
+              <h2 className="text-xl font-extrabold text-[#2d2926]">Formas de pagamento</h2>
+
+              {/* Online */}
+              <div className="space-y-4">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Pagamento online</p>
+                <div className="space-y-3">
+                  {store.accepts_pix !== false && (
+                    <div className="flex items-center gap-4 bg-gray-50/80 p-3 rounded-2xl border border-gray-100">
+                      <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600 font-bold text-xs shrink-0">
+                        ❖
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-900 text-sm">Pix</p>
+                        <p className="text-xs text-gray-500">Pagamento online</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-4 bg-gray-50/80 p-3 rounded-2xl border border-gray-100">
+                    <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-600 font-bold text-xs shrink-0">
+                      💳
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-900 text-sm">Cartão de crédito (Online)</p>
+                      <p className="text-xs text-gray-500">Pagamento online</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Na Entrega */}
+              <div className="space-y-3 pt-2">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Pagamento na entrega</p>
+                <div className="flex flex-wrap gap-2">
+                  {['Mastercard Débito', 'Visa Crédito', 'American Express crédito', 'Mastercard Crédito', 'Elo Crédito', 'Elo Débito', 'Visa Débito', 'Hipercard débito', 'Dinners crédito', 'Hipercard crédito'].map((card, idx) => (
+                    <span key={idx} className="bg-gray-100 text-gray-700 font-semibold text-xs px-3 py-2 rounded-xl border border-gray-200">
+                      {card}
+                    </span>
+                  ))}
+                  {store.accepts_cash !== false && (
+                    <span className="bg-gray-100 text-gray-700 font-semibold text-xs px-3 py-2 rounded-xl border border-gray-200">
+                      Dinheiro em espécie
+                    </span>
+                  )}
+                </div>
+              </div>
+            </section>
+
+            {/* Endereço */}
+            <section className="space-y-4">
+              <h2 className="text-xl font-extrabold text-[#2d2926]">Endereço</h2>
+              <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 flex items-center justify-between">
+                <p className="text-sm font-medium text-gray-800">
+                  {store.street || 'Rua José Franco Pimentel, 57'}, {store.block ? `Qd. ${store.block}` : 'Centro'}, {store.neighborhood || 'Luziânia - GO'}, Brasil
+                </p>
+                <ArrowRight className="w-5 h-5 text-gray-400 shrink-0" />
+              </div>
+
+              {/* Mapa Google Maps Embed */}
+              <div className="w-full h-64 rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative bg-gray-100">
+                <iframe
+                  title="Mapa do Estabelecimento"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  allowFullScreen
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(`${store.street || ''} ${store.neighborhood || ''} ${store.name}`)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                />
+              </div>
+            </section>
+
+          </div>
+        </div>
+      )}
 
       {/* Slide-over Cart & Checkout */}
       {isCartOpen && (
@@ -836,7 +956,7 @@ export default function StoreFrontClient({
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-sm font-semibold mb-1">Bairro</label>
+                            <label className="block text-sm font-semibold mb-1">Bairro *</label>
                             {deliveryZones.length > 0 ? (
                               <select 
                                 required 
@@ -844,7 +964,7 @@ export default function StoreFrontClient({
                                 onChange={e => setAddress({...address, neighborhood: e.target.value})} 
                                 className={`w-full rounded-xl p-3 ${theme.inputBg}`}
                               >
-                                <option value="">Selecione um bairro</option>
+                                <option value="">Selecione seu bairro...</option>
                                 {deliveryZones.map(zone => (
                                   <option key={zone.id} value={zone.neighborhood_name}>
                                     {zone.neighborhood_name} (+{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(zone.fee)})
@@ -852,13 +972,9 @@ export default function StoreFrontClient({
                                 ))}
                               </select>
                             ) : (
-                              <input 
-                                required 
-                                type="text" 
-                                value={address.neighborhood} 
-                                onChange={e => setAddress({...address, neighborhood: e.target.value})} 
-                                className={`w-full rounded-xl p-3 ${theme.inputBg}`} 
-                              />
+                              <div className="p-3 bg-red-50 text-red-700 text-xs font-semibold rounded-xl border border-red-200">
+                                Entrega indisponível: Nenhuma taxa de bairro cadastrada nesta loja.
+                              </div>
                             )}
                           </div>
                           <div>

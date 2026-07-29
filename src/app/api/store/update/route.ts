@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const { 
-      userId, name, slug, phone, street, block, lot, neighborhood, delivery_fee, 
+      userId, name, slug, phone, street, block, lot, neighborhood, 
       store_category, is_open, opening_hours, logo_url, cover_url, isUpdate,
       accepts_pix, accepts_card, accepts_cash, pix_key, pix_receipt_phone
     } = body;
@@ -45,7 +45,6 @@ export async function POST(req: NextRequest) {
       block: sanitizeString(block, 20),
       lot: sanitizeString(lot, 20),
       neighborhood: sanitizeString(neighborhood, 100),
-      delivery_fee: delivery_fee ? Math.abs(parseFloat(delivery_fee)) : 0, // Math.abs previne taxas negativas
       accepts_pix: Boolean(accepts_pix),
       accepts_card: Boolean(accepts_card),
       accepts_cash: Boolean(accepts_cash),
