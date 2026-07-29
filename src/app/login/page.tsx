@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Store, Loader2, AlertCircle } from 'lucide-react'
 import { Turnstile } from '@marsidev/react-turnstile'
+import { motion } from 'motion/react'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -47,14 +48,19 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-8">
       <div className="mb-8 flex items-center gap-2">
-        <Store className="h-8 w-8 text-blue-600" />
-        <span className="text-2xl font-bold text-gray-900">Localiza<span className="text-blue-600">SaaS</span></span>
+        <Store className="h-8 w-8 text-purple-600" />
+        <span className="text-2xl font-bold text-gray-900">Agência <span className="text-purple-600">Noxus</span></span>
       </div>
 
-      <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-gray-100"
+      >
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Acesse sua conta</h1>
-          <p className="text-gray-600 mt-2">Bem-vindo de volta ao seu painel.</p>
+          <h1 className="text-3xl font-bold text-gray-900">Acesse sua conta</h1>
+          <p className="text-gray-600 mt-2">Bem-vindo de volta ao seu painel administrativo.</p>
         </div>
 
         {error && (
@@ -75,17 +81,17 @@ export default function Login() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all bg-gray-50 font-medium"
               placeholder="seu@email.com"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-medium text-gray-700" htmlFor="password">
+              <label className="block text-sm font-bold text-gray-700" htmlFor="password">
                 Senha
               </label>
-              <Link href="#" className="text-sm text-blue-600 hover:underline">
+              <Link href="#" className="text-sm text-purple-600 hover:underline font-semibold">
                 Esqueceu a senha?
               </Link>
             </div>
@@ -95,7 +101,7 @@ export default function Login() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all bg-gray-50 font-medium"
               placeholder="••••••••"
             />
           </div>
@@ -111,19 +117,19 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading || !captchaToken}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full py-4 px-4 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl transition-colors flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed shadow-md shadow-purple-200"
           >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Entrar'}
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Entrar no Painel'}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-600">
+        <div className="mt-8 text-center text-sm text-gray-600">
           Ainda não tem conta?{' '}
-          <Link href="/register" className="text-blue-600 hover:underline font-medium">
+          <Link href="/register" className="text-purple-600 hover:underline font-bold">
             Cadastre-se
           </Link>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

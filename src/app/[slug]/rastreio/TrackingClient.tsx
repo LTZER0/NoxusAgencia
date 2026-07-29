@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Package, Clock, CheckCircle, Search, Truck, Phone, AlertCircle, LogOut, XCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { motion, AnimatePresence } from 'motion/react';
+import Link from 'next/link';
 
 type Order = {
   id: string;
@@ -130,7 +131,9 @@ export default function TrackingClient({ store }: { store: any }) {
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">{store.name}</h1>
+          <Link href={`/${store.slug}`} className="text-xl font-bold text-gray-900 hover:text-purple-700 transition-colors">
+            {store.name}
+          </Link>
           {isLoggedIn && (
             <button onClick={handleLogout} className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">
               <LogOut className="w-4 h-4" />

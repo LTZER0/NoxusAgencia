@@ -32,9 +32,11 @@ export default function OrdersAccordion({
   storeName: string;
   updateAction: (id: string, status: string) => Promise<void>;
   archiveAction: (id: string) => Promise<void>;
+  archiveMultipleAction?: (ids: string[]) => Promise<void>;
   defaultOpen?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [isArchivingAll, setIsArchivingAll] = useState(false);
 
   const getStatusDetails = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -121,7 +123,26 @@ export default function OrdersAccordion({
               {orders.length === 0 ? (
                 <p className="text-center text-gray-500 py-4">Nenhum pedido nesta categoria.</p>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <>
+                  {archiveMultipleAction && (
+                    <div className="flex justify-end mb-4">
+                      <button 
+                        onClick={async () => {
+                          if (confirm('Deseja realmente arquivar todos os pedidos desta categoria?')) {
+                            setIsArchivingAll(true);
+                            await archiveMultipleAction(orders.map((o: any) => o.id));
+                            setIsArchivingAll(false);
+                          }
+                        }}
+                        disabled={isArchivingAll}
+                        className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 py-1.5 px-3 rounded-lg flex items-center gap-2 transition-colors font-medium disabled:opacity-50"
+                      >
+                        <Archive className="w-4 h-4" /> 
+                        {isArchivingAll ? 'Arquivando...' : 'Arquivar Todos'}
+                      </button>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {orders.map((order: any, index: number) => {
                     const statusDetails = getStatusDetails(order.status);
                     const StatusIcon = statusDetails.icon;
@@ -214,6 +235,7 @@ export default function OrdersAccordion({
                     );
                   })}
                 </div>
+                </>
               )}
             </div>
           </motion.div>

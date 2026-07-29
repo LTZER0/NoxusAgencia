@@ -21,6 +21,20 @@ export default async function SettingsPage() {
     .eq('owner_id', user.id)
     .single();
 
+  let archivedOrders = [];
+  if (store) {
+    const { data } = await supabase
+      .from('appointments_orders')
+      .select('*')
+      .eq('store_id', store.id)
+      .eq('is_archived', true)
+      .order('created_at', { ascending: false });
+      
+    if (data) {
+      archivedOrders = data;
+    }
+  }
+
   return (
     <div className="flex flex-col gap-8 max-w-4xl mx-auto w-full">
       <div className="flex items-center gap-3">
@@ -37,7 +51,7 @@ export default async function SettingsPage() {
         </div>
       </div>
 
-      <SettingsForm initialStore={store} userId={user.id} />
+      <SettingsForm initialStore={store} userId={user.id} archivedOrders={archivedOrders} />
     </div>
   );
 }

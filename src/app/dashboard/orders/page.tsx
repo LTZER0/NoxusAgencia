@@ -124,6 +124,32 @@ export default async function OrdersPage() {
     revalidatePath('/dashboard/orders');
   }
 
+  // Server Action para arquivar múltiplos pedidos
+  async function archiveMultipleOrders(orderIds: string[]) {
+    "use server";
+    if (!orderIds || orderIds.length === 0) return;
+    const supabaseServer = await createClient();
+    
+    const { data: { user } } = await supabaseServer.auth.getUser();
+    if (!user) throw new Error('Não autorizado');
+
+    const { data: storeOwner } = await supabaseServer
+      .from('stores')
+      .select('id')
+      .eq('owner_id', user.id)
+      .single();
+
+    if (!storeOwner) throw new Error('Loja não encontrada');
+
+    await supabaseServer
+      .from('appointments_orders')
+      .update({ is_archived: true })
+      .in('id', orderIds)
+      .eq('store_id', storeOwner.id);
+      
+    revalidatePath('/dashboard/orders');
+  }
+
   return (
     <MotionDiv 
       initial={{ opacity: 0, y: 20 }}
@@ -158,6 +184,7 @@ export default async function OrdersPage() {
             storeName={store.name || ''} 
             updateAction={updateOrderStatus} 
             archiveAction={archiveOrder}
+            archiveMultipleAction={archiveMultipleOrders}
             defaultOpen={true}
           />
           <OrdersAccordion 
@@ -166,6 +193,7 @@ export default async function OrdersPage() {
             storeName={store.name || ''} 
             updateAction={updateOrderStatus} 
             archiveAction={archiveOrder}
+            archiveMultipleAction={archiveMultipleOrders}
             defaultOpen={true}
           />
           <OrdersAccordion 
@@ -174,6 +202,7 @@ export default async function OrdersPage() {
             storeName={store.name || ''} 
             updateAction={updateOrderStatus} 
             archiveAction={archiveOrder}
+            archiveMultipleAction={archiveMultipleOrders}
             defaultOpen={false}
           />
           <OrdersAccordion 
@@ -182,6 +211,7 @@ export default async function OrdersPage() {
             storeName={store.name || ''} 
             updateAction={updateOrderStatus} 
             archiveAction={archiveOrder}
+            archiveMultipleAction={archiveMultipleOrders}
             defaultOpen={false}
           />
         </div>
