@@ -312,16 +312,21 @@ export default function StoreFrontClient({
       <div className="fixed inset-0 z-50 overflow-hidden flex items-end sm:items-center justify-center">
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedProduct(null)} />
         <div className={`relative w-full max-w-lg ${theme.cartBg} rounded-t-2xl sm:rounded-2xl max-h-[90vh] flex flex-col animate-in slide-in-from-bottom-8 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200`}>
-          <div className="relative h-48 sm:h-56 shrink-0 bg-gray-100 rounded-t-2xl overflow-hidden">
-            {selectedProduct.image_url ? (
+          {selectedProduct.image_url ? (
+            <div className="relative h-48 sm:h-56 shrink-0 bg-gray-100 rounded-t-2xl overflow-hidden">
               <img src={selectedProduct.image_url} alt={selectedProduct.name} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-300">Sem imagem</div>
-            )}
-            <button onClick={() => setSelectedProduct(null)} className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-md">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+              <button onClick={() => setSelectedProduct(null)} className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-md">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between px-5 pt-5">
+              <div />
+              <button onClick={() => setSelectedProduct(null)} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          )}
           
           <div className="p-5 flex-1 overflow-y-auto">
             <h2 className="text-2xl font-bold mb-1">{selectedProduct.name}</h2>
@@ -584,19 +589,14 @@ export default function StoreFrontClient({
                               )}
                             </div>
                           </div>
-                          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden shrink-0 bg-gray-100 relative group-hover:scale-[1.02] transition-transform">
-                            {product.image_url ? (
+                          {product.image_url && (
+                            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden shrink-0 bg-gray-100 relative group-hover:scale-[1.02] transition-transform">
                               <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-500/5 text-xs">
-                                <Utensils className="w-6 h-6 mb-1 opacity-40" />
-                                <span>Foto</span>
+                              <div className={`absolute bottom-1.5 right-1.5 ${theme.primaryBg} text-white p-1.5 rounded-lg shadow-md flex items-center justify-center`}>
+                                <Plus className="w-4 h-4" />
                               </div>
-                            )}
-                            <div className={`absolute bottom-1.5 right-1.5 ${theme.primaryBg} text-white p-1.5 rounded-lg shadow-md flex items-center justify-center`}>
-                              <Plus className="w-4 h-4" />
                             </div>
-                          </div>
+                          )}
                         </div>
                       ))}
                     </div>
