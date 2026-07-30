@@ -93,8 +93,11 @@ export default function Home() {
                 animate={{ opacity: 1, x: 0 }}
                 className="flex items-center"
               >
-                <Link href="/">
-                  <img src="/noxus-logo.jpg" alt="Agência NOXUS" className="h-12 w-auto mix-blend-multiply" />
+                <Link href="/" className="flex items-center gap-3">
+                  <img src="/noxus-logo.jpg" alt="Agência NOXUS" className="h-16 w-auto mix-blend-multiply" />
+                  <span className="text-2xl font-black tracking-tighter text-slate-900 hidden sm:inline">
+                    Agência <span className="text-purple-600">NOXUS</span>
+                  </span>
                 </Link>
               </motion.div>
             
@@ -377,8 +380,11 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
-              <div className="flex items-center mb-4">
-                <img src="/noxus-logo.jpg" alt="Agência NOXUS" className="h-12 w-auto mix-blend-multiply" />
+              <div className="flex items-center gap-3 mb-4">
+                <img src="/noxus-logo.jpg" alt="Agência NOXUS" className="h-16 w-auto mix-blend-multiply" />
+                <span className="text-xl font-black tracking-tighter text-slate-900">
+                  Agência <span className="text-purple-600">NOXUS</span>
+                </span>
               </div>
               <p className="text-slate-500 max-w-sm mb-6">
                 Simplificamos o delivery do seu negócio com tecnologia acessível e focada em resultados reais.
