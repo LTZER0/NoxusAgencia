@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { TrendingUp, Package, DollarSign, BarChart2, PieChart as PieChartIcon, CreditCard } from 'lucide-react';
+import { TrendingUp, Package, DollarSign, BarChart2, PieChart as PieChartIcon, CreditCard, Calendar } from 'lucide-react';
 import { 
-  BarChart, Bar, AreaChart, Area, PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend
+  BarChart, Bar, AreaChart, Area, PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend, LabelList
 } from 'recharts';
 import { motion } from 'motion/react';
 
@@ -97,7 +97,12 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
       groups[key] = (groups[key] || 0) + (Number(order.total_amount) || 0);
     });
 
-    return Object.entries(groups).map(([name, value]) => ({ name, value }));
+    const data = Object.entries(groups).map(([name, value]) => ({ name, value }));
+    // Se houver apenas 1 ponto no gráfico de evolução, a linha não aparece (precisa de 2 pontos)
+    if (data.length === 1) {
+      data.unshift({ name: 'Início', value: 0 });
+    }
+    return data;
   }, [filteredOrders, timeFilter]);
 
   const topProductsChartData = useMemo(() => {
@@ -107,7 +112,12 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
   const paymentStats = useMemo(() => {
     const stats: Record<string, number> = {};
     filteredOrders.forEach(order => {
-      const method = order.payment_method || 'Não Informado';
+      let method = order.payment_method || 'Não Informado';
+      if (method.toLowerCase().includes('dinheiro')) {
+        method = 'Dinheiro';
+      } else {
+        method = method.charAt(0).toUpperCase() + method.slice(1).toLowerCase();
+      }
       stats[method] = (stats[method] || 0) + (Number(order.total_amount) || 0);
     });
     return Object.entries(stats).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
@@ -150,12 +160,15 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
         </div>
 
         {timeFilter === 'month' && (
-          <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
+          <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="relative flex items-center">
+            <div className="absolute left-3 text-gray-500 pointer-events-none">
+              <Calendar className="w-4 h-4" />
+            </div>
             <input 
               type="month"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
+              className="pl-10 pr-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 bg-white shadow-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 cursor-pointer"
             />
           </motion.div>
         )}
@@ -262,7 +275,16 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
                     cursor={{ fill: '#F3F4F6' }}
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                   />
-                  <Bar dataKey="revenue" fill="#6366f1" radius={[0, 4, 4, 0]} barSize={24} />
+                  <Bar dataKey="revenue" fill="#6366f1" radius={[0, 4, 4, 0]} barSize={24}>
+                    <LabelList 
+                      dataKey="quantity" 
+                      position="right" 
+                      formatter={(val: number) => `${val}x`}
+                      fill="#6B7280" 
+                      fontSize={12} 
+                      fontWeight={500}
+                    />
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
