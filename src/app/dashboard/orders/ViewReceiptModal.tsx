@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Eye, X, User, Phone, MapPin, CreditCard, Calendar, ShoppingBag, DollarSign } from 'lucide-react';
+import { Eye, X, User, MapPin, CreditCard, Calendar, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 type OrderData = {

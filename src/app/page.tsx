@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Store, ArrowRight, CheckCircle2, Star, Menu, X } from "lucide-react";
+import { ArrowRight, CheckCircle2, Star, Menu, X } from "lucide-react";
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
 

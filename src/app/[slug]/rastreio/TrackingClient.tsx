@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Package, Clock, CheckCircle, Search, Truck, Phone, AlertCircle, LogOut, XCircle } from 'lucide-react';
+import { Package, Clock, CheckCircle, Search, AlertCircle, LogOut, XCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';

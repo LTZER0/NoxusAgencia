@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Briefcase, CalendarDays, Settings, Menu, X, LogOut, Store, ShoppingBag, MapPin, Tag, Layers, ShieldCheck, Home } from 'lucide-react'
+import { LayoutDashboard, Briefcase, Settings, Menu, X, LogOut, Store, ShoppingBag, MapPin, Tag, Layers, ShieldCheck, Home } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const navigation = [

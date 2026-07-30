@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Store, Link as LinkIcon, Phone, Save, CheckCircle, AlertCircle, MapPin, Building, Hash, Tag, Image as ImageIcon, Layout, Clock, Power, Info, CreditCard, History, Settings2, Search, ArrowRight } from 'lucide-react';
+import { Store, Link as LinkIcon, Phone, Save, CheckCircle, AlertCircle, MapPin, Building, Hash, Tag, Image as ImageIcon, Layout, Power, Info, CreditCard, History, Settings2, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function SettingsForm({ 
