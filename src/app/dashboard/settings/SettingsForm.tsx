@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Store, Link as LinkIcon, Phone, Save, CheckCircle, AlertCircle, MapPin, Building, Hash, Tag, Image as ImageIcon, Layout, Power, Info, CreditCard, History, Settings2, Search } from 'lucide-react';
+import { Store, Link as LinkIcon, Phone, Save, CheckCircle, AlertCircle, MapPin, Building, Hash, Tag, Image as ImageIcon, Layout, Power, Info, CreditCard, History, Settings2, Search, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { createClient } from '@/lib/supabase/client';
 
 export default function SettingsForm({ 
   initialStore, 
@@ -15,11 +16,20 @@ export default function SettingsForm({
   archivedOrders?: any[]
 }) {
   const router = useRouter();
+  const supabase = createClient();
+  
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'info' | 'operation' | 'payment' | 'history'>('info');
+  // Security Tab States
+  const [newPassword, setNewPassword] = useState('');
+  const [showSettingsPassword, setShowSettingsPassword] = useState(false);
+  const [securityLoading, setSecurityLoading] = useState(false);
+  const [securitySuccess, setSecuritySuccess] = useState(false);
+  const [securityError, setSecurityError] = useState<string | null>(null);
+
+  const [activeTab, setActiveTab] = useState<'info' | 'operation' | 'payment' | 'history' | 'security'>('info');
 
   const [name, setName] = useState(initialStore?.name || '');
   const [slug, setSlug] = useState(initialStore?.slug || '');
@@ -104,10 +114,40 @@ export default function SettingsForm({
     }
   };
 
+  const handleSecuritySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSecurityLoading(true);
+    setSecurityError(null);
+    setSecuritySuccess(false);
+
+    if (newPassword.length < 6) {
+      setSecurityError('A senha deve ter pelo menos 6 caracteres.');
+      setSecurityLoading(false);
+      return;
+    }
+
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (updateError) throw updateError;
+
+      setSecuritySuccess(true);
+      setNewPassword('');
+      setTimeout(() => setSecuritySuccess(false), 3000);
+    } catch (err: any) {
+      setSecurityError(err.message || 'Erro ao atualizar a senha.');
+    } finally {
+      setSecurityLoading(false);
+    }
+  };
+
   const tabs = [
     { id: 'info', label: 'Informações da Loja', icon: Info },
     { id: 'operation', label: 'Operação', icon: Settings2 },
     { id: 'payment', label: 'Pagamentos', icon: CreditCard },
+    { id: 'security', label: 'Segurança', icon: Lock },
     { id: 'history', label: 'Histórico', icon: History },
   ] as const;
 
@@ -154,7 +194,7 @@ export default function SettingsForm({
       )}
 
       <AnimatePresence mode="wait">
-        {activeTab !== 'history' ? (
+        {activeTab !== 'history' && activeTab !== 'security' && (
           <motion.form 
             key="form"
             initial={{ opacity: 0, y: 10 }}
@@ -432,8 +472,83 @@ export default function SettingsForm({
               </motion.button>
             </div>
           </motion.form>
-        ) : (
-          /* HISTORY TAB */
+          </motion.form>
+        )}
+
+        {/* SECURITY TAB */}
+        {activeTab === 'security' && (
+          <motion.form 
+            key="security"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            onSubmit={handleSecuritySubmit}
+            className="bg-white shadow sm:rounded-lg overflow-hidden border border-gray-100"
+          >
+            <div className="border-b border-gray-100 px-4 py-5 sm:px-6 bg-gray-50/50">
+              <h2 className="text-base font-semibold leading-6 text-gray-900">Segurança da Conta</h2>
+              <p className="mt-1 text-sm text-gray-500">Altere sua senha de acesso ao painel gerencial.</p>
+            </div>
+            
+            <div className="px-4 py-6 sm:p-8">
+              {securitySuccess && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm font-bold text-green-800">Senha atualizada com sucesso!</p>
+                </div>
+              )}
+
+              {securityError && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-700">{securityError}</p>
+                </div>
+              )}
+
+              <div className="max-w-md">
+                <label className="block text-sm font-bold text-gray-700 mb-2" htmlFor="newPassword">
+                  Nova Senha
+                </label>
+                <div className="relative">
+                  <input
+                    id="newPassword"
+                    type={showSettingsPassword ? "text" : "password"}
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full pl-4 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none transition-all bg-gray-50 font-medium text-sm"
+                    placeholder="Mínimo 6 caracteres"
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSettingsPassword(!showSettingsPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  >
+                    {showSettingsPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-start border-t border-gray-900/10 px-4 py-4 sm:px-8 bg-gray-50 rounded-b-xl">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                disabled={securityLoading || newPassword.length < 6}
+                className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 disabled:opacity-50"
+              >
+                {securityLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Lock className="h-4 w-4 mr-2" />}
+                {securityLoading ? 'Atualizando...' : 'Atualizar Senha'}
+              </motion.button>
+            </div>
+          </motion.form>
+        )}
+
+        {/* HISTORY TAB */}
+        {activeTab === 'history' && (
           <motion.div 
             key="history"
             initial={{ opacity: 0, y: 10 }}
