@@ -47,9 +47,8 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-8">
-      <div className="mb-8 flex items-center gap-2">
-        <Store className="h-8 w-8 text-purple-600" />
-        <span className="text-2xl font-bold text-gray-900">Agência <span className="text-purple-600">Noxus</span></span>
+      <div className="mb-8 flex items-center justify-center">
+        <img src="/noxus-logo.jpg" alt="NOXUS" className="h-16 w-auto mix-blend-multiply" />
       </div>
 
       <motion.div 

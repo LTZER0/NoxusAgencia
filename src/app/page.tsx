@@ -88,16 +88,15 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-2"
-            >
-              <Store className="h-8 w-8 text-purple-600" />
-              <span className="text-2xl font-black tracking-tighter text-slate-900">
-                Agência <span className="text-purple-600">NOXUS</span>
-              </span>
-            </motion.div>
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex items-center"
+              >
+                <Link href="/">
+                  <img src="/noxus-logo.jpg" alt="Agência NOXUS" className="h-12 w-auto mix-blend-multiply" />
+                </Link>
+              </motion.div>
             
             {/* Desktop Nav */}
             <motion.div 
@@ -378,11 +377,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <Store className="h-6 w-6 text-purple-600" />
-                <span className="text-xl font-black tracking-tighter text-slate-900">
-                  Agência <span className="text-purple-600">NOXUS</span>
-                </span>
+              <div className="flex items-center mb-4">
+                <img src="/noxus-logo.jpg" alt="Agência NOXUS" className="h-12 w-auto mix-blend-multiply" />
               </div>
               <p className="text-slate-500 max-w-sm mb-6">
                 Simplificamos o delivery do seu negócio com tecnologia acessível e focada em resultados reais.
