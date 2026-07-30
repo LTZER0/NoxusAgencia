@@ -216,7 +216,7 @@ export default function Home() {
                 <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ffbd2e]"></div>
                 <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#27c93f]"></div>
               </div>
-              <img src="/images/dashboard-charts.png" alt="Dashboard Noxus" className="w-full object-cover object-left-top h-full" />
+              <img src="/images/dashboard-charts.jpg" alt="Dashboard Noxus" className="w-full object-cover object-left-top h-full" />
             </div>
 
             {/* Phone Mockup */}
@@ -228,7 +228,7 @@ export default function Home() {
             >
               {/* Phone Notch/Dynamic Island */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[35%] h-[12px] sm:h-[20px] bg-slate-900 rounded-b-xl sm:rounded-b-2xl z-30"></div>
-              <img src="/images/mobile-menu.png" alt="Cardápio Mobile Noxus" className="w-full h-full object-cover object-top" />
+              <img src="/images/mobile-menu.jpg" alt="Cardápio Mobile Noxus" className="w-full h-full object-cover object-top" />
             </motion.div>
           </motion.div>
         </section>
@@ -424,7 +424,7 @@ export default function Home() {
                 <div className="px-8 flex-1 flex items-end justify-center">
                   <div className="w-[220px] sm:w-[260px] bg-slate-900 rounded-t-3xl shadow-2xl shadow-slate-300/50 border-t-[8px] border-x-[8px] border-slate-900 overflow-hidden mt-auto relative">
                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[40%] h-[16px] bg-slate-900 rounded-b-xl z-10"></div>
-                     <img src="/images/mobile-menu.png" alt="Cardápio Digital Mobile" className="w-full object-cover object-top h-[320px]" />
+                     <img src="/images/mobile-menu.jpg" alt="Cardápio Digital Mobile" className="w-full object-cover object-top h-[320px]" />
                   </div>
                 </div>
               </motion.div>
@@ -448,7 +448,7 @@ export default function Home() {
                 </div>
                 <div className="px-8 flex-1 flex items-end">
                   <div className="w-full bg-white rounded-t-xl shadow-xl shadow-slate-300 border-t border-x border-slate-200 overflow-hidden mt-auto">
-                     <img src="/images/dashboard-kanban.png" alt="Gestor de Pedidos Noxus" className="w-full object-cover object-left-top h-[320px]" />
+                     <img src="/images/dashboard-kanban.jpg" alt="Gestor de Pedidos Noxus" className="w-full object-cover object-left-top h-[320px]" />
                   </div>
                 </div>
               </motion.div>
