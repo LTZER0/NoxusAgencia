@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, CreditCard, User, Phone, CheckCircle2, Sparkles, Utensils, Home, Percent, ChevronDown, ChevronUp, AlertCircle, Edit, Trash2 } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, CreditCard, User, Phone, CheckCircle2, Sparkles, Utensils, Home, Percent, ChevronDown, ChevronUp, AlertCircle, Edit, Trash2, Wallet, MapPin, Smartphone, DollarSign, PlusCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 
@@ -610,11 +610,27 @@ export default function StoreFrontClient({
                                     }}
                                     className="w-5 h-5 border-gray-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer"
                                   />
+                                ) : qty === 0 ? (
+                                  <button
+                                    type="button"
+                                    disabled={!canAddMore}
+                                    onClick={() => {
+                                      setSelectedComplements({
+                                        ...selectedComplements,
+                                        [group.id]: {
+                                          ...groupSelections,
+                                          [item.name]: 1
+                                        }
+                                      });
+                                    }}
+                                    className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 transition-colors"
+                                  >
+                                    <PlusCircle className="w-6 h-6" />
+                                  </button>
                                 ) : (
                                   <div className="flex items-center gap-3 bg-gray-200/50 rounded-full px-2 py-1">
                                     <button 
                                       type="button"
-                                      disabled={qty === 0}
                                       onClick={() => {
                                         setSelectedComplements({
                                           ...selectedComplements,
@@ -624,7 +640,7 @@ export default function StoreFrontClient({
                                           }
                                         });
                                       }}
-                                      className="p-1 rounded-full hover:bg-gray-300/50 dark:hover:bg-gray-600/50 disabled:opacity-30 transition-colors"
+                                      className="p-1 rounded-full hover:bg-gray-300/50 transition-colors"
                                     >
                                       <Minus className="w-3.5 h-3.5" />
                                     </button>
@@ -641,7 +657,7 @@ export default function StoreFrontClient({
                                           }
                                         });
                                       }}
-                                      className="p-1 rounded-full hover:bg-gray-300/50 dark:hover:bg-gray-600/50 disabled:opacity-30 transition-colors"
+                                      className="p-1 rounded-full hover:bg-gray-300/50 disabled:opacity-30 transition-colors"
                                     >
                                       <Plus className="w-3.5 h-3.5" />
                                     </button>
@@ -1031,42 +1047,45 @@ export default function StoreFrontClient({
               </div>
             </section>
 
+            {/* Telefone */}
+            <section className="flex items-center gap-3 py-2">
+              <Smartphone className="w-4 h-4 text-gray-500 shrink-0" />
+              <span className="text-sm font-medium text-gray-700">
+                {store.phone || store.pix_receipt_phone || 'Telefone não cadastrado'}
+              </span>
+            </section>
+
             {/* Formas de Pagamento */}
-            <section className="space-y-4">
+            <section className="space-y-3">
               <h2 className="text-lg font-bold text-[#2d2926] flex items-center gap-2">
-                $ Pagamento
+                <DollarSign className="w-5 h-5 text-gray-600" />
+                Pagamento
               </h2>
               <div className="flex flex-wrap gap-2">
                 {store.accepts_cash !== false && (
                   <span className="bg-white text-gray-700 font-semibold text-xs px-3 py-2 rounded-lg border border-gray-200 shadow-sm flex items-center gap-1.5">
-                    <span className="text-green-600">💵</span> Dinheiro
+                    <Wallet className="w-3.5 h-3.5 text-green-600" /> Dinheiro
                   </span>
                 )}
                 <span className="bg-white text-gray-700 font-semibold text-xs px-3 py-2 rounded-lg border border-gray-200 shadow-sm flex items-center gap-1.5">
-                  <CreditCard className="w-3.5 h-3.5 text-gray-400" /> Cartão de Débito
+                  <CreditCard className="w-3.5 h-3.5 text-blue-500" /> Cartão de Débito
                 </span>
                 <span className="bg-white text-gray-700 font-semibold text-xs px-3 py-2 rounded-lg border border-gray-200 shadow-sm flex items-center gap-1.5">
-                  <CreditCard className="w-3.5 h-3.5 text-gray-400" /> Cartão de Crédito
+                  <CreditCard className="w-3.5 h-3.5 text-purple-500" /> Cartão de Crédito
                 </span>
                 {store.accepts_pix !== false && (
                   <span className="bg-white text-gray-700 font-semibold text-xs px-3 py-2 rounded-lg border border-gray-200 shadow-sm flex items-center gap-1.5">
-                    <span className="text-teal-600 font-bold">❖</span> Pix
+                    <svg className="w-3.5 h-3.5 text-teal-600" viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 4.5l3.5 3.5-3.5 3.5m5-7l3.5 3.5-3.5 3.5M9.5 12.5l3.5 3.5-3.5 3.5m5-7l3.5 3.5-3.5 3.5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    Pix
                   </span>
                 )}
               </div>
             </section>
 
-            {/* Telefone */}
-            <div className="text-gray-800 font-medium text-sm px-1">
-              {store.phone || store.pix_receipt_phone || 'Telefone não cadastrado'}
-            </div>
-
             {/* Endereço */}
             <section className="space-y-4">
               <h2 className="text-lg font-bold text-[#2d2926] flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
-                  <span className="text-sm">📍</span>
-                </div>
+                <MapPin className="w-5 h-5 text-gray-600" />
                 Endereço
               </h2>
               <div className="bg-white border-b border-gray-100 pb-4">
