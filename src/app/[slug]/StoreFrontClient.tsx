@@ -566,9 +566,16 @@ export default function StoreFrontClient({
                               </span>
                             )}
                           </div>
-                          <span className="text-xs text-gray-500 mt-1">
-                            {group.is_mandatory ? `Escolha de ${group.min_choices} até ${group.max_choices} opções` : `Escolha até ${group.max_choices} opções`}
-                          </span>
+                          {group.max_choices < 99 && (
+                            <span className="text-xs text-gray-500 mt-1">
+                              {group.is_mandatory ? `Escolha de ${group.min_choices} até ${group.max_choices} opções` : `Escolha até ${group.max_choices} opções`}
+                            </span>
+                          )}
+                          {group.max_choices >= 99 && group.is_mandatory && (
+                            <span className="text-xs text-gray-500 mt-1">
+                              Escolha pelo menos {group.min_choices} opções
+                            </span>
+                          )}
                         </div>
                         {isExpanded ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
                       </button>
@@ -577,7 +584,7 @@ export default function StoreFrontClient({
                         <div className="p-2 space-y-1">
                           {group.items.filter(item => item.is_available !== false).map((item, idx) => {
                             const qty = groupSelections[item.name] || 0;
-                            const canAddMore = totalSelected < group.max_choices;
+                            const canAddMore = group.max_choices >= 99 || totalSelected < group.max_choices;
                             
                             return (
                               <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-black/5 transition-colors">
@@ -1025,63 +1032,47 @@ export default function StoreFrontClient({
             </section>
 
             {/* Formas de Pagamento */}
-            <section className="space-y-6">
-              <h2 className="text-xl font-extrabold text-[#2d2926]">Formas de pagamento</h2>
-
-              {/* Online */}
-              <div className="space-y-4">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Pagamento online</p>
-                <div className="space-y-3">
-                  {store.accepts_pix !== false && (
-                    <div className="flex items-center gap-4 bg-gray-50/80 p-3 rounded-2xl border border-gray-100">
-                      <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600 font-bold text-xs shrink-0">
-                        ❖
-                      </div>
-                      <div>
-                        <p className="font-bold text-gray-900 text-sm">Pix</p>
-                        <p className="text-xs text-gray-500">Pagamento online</p>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-4 bg-gray-50/80 p-3 rounded-2xl border border-gray-100">
-                    <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-600 font-bold text-xs shrink-0">
-                      💳
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-900 text-sm">Cartão de crédito (Online)</p>
-                      <p className="text-xs text-gray-500">Pagamento online</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Na Entrega */}
-              <div className="space-y-3 pt-2">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Pagamento na entrega</p>
-                <div className="flex flex-wrap gap-2">
-                  {['Mastercard Débito', 'Visa Crédito', 'American Express crédito', 'Mastercard Crédito', 'Elo Crédito', 'Elo Débito', 'Visa Débito', 'Hipercard débito', 'Dinners crédito', 'Hipercard crédito'].map((card, idx) => (
-                    <span key={idx} className="bg-gray-100 text-gray-700 font-semibold text-xs px-3 py-2 rounded-xl border border-gray-200">
-                      {card}
-                    </span>
-                  ))}
-                  {store.accepts_cash !== false && (
-                    <span className="bg-gray-100 text-gray-700 font-semibold text-xs px-3 py-2 rounded-xl border border-gray-200">
-                      Dinheiro em espécie
-                    </span>
-                  )}
-                </div>
+            <section className="space-y-4">
+              <h2 className="text-lg font-bold text-[#2d2926] flex items-center gap-2">
+                $ Pagamento
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {store.accepts_cash !== false && (
+                  <span className="bg-white text-gray-700 font-semibold text-xs px-3 py-2 rounded-lg border border-gray-200 shadow-sm flex items-center gap-1.5">
+                    <span className="text-green-600">💵</span> Dinheiro
+                  </span>
+                )}
+                <span className="bg-white text-gray-700 font-semibold text-xs px-3 py-2 rounded-lg border border-gray-200 shadow-sm flex items-center gap-1.5">
+                  <CreditCard className="w-3.5 h-3.5 text-gray-400" /> Cartão de Débito
+                </span>
+                <span className="bg-white text-gray-700 font-semibold text-xs px-3 py-2 rounded-lg border border-gray-200 shadow-sm flex items-center gap-1.5">
+                  <CreditCard className="w-3.5 h-3.5 text-gray-400" /> Cartão de Crédito
+                </span>
+                {store.accepts_pix !== false && (
+                  <span className="bg-white text-gray-700 font-semibold text-xs px-3 py-2 rounded-lg border border-gray-200 shadow-sm flex items-center gap-1.5">
+                    <span className="text-teal-600 font-bold">❖</span> Pix
+                  </span>
+                )}
               </div>
             </section>
 
+            {/* Telefone */}
+            <div className="text-gray-800 font-medium text-sm px-1">
+              {store.phone || store.pix_receipt_phone || 'Telefone não cadastrado'}
+            </div>
+
             {/* Endereço */}
             <section className="space-y-4">
-              <h2 className="text-xl font-extrabold text-[#2d2926]">Endereço</h2>
-              <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 flex items-center justify-between">
-                <p className="text-sm font-medium text-gray-800">
-                  {store.street || 'Rua José Franco Pimentel, 57'}, {store.block ? `Qd. ${store.block}` : 'Centro'}, {store.neighborhood || 'Luziânia - GO'}, Brasil
+              <h2 className="text-lg font-bold text-[#2d2926] flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
+                  <span className="text-sm">📍</span>
+                </div>
+                Endereço
+              </h2>
+              <div className="bg-white border-b border-gray-100 pb-4">
+                <p className="text-sm text-gray-600">
+                  {store.street ? `${store.street}${store.number ? `, nº${store.number}` : ''} - ${store.block ? `Qd. ${store.block} - ` : ''}${store.neighborhood || 'Centro'}` : 'Rua Doutor João Teixeira nº86 - Centro'}
                 </p>
-                <ArrowRight className="w-5 h-5 text-gray-400 shrink-0" />
               </div>
 
               {/* Mapa Google Maps Embed */}
@@ -1097,6 +1088,27 @@ export default function StoreFrontClient({
                 />
               </div>
             </section>
+
+            <div className="pt-8 pb-4 text-center space-y-4">
+              <a href="#" className="text-sm text-[#0066cc] hover:underline font-medium">
+                Política de privacidade e termos de uso
+              </a>
+              <div className="flex flex-col items-center justify-center gap-1 mt-6">
+                <span className="text-xs text-gray-500 font-medium">Desenvolvido por</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-5 h-5 bg-[#5e17eb] rounded flex items-center justify-center">
+                    <span className="text-white font-bold text-[10px]">NX</span>
+                  </div>
+                  <span className="font-bold text-[#5e17eb] tracking-tight">Agência Noxus</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 flex justify-end">
+              <button onClick={() => setIsProfileOpen(false)} className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors">
+                Fechar
+              </button>
+            </div>
 
           </div>
         </div>

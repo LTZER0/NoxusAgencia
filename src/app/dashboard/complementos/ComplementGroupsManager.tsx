@@ -269,17 +269,30 @@ export default function ComplementGroupsManager({
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-1.5">
-                  Máximo de escolhas
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={maxChoices}
-                  onChange={(e) => setMaxChoices(parseInt(e.target.value) || 1)}
-                  className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-purple-800 sm:text-sm sm:leading-6"
-                />
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-semibold text-gray-900">
+                    Máximo de escolhas
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={maxChoices >= 99}
+                      onChange={(e) => setMaxChoices(e.target.checked ? 99 : 1)}
+                      className="rounded border-gray-300 text-purple-600 focus:ring-purple-600"
+                    />
+                    <span className="text-xs text-gray-600 font-medium">Sem limite</span>
+                  </label>
+                </div>
+                {maxChoices < 99 && (
+                  <input
+                    type="number"
+                    min="1"
+                    value={maxChoices}
+                    onChange={(e) => setMaxChoices(parseInt(e.target.value) || 1)}
+                    className="block w-full rounded-xl border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-purple-800 sm:text-sm sm:leading-6"
+                  />
+                )}
               </div>
             </div>
 
@@ -417,7 +430,10 @@ export default function ComplementGroupsManager({
                     )}
                   </div>
                   <p className="text-sm text-gray-500 mb-2">
-                    Escolhas: Mín {group.min_choices} / Máx {group.max_choices}
+                    {group.max_choices >= 99 
+                      ? `Escolhas: Mín ${group.min_choices} / Sem limite`
+                      : `Escolhas: Mín ${group.min_choices} / Máx ${group.max_choices}`
+                    }
                   </p>
                   <div className="flex flex-wrap items-center gap-2 text-sm">
                     {group.items && group.items.length > 0 && (
