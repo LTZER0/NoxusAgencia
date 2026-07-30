@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, CreditCard, User, Phone, CheckCircle2, Sparkles, Utensils, Home, Percent, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, CreditCard, User, Phone, CheckCircle2, Sparkles, Utensils, Home, Percent, ChevronDown, ChevronUp, AlertCircle, Edit, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 
@@ -72,6 +72,7 @@ export default function StoreFrontClient({
   const [observations, setObservations] = useState('');
   const [itemQuantity, setItemQuantity] = useState(1);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+  const [editingCartIndex, setEditingCartIndex] = useState<number | null>(null);
 
   // Checkout Form State
   const [clientName, setClientName] = useState('');
@@ -389,12 +390,49 @@ export default function StoreFrontClient({
       unitPrice: currentItemPrice
     };
 
-    setCart([...cart, newItem]);
+    if (editingCartIndex !== null) {
+      const newCart = [...cart];
+      newCart[editingCartIndex] = newItem;
+      setCart(newCart);
+      setEditingCartIndex(null);
+    } else {
+      setCart([...cart, newItem]);
+    }
     setSelectedProduct(null);
+    setObservations('');
+    setItemQuantity(1);
   };
 
   const removeFromCart = (cartItemId: string) => {
     setCart(cart.filter(item => item.id !== cartItemId));
+  };
+
+  const handleEditCartItem = (index: number) => {
+    const item = cart[index];
+    
+    // Reconstruct selectedComplements mapping from the formatted array
+    const reconstructedComplements: Record<string, Record<string, number>> = {};
+    const productGroups = (item.product.complement_group_ids || [])
+      .map(id => complementGroups?.find(g => g.id === id))
+      .filter(Boolean) as ComplementGroup[];
+
+    item.selectedComplements.forEach(cartGroup => {
+      const originalGroup = productGroups.find(g => g.name === cartGroup.groupName);
+      if (originalGroup) {
+        if (!reconstructedComplements[originalGroup.id]) {
+          reconstructedComplements[originalGroup.id] = {};
+        }
+        cartGroup.items.forEach(cartItem => {
+          reconstructedComplements[originalGroup.id][cartItem.name] = cartItem.quantity;
+        });
+      }
+    });
+
+    setEditingCartIndex(index);
+    setSelectedComplements(reconstructedComplements);
+    setItemQuantity(item.quantity);
+    setObservations(item.observations || '');
+    setSelectedProduct(item.product);
   };
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -478,7 +516,7 @@ export default function StoreFrontClient({
 
     return (
       <div className="fixed inset-0 z-50 overflow-hidden flex items-end sm:items-center justify-center">
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedProduct(null)} />
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => { setSelectedProduct(null); setEditingCartIndex(null); }} />
         <div className={`relative w-full max-w-lg ${theme.cartBg} rounded-t-2xl sm:rounded-2xl max-h-[90vh] flex flex-col animate-in slide-in-from-bottom-8 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200`}>
           <div className="relative h-48 sm:h-56 shrink-0 rounded-t-2xl overflow-hidden">
             {selectedProduct.image_url ? (
@@ -490,7 +528,7 @@ export default function StoreFrontClient({
                 backgroundSize: '40px 40px',
               }} />
             )}
-            <button onClick={() => setSelectedProduct(null)} className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-md">
+            <button onClick={() => { setSelectedProduct(null); setEditingCartIndex(null); }} className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 backdrop-blur-md">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -535,7 +573,7 @@ export default function StoreFrontClient({
 
                       {isExpanded && (
                         <div className="p-2 space-y-1">
-                          {group.items.map((item, idx) => {
+                          {group.items.filter(item => item.is_available !== false).map((item, idx) => {
                             const qty = groupSelections[item.name] || 0;
                             const canAddMore = totalSelected < group.max_choices;
                             
@@ -799,8 +837,8 @@ export default function StoreFrontClient({
               .filter(category => selectedCategory === 'Todos' || selectedCategory === category)
               .map(category => {
                 const categoryProducts = category === 'Ofertas'
-                  ? products.filter(p => p.is_promotional && p.discount_price !== null)
-                  : products.filter(p => (p.category || 'Outros') === category);
+                  ? products.filter(p => p.is_promotional && p.discount_price !== null && p.is_available !== false)
+                  : products.filter(p => (p.category || 'Outros') === category && p.is_available !== false);
 
                 if (categoryProducts.length === 0) return null;
                 return (
@@ -1178,8 +1216,17 @@ export default function StoreFrontClient({
                             {item.observations && (
                               <p className="text-xs italic opacity-70 mt-1">Obs: {item.observations}</p>
                             )}
-                            
-                            <button onClick={() => removeFromCart(item.id)} className="text-sm text-red-500 self-start mt-2 font-medium">Remover item</button>
+                            <div className="flex items-center gap-4 mt-2">
+                              <button onClick={() => {
+                                const index = cart.findIndex(c => c.id === item.id);
+                                if (index !== -1) handleEditCartItem(index);
+                              }} className={`text-sm ${theme.primaryText} font-medium flex items-center gap-1`}>
+                                <Edit className="w-4 h-4" /> Editar
+                              </button>
+                              <button onClick={() => removeFromCart(item.id)} className="text-sm text-red-500 font-medium flex items-center gap-1">
+                                <Trash2 className="w-4 h-4" /> Remover
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>

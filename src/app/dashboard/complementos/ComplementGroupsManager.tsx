@@ -8,6 +8,7 @@ import { motion } from 'motion/react';
 type ComplementItem = {
   name: string;
   price: number;
+  is_available?: boolean;
 };
 
 type ComplementGroup = {
@@ -63,7 +64,7 @@ export default function ComplementGroupsManager({
   };
 
   const handleAddItem = () => {
-    setItems([...items, { name: '', price: 0 }]);
+    setItems([...items, { name: '', price: 0, is_available: true }]);
   };
 
   const handleUpdateItem = (index: number, field: keyof ComplementItem, value: any) => {
@@ -329,13 +330,27 @@ export default function ComplementGroupsManager({
                           />
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveItem(index)}
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
+                      <div className="flex items-center gap-3 w-full sm:w-auto mt-3 sm:mt-0 pt-2 sm:pt-0 sm:pl-2 sm:border-l border-gray-200">
+                        <label className="relative inline-flex items-center cursor-pointer gap-2">
+                          <input
+                            type="checkbox"
+                            checked={item.is_available !== false}
+                            onChange={(e) => handleUpdateItem(index, 'is_available', e.target.checked)}
+                            className="sr-only peer"
+                          />
+                          <div className="w-8 h-4 bg-red-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-green-500"></div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                            {item.is_available !== false ? 'Ativo' : 'Pausado'}
+                          </span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveItem(index)}
+                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

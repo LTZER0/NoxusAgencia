@@ -36,6 +36,7 @@ export default function ServicesClient({
   const [imageUrl, setImageUrl] = useState('');
   const [category, setCategory] = useState('');
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
+  const [isAvailable, setIsAvailable] = useState(true);
 
   const resetForm = () => {
     setName('');
@@ -46,6 +47,7 @@ export default function ServicesClient({
     setImageUrl('');
     setCategory('');
     setSelectedGroupIds([]);
+    setIsAvailable(true);
     setEditingId(null);
     setIsAdding(false);
     setError(null);
@@ -61,6 +63,7 @@ export default function ServicesClient({
     setCategory(product.category || '');
     
     setSelectedGroupIds(product.complement_group_ids || []);
+    setIsAvailable(product.is_available !== false); // default to true if undefined
     setEditingId(product.id);
     setIsAdding(true);
     setError(null);
@@ -90,7 +93,8 @@ export default function ServicesClient({
         discount_price: parsedDiscountPrice,
         is_promotional: isPromotional,
         image_url: imageUrl,
-        complement_group_ids: selectedGroupIds
+        complement_group_ids: selectedGroupIds,
+        is_available: isAvailable
       };
 
       if (category) {
@@ -285,7 +289,20 @@ export default function ServicesClient({
                     </select>
                   </div>
 
-                  <div className="flex items-center pt-5">
+                  <div className="flex items-center gap-6 pt-5">
+                    <label className="relative inline-flex items-center cursor-pointer gap-3">
+                      <input
+                        type="checkbox"
+                        checked={isAvailable}
+                        onChange={(e) => setIsAvailable(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-red-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                      <span className="text-sm font-semibold text-gray-900 flex items-center gap-1">
+                        {isAvailable ? 'Ativo na Vitrine' : 'Pausado (Oculto)'}
+                      </span>
+                    </label>
+
                     <label className="relative inline-flex items-center cursor-pointer gap-3">
                       <input
                         type="checkbox"
@@ -465,6 +482,11 @@ export default function ServicesClient({
                       {(product.is_promotional || product.discount_price) && (
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wider flex items-center gap-1">
                           <Sparkles className="w-3 h-3" /> Promocional
+                        </span>
+                      )}
+                      {product.is_available === false && (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 uppercase tracking-wider flex items-center gap-1">
+                          Pausado
                         </span>
                       )}
                     </div>
