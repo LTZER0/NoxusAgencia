@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Star, Menu, X, Monitor, Store, Headphones, Smartphone } from "lucide-react";
+import { ArrowRight, CheckCircle2, Menu, X, Monitor } from "lucide-react";
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
 import { createClient } from '@/lib/supabase/client';
