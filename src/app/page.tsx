@@ -286,7 +286,7 @@ export default function Home() {
                   transition={{ delay: idx * 0.1 }}
                   className="bg-slate-50 hover:bg-slate-100 border border-slate-200 px-4 py-2 rounded-full flex items-center gap-2 cursor-default transition-colors"
                 >
-                  <div className={\`w-2 h-2 rounded-full \${niche.color}\`}></div>
+                  <div className={`w-2 h-2 rounded-full ${niche.color}`}></div>
                   <span className="text-sm font-semibold text-slate-700">{niche.name}</span>
                 </motion.div>
               ))}
