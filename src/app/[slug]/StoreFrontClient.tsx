@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 type ComplementItem = {
   name: string;
   price: number;
+  is_available?: boolean;
 };
 
 type ComplementGroup = {
