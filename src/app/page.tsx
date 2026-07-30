@@ -201,20 +201,35 @@ export default function Home() {
             </Link>
           </motion.div>
 
-          {/* Hero Image Composition */}
+          {/* Hero Image Composition (Alfalabs Style) */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ delay: 0.4 }}
-            className="relative w-full max-w-4xl mx-auto mt-10 rounded-t-3xl border-t-[8px] border-x-[8px] border-slate-800 shadow-2xl overflow-hidden bg-white"
+            className="relative w-full max-w-5xl mx-auto mt-16 h-[350px] sm:h-[550px] perspective-1000"
           >
-            <div className="bg-slate-50 border-b border-slate-200 p-3 flex items-center justify-start gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-400"></div>
-              <div className="w-3 h-3 rounded-full bg-amber-400"></div>
-              <div className="w-3 h-3 rounded-full bg-green-400"></div>
+            {/* Tablet Mockup */}
+            <div className="absolute top-0 left-0 sm:left-[2%] w-[90%] sm:w-[85%] h-full rounded-t-[1.5rem] sm:rounded-t-[2rem] border-t-[10px] border-x-[10px] sm:border-t-[16px] sm:border-x-[16px] border-slate-900 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden bg-white z-10 transition-transform duration-500 hover:scale-[1.01]">
+              <div className="bg-slate-50 border-b border-slate-200 p-2 sm:p-3 flex items-center justify-start gap-1.5 sm:gap-2">
+                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ff5f56]"></div>
+                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ffbd2e]"></div>
+                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#27c93f]"></div>
+              </div>
+              <img src="/images/dashboard-overview.png" alt="Dashboard Noxus" className="w-full object-cover object-left-top h-full" />
             </div>
-            <img src="/images/dashboard-overview.png" alt="Dashboard Noxus" className="w-full object-cover object-top h-[300px] sm:h-[450px]" />
+
+            {/* Phone Mockup */}
+            <motion.div 
+              initial={{ y: 50, x: 20 }}
+              animate={{ y: 0, x: 0 }}
+              transition={{ delay: 0.6, type: "spring" }}
+              className="absolute bottom-0 right-0 sm:right-[2%] w-[130px] sm:w-[240px] h-[85%] sm:h-[90%] rounded-t-[1.5rem] sm:rounded-t-[2.5rem] border-t-[8px] border-x-[8px] sm:border-t-[12px] sm:border-x-[12px] border-slate-900 shadow-2xl overflow-hidden bg-white z-20 flex flex-col transition-transform duration-500 hover:scale-[1.05] origin-bottom-right"
+            >
+              {/* Phone Notch/Dynamic Island */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[35%] h-[12px] sm:h-[20px] bg-slate-900 rounded-b-xl sm:rounded-b-2xl z-30"></div>
+              <img src="/images/mobile-menu.png" alt="Cardápio Mobile Noxus" className="w-full h-full object-cover object-top" />
+            </motion.div>
           </motion.div>
         </section>
 
@@ -241,25 +256,56 @@ export default function Home() {
               </motion.p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {proposals.map((prop, idx) => (
-                <motion.div 
-                  key={prop.title}
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-80px" }}
-                  transition={{ delay: idx * 0.1 }}
-                  className={`bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-xl ${prop.shadow} transition-transform hover:-translate-y-1 flex flex-col`}
-                >
-                  <div className="h-48 overflow-hidden relative">
-                    <img src={prop.image} alt={prop.title} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="p-8 flex flex-col flex-1">
-                    <h3 className={`text-2xl font-bold mb-3 ${prop.color}`}>{prop.title}</h3>
-                    <p className="text-slate-600 leading-relaxed font-medium">{prop.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
+            <div className="relative w-full overflow-hidden -mx-4 px-4 sm:mx-0 sm:px-0 mt-8">
+              {/* Fade gradients for smooth entering/exiting effect */}
+              <div className="absolute top-0 left-0 w-12 sm:w-32 h-full bg-gradient-to-r from-white to-transparent z-10"></div>
+              <div className="absolute top-0 right-0 w-12 sm:w-32 h-full bg-gradient-to-l from-white to-transparent z-10"></div>
+
+              <motion.div 
+                className="flex w-max"
+                animate={{ x: ["0%", "-50%"] }}
+                transition={{ 
+                  repeat: Infinity, 
+                  ease: "linear", 
+                  duration: 40 
+                }}
+              >
+                {/* Group 1 */}
+                <div className="flex gap-6 pr-6">
+                  {proposals.map((prop, idx) => (
+                    <div 
+                      key={`${prop.title}-1-${idx}`}
+                      className={`w-[280px] sm:w-[380px] shrink-0 bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-xl ${prop.shadow} flex flex-col transition-all hover:shadow-2xl`}
+                    >
+                      <div className="h-48 overflow-hidden relative">
+                        <img src={prop.image} alt={prop.title} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="p-6 sm:p-8 flex flex-col flex-1">
+                        <h3 className={`text-xl sm:text-2xl font-bold mb-3 ${prop.color}`}>{prop.title}</h3>
+                        <p className="text-slate-600 leading-relaxed font-medium text-sm sm:text-base">{prop.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Group 2 (Duplicate for infinite scroll) */}
+                <div className="flex gap-6 pr-6">
+                  {proposals.map((prop, idx) => (
+                    <div 
+                      key={`${prop.title}-2-${idx}`}
+                      className={`w-[280px] sm:w-[380px] shrink-0 bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-xl ${prop.shadow} flex flex-col transition-all hover:shadow-2xl`}
+                    >
+                      <div className="h-48 overflow-hidden relative">
+                        <img src={prop.image} alt={prop.title} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="p-6 sm:p-8 flex flex-col flex-1">
+                        <h3 className={`text-xl sm:text-2xl font-bold mb-3 ${prop.color}`}>{prop.title}</h3>
+                        <p className="text-slate-600 leading-relaxed font-medium text-sm sm:text-base">{prop.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
             </div>
           </div>
         </section>
