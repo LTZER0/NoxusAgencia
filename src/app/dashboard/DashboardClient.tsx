@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { TrendingUp, Package, DollarSign, BarChart2 } from 'lucide-react';
+import { TrendingUp, Package, DollarSign, BarChart2, PieChart as PieChartIcon, CreditCard } from 'lucide-react';
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
+  BarChart, Bar, AreaChart, Area, PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend
 } from 'recharts';
 import { motion } from 'motion/react';
 
@@ -12,6 +12,7 @@ type Order = {
   created_at: string;
   total_amount: number;
   status: string;
+  payment_method?: string;
   cart_items: Array<{
     quantity: number;
     unitPrice: number;
@@ -22,14 +23,21 @@ type Order = {
   }>;
 };
 
+const PIE_COLORS = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#64748b'];
+
 export default function DashboardClient({ orders, store }: { orders: Order[], store: any }) {
   const [timeFilter, setTimeFilter] = useState<'day' | 'week' | 'month' | 'all'>('month');
+  
+  // Specific month filter state
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  });
 
   const filteredOrders = useMemo(() => {
     const now = new Date();
     return orders.filter(order => {
-      // Exclude cancelled? Let's exclude canceled if we want real revenue, but maybe keep completed/pending.
-      // Usually revenue is only 'completed', but pending might just mean not delivered yet.
+      // Exclude cancelled for revenue metrics
       if (order.status === 'canceled') return false;
 
       const orderDate = new Date(order.created_at);
@@ -42,11 +50,12 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
         return orderDate >= pastWeek;
       }
       if (timeFilter === 'month') {
-        return orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear();
+        const [year, month] = selectedMonth.split('-');
+        return orderDate.getMonth() === parseInt(month) - 1 && orderDate.getFullYear() === parseInt(year);
       }
       return true;
     });
-  }, [orders, timeFilter]);
+  }, [orders, timeFilter, selectedMonth]);
 
   const totalRevenue = filteredOrders.reduce((acc, order) => acc + (Number(order.total_amount) || 0), 0);
   const totalOrders = filteredOrders.length;
@@ -67,22 +76,22 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
       });
     });
 
-    return Object.values(stats).sort((a, b) => b.quantity - a.quantity);
+    return Object.values(stats).sort((a, b) => b.revenue - a.revenue);
   }, [filteredOrders]);
 
   const chartData = useMemo(() => {
-    // Group orders by date (for day, week, month)
     const groups: Record<string, number> = {};
     
     filteredOrders.forEach(order => {
       const d = new Date(order.created_at);
-      let key = d.toLocaleDateString('pt-BR'); // default day
+      let key = d.toLocaleDateString('pt-BR'); 
       
       if (timeFilter === 'day') {
-        // Group by hour
         key = d.getHours() + 'h';
       } else if (timeFilter === 'week' || timeFilter === 'month') {
         key = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      } else {
+        key = d.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
       }
       
       groups[key] = (groups[key] || 0) + (Number(order.total_amount) || 0);
@@ -90,6 +99,19 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
 
     return Object.entries(groups).map(([name, value]) => ({ name, value }));
   }, [filteredOrders, timeFilter]);
+
+  const topProductsChartData = useMemo(() => {
+    return productStats.slice(0, 5);
+  }, [productStats]);
+
+  const paymentStats = useMemo(() => {
+    const stats: Record<string, number> = {};
+    filteredOrders.forEach(order => {
+      const method = order.payment_method || 'Não Informado';
+      stats[method] = (stats[method] || 0) + (Number(order.total_amount) || 0);
+    });
+    return Object.entries(stats).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [filteredOrders]);
 
   return (
     <motion.div 
@@ -99,31 +121,44 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
       className="space-y-6"
     >
       {/* Filters */}
-      <div className="flex bg-gray-100 p-1 rounded-lg w-fit">
-        <button 
-          onClick={() => setTimeFilter('day')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${timeFilter === 'day' ? 'bg-white shadow-sm text-purple-900' : 'text-gray-500 hover:text-purple-900'}`}
-        >
-          Hoje
-        </button>
-        <button 
-          onClick={() => setTimeFilter('week')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${timeFilter === 'week' ? 'bg-white shadow-sm text-purple-900' : 'text-gray-500 hover:text-purple-900'}`}
-        >
-          Últimos 7 dias
-        </button>
-        <button 
-          onClick={() => setTimeFilter('month')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${timeFilter === 'month' ? 'bg-white shadow-sm text-purple-900' : 'text-gray-500 hover:text-purple-900'}`}
-        >
-          Este Mês
-        </button>
-        <button 
-          onClick={() => setTimeFilter('all')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${timeFilter === 'all' ? 'bg-white shadow-sm text-purple-900' : 'text-gray-500 hover:text-purple-900'}`}
-        >
-          Todo o período
-        </button>
+      <div className="flex flex-wrap gap-4 items-center">
+        <div className="flex bg-gray-100 p-1 rounded-lg w-fit">
+          <button 
+            onClick={() => setTimeFilter('day')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${timeFilter === 'day' ? 'bg-white shadow-sm text-purple-900' : 'text-gray-500 hover:text-purple-900'}`}
+          >
+            Hoje
+          </button>
+          <button 
+            onClick={() => setTimeFilter('week')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${timeFilter === 'week' ? 'bg-white shadow-sm text-purple-900' : 'text-gray-500 hover:text-purple-900'}`}
+          >
+            Últimos 7 dias
+          </button>
+          <button 
+            onClick={() => setTimeFilter('month')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${timeFilter === 'month' ? 'bg-white shadow-sm text-purple-900' : 'text-gray-500 hover:text-purple-900'}`}
+          >
+            Mês Específico
+          </button>
+          <button 
+            onClick={() => setTimeFilter('all')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${timeFilter === 'all' ? 'bg-white shadow-sm text-purple-900' : 'text-gray-500 hover:text-purple-900'}`}
+          >
+            Todo o período
+          </button>
+        </div>
+
+        {timeFilter === 'month' && (
+          <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
+            <input 
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
+            />
+          </motion.div>
+        )}
       </div>
 
       {/* KPIs */}
@@ -169,33 +204,35 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
         </motion.div>
       </div>
 
-      {/* Chart & Top Products */}
+      {/* Charts First Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Chart */}
+        {/* Evolution Chart */}
         <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <BarChart2 className="w-5 h-5 text-gray-400" />
+            <BarChart2 className="w-5 h-5 text-purple-500" />
             Evolução de Faturamento
           </h3>
           <div className="h-[300px] w-full">
             {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} tickFormatter={(val) => `R$ ${val}`} />
                   <Tooltip 
-                    formatter={(value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}
-                    cursor={{ fill: '#F3F4F6' }}
+                    formatter={(value: number) => [new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value), 'Faturamento']}
+                    cursor={{ stroke: '#8b5cf6', strokeWidth: 2, strokeDasharray: '4 4' }}
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                   />
-                  <Bar dataKey="value" fill="#6b21a8" radius={[4, 4, 0, 0]}>
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill="#6b21a8" />
-                    ))}
-                  </Bar>
-                </BarChart>
+                  <Area type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
+                </AreaChart>
               </ResponsiveContainer>
             ) : (
               <div className="flex flex-col h-full items-center justify-center text-gray-500 space-y-2">
@@ -208,36 +245,76 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
         </div>
 
         {/* Top Products */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-bold text-gray-900 mb-6">Mais Vendidos</h3>
-          
-          <div className="space-y-4">
-            {productStats.length > 0 ? (
-              productStats.slice(0, 5).map((stat, idx) => (
-                <div key={idx} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center font-bold text-sm">
-                      {idx + 1}
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900 line-clamp-1">{stat.name}</p>
-                      <p className="text-xs text-gray-500">{stat.quantity} unidades vendidas</p>
-                    </div>
-                  </div>
-                  <div className="font-semibold text-gray-900">
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stat.revenue)}
-                  </div>
-                </div>
-              ))
+        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col">
+          <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <Package className="w-5 h-5 text-indigo-500" />
+            Mais Vendidos
+          </h3>
+          <div className="flex-1 min-h-[300px]">
+            {topProductsChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topProductsChartData} layout="vertical" margin={{ top: 0, right: 30, left: 20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
+                  <XAxis type="number" hide />
+                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#374151', fontWeight: 500 }} width={100} />
+                  <Tooltip 
+                    formatter={(value: number, name: string, props: any) => [new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value), 'Faturamento']}
+                    cursor={{ fill: '#F3F4F6' }}
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Bar dataKey="revenue" fill="#6366f1" radius={[0, 4, 4, 0]} barSize={24} />
+                </BarChart>
+              </ResponsiveContainer>
             ) : (
-              <div className="text-center text-gray-500 py-8 flex flex-col items-center gap-2">
+              <div className="text-center text-gray-500 py-8 flex flex-col h-full items-center justify-center gap-2">
                 <Package className="w-8 h-8 text-gray-300" />
                 <p>O seu pódio está vazio.</p>
               </div>
             )}
           </div>
         </div>
-        
+      </div>
+
+      {/* Charts Second Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Payment Methods */}
+        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+          <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <CreditCard className="w-5 h-5 text-emerald-500" />
+            Formas de Pagamento
+          </h3>
+          <div className="h-[250px] w-full">
+            {paymentStats.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={paymentStats}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {paymentStats.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex flex-col h-full items-center justify-center text-gray-500 space-y-2">
+                <PieChartIcon className="w-10 h-10 text-gray-300" />
+                <p>Sem dados de pagamento.</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </motion.div>
   );
