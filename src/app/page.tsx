@@ -13,14 +13,42 @@ const reviews = [
   { name: "Beto", role: "Beto Pizzas", text: "Aquela parada de atualizar os preços sozinho salvou muito meu tempo. Recomendo demais o plano PRO." }
 ];
 
-const niches = [
-  { name: "Pizzarias", color: "bg-red-500" },
-  { name: "Hamburguerias", color: "bg-amber-500" },
-  { name: "Temaquerias", color: "bg-emerald-500" },
-  { name: "Marmitarias", color: "bg-orange-500" },
-  { name: "Açaí e sorvetes", color: "bg-purple-500" },
-  { name: "Docerias", color: "bg-pink-500" },
-  { name: "Cafeterias", color: "bg-amber-700" }
+const proposals = [
+  {
+    title: "Açaiteria",
+    color: "text-purple-700",
+    shadow: "shadow-purple-100",
+    image: "/images/acaiteria.jpg",
+    desc: "Visual fresco e vibrante. Seus clientes vão poder montar o copo com os adicionais que quiserem, sem confusão."
+  },
+  {
+    title: "Lanchonete",
+    color: "text-indigo-700",
+    shadow: "shadow-indigo-100",
+    image: "/images/lanchonete.jpg",
+    desc: "Cardápio direto ao ponto para quem tem fome e pressa. Receba os pedidos rápidos e bem organizados."
+  },
+  {
+    title: "Pizzaria",
+    color: "text-red-700",
+    shadow: "shadow-red-100",
+    image: "/images/pizzaria.jpg",
+    desc: "Cores quentes e um sistema inteligente para montar pizzas meio a meio com cálculo exato do preço."
+  },
+  {
+    title: "Hamburgueria",
+    color: "text-amber-600",
+    shadow: "shadow-amber-100",
+    image: "/images/hamburgueria.jpg",
+    desc: "Deixe seu cliente com água na boca. Facilitamos a escolha de pontos da carne e acréscimos extras."
+  },
+  {
+    title: "Restaurante",
+    color: "text-orange-800",
+    shadow: "shadow-orange-100",
+    image: "/images/restaurante.jpg",
+    desc: "Simples, elegante e prático. Mostre o prato do dia e venda mais marmitas no horário de pico."
+  }
 ];
 
 export default function Home() {
@@ -138,17 +166,6 @@ export default function Home() {
           {/* Background decoration */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-purple-50/50 rounded-full blur-3xl -z-10"></div>
           
-          <motion.div 
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            className="flex items-center gap-3 mb-8"
-          >
-            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-100 text-xs font-semibold text-slate-600"><span className="text-lg">🚀</span> Mais pedidos</span>
-            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-100 text-xs font-semibold text-slate-600"><span className="text-lg">✅</span> Menos erros</span>
-            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-100 text-xs font-semibold text-slate-600"><span className="text-lg">💰</span> Mais lucro</span>
-          </motion.div>
-
           <motion.h1 
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -166,7 +183,7 @@ export default function Home() {
             transition={{ delay: 0.2 }}
             className="text-lg md:text-xl text-slate-500 max-w-2xl mb-10 font-medium"
           >
-            Com cardápio digital, gestor de pedidos, robô no WhatsApp e muito mais. Tudo integrado para o seu restaurante crescer sem limites.
+            Com cardápio digital, gestor de pedidos e muito mais. Tudo integrado para o seu restaurante crescer sem limites.
           </motion.p>
           
           <motion.div 
@@ -184,110 +201,63 @@ export default function Home() {
             </Link>
           </motion.div>
 
-          {/* Hero Mockup Composition */}
+          {/* Hero Image Composition */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ delay: 0.4 }}
-            className="relative w-full max-w-5xl mx-auto h-[400px] sm:h-[500px] perspective-1000"
+            className="relative w-full max-w-4xl mx-auto mt-10 rounded-t-3xl border-t-[8px] border-x-[8px] border-slate-800 shadow-2xl overflow-hidden bg-white"
           >
-            {/* Tablet Mockup */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[350px] sm:h-[450px] bg-white rounded-t-3xl border-t-[8px] border-x-[8px] border-slate-800 shadow-2xl overflow-hidden flex flex-col z-10">
-              <div className="bg-slate-50 border-b border-slate-200 p-4 flex items-center justify-between">
-                <div className="flex gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                  <div className="w-3 h-3 rounded-full bg-amber-400"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                </div>
-                <div className="text-xs font-bold text-slate-400">Gestor de Pedidos</div>
-              </div>
-              <div className="p-6 bg-slate-50 flex-1 grid grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                  <div className="text-xs text-slate-400 font-bold mb-2">NOVOS (2)</div>
-                  <div className="space-y-3">
-                    <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="font-bold text-sm text-purple-900">#1024</span>
-                        <span className="text-xs bg-purple-200 text-purple-800 px-2 py-0.5 rounded-full font-bold">Delivery</span>
-                      </div>
-                      <div className="text-xs text-slate-600">1x Pizza Calabresa, 1x Coca 2L</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                  <div className="text-xs text-slate-400 font-bold mb-2">PREPARANDO (1)</div>
-                  <div className="space-y-3">
-                    <div className="p-3 bg-amber-50 rounded-lg border border-amber-100">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="font-bold text-sm text-amber-900">#1023</span>
-                        <span className="text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full font-bold">Mesa 04</span>
-                      </div>
-                      <div className="text-xs text-slate-600">2x Hamburguer Duplo, 2x Fritas</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                  <div className="text-xs text-slate-400 font-bold mb-2">PRONTOS (0)</div>
-                </div>
-              </div>
+            <div className="bg-slate-50 border-b border-slate-200 p-3 flex items-center justify-start gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-400"></div>
+              <div className="w-3 h-3 rounded-full bg-amber-400"></div>
+              <div className="w-3 h-3 rounded-full bg-green-400"></div>
             </div>
-
-            {/* Phone Mockup */}
-            <motion.div 
-              initial={{ y: 50, x: 20 }}
-              animate={{ y: 0, x: 0 }}
-              transition={{ delay: 0.6, type: "spring" }}
-              className="absolute bottom-0 right-[5%] sm:right-[15%] w-48 sm:w-64 h-80 sm:h-96 bg-white rounded-t-3xl border-t-[10px] border-x-[10px] border-slate-800 shadow-2xl z-20 overflow-hidden flex flex-col"
-            >
-              <div className="bg-purple-600 p-4 text-white text-center pb-6 rounded-b-2xl shadow-sm z-10 relative">
-                <div className="font-black text-lg">Pizzaria Noxus</div>
-                <div className="text-[10px] opacity-80">Aberto até às 23:00</div>
-              </div>
-              <div className="flex-1 bg-slate-50 p-3 pt-6 -mt-4 overflow-hidden relative">
-                <div className="text-xs font-bold text-slate-800 mb-2">Destaques</div>
-                <div className="bg-white p-2 rounded-xl shadow-sm flex gap-3 items-center mb-3">
-                  <div className="w-12 h-12 bg-red-100 rounded-lg flex-shrink-0"></div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-800">Pizza Calabresa</div>
-                    <div className="text-xs text-purple-600 font-bold">R$ 45,90</div>
-                  </div>
-                </div>
-                <div className="bg-white p-2 rounded-xl shadow-sm flex gap-3 items-center">
-                  <div className="w-12 h-12 bg-amber-100 rounded-lg flex-shrink-0"></div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-800">Pizza Marguerita</div>
-                    <div className="text-xs text-purple-600 font-bold">R$ 42,90</div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+            <img src="/images/dashboard-overview.png" alt="Dashboard Noxus" className="w-full object-cover object-top h-[300px] sm:h-[450px]" />
           </motion.div>
         </section>
 
-        {/* Niche Tags Section */}
-        <section className="py-16 bg-white border-y border-slate-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <motion.h2 
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-8"
-            >
-              Sistema perfeito para
-            </motion.h2>
-            <div className="flex flex-wrap justify-center gap-3">
-              {niches.map((niche, idx) => (
-                <motion.div
-                  key={niche.name}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
+        {/* Proposals Section */}
+        <section className="py-24 bg-white border-y border-slate-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <motion.h2 
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                className="text-3xl md:text-4xl font-bold mb-4 text-slate-900"
+              >
+                Feito para o <span className="text-purple-600">seu</span> negócio
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ delay: 0.1 }}
+                className="text-lg text-slate-600 max-w-2xl mx-auto"
+              >
+                Não importa o que você vende. A gente adapta o cardápio pra ter a sua cara e as suas cores.
+              </motion.p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {proposals.map((prop, idx) => (
+                <motion.div 
+                  key={prop.title}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-80px" }}
                   transition={{ delay: idx * 0.1 }}
-                  className="bg-slate-50 hover:bg-slate-100 border border-slate-200 px-4 py-2 rounded-full flex items-center gap-2 cursor-default transition-colors"
+                  className={`bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-xl ${prop.shadow} transition-transform hover:-translate-y-1 flex flex-col`}
                 >
-                  <div className={`w-2 h-2 rounded-full ${niche.color}`}></div>
-                  <span className="text-sm font-semibold text-slate-700">{niche.name}</span>
+                  <div className="h-48 overflow-hidden relative">
+                    <img src={prop.image} alt={prop.title} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="p-8 flex flex-col flex-1">
+                    <h3 className={`text-2xl font-bold mb-3 ${prop.color}`}>{prop.title}</h3>
+                    <p className="text-slate-600 leading-relaxed font-medium">{prop.desc}</p>
+                  </div>
                 </motion.div>
               ))}
             </div>
@@ -383,94 +353,55 @@ export default function Home() {
                 transition={{ delay: 0.1 }}
                 className="text-lg text-slate-500 font-medium"
               >
-                Cardápio digital, integrações e muito mais
+                Gestão simplificada e muito mais
               </motion.p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[400px]">
-              {/* Card 1: Bento Large */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Card 1: Cardápio */}
               <motion.div 
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ delay: 0.1 }}
-                className="md:col-span-8 bg-slate-50 rounded-3xl border border-slate-200 overflow-hidden relative flex flex-col md:flex-row"
+                className="bg-slate-50 rounded-3xl border border-slate-200 overflow-hidden flex flex-col shadow-lg shadow-slate-100"
               >
-                <div className="p-8 md:w-1/2 flex flex-col justify-center">
+                <div className="p-8 pb-0">
                   <h3 className="text-2xl font-bold mb-4 text-slate-900">Cardápio digital próprio</h3>
                   <p className="text-slate-600 mb-6">Livre-se das taxas dos aplicativos. Tenha um cardápio com a cara da sua marca, super rápido e fácil de usar pelos clientes.</p>
-                  <ul className="space-y-2">
+                  <ul className="space-y-2 mb-8">
                     <li className="flex items-center gap-2 text-sm text-slate-700 font-medium"><CheckCircle2 className="w-4 h-4 text-purple-600" /> Sem taxas por pedido</li>
                     <li className="flex items-center gap-2 text-sm text-slate-700 font-medium"><CheckCircle2 className="w-4 h-4 text-purple-600" /> Cores e logo da sua marca</li>
-                    <li className="flex items-center gap-2 text-sm text-slate-700 font-medium"><CheckCircle2 className="w-4 h-4 text-purple-600" /> Pix automatizado</li>
+                    <li className="flex items-center gap-2 text-sm text-slate-700 font-medium"><CheckCircle2 className="w-4 h-4 text-purple-600" /> Atualização em tempo real</li>
                   </ul>
                 </div>
-                <div className="relative md:w-1/2 h-full min-h-[250px] bg-purple-100 flex items-end justify-center overflow-hidden">
-                  <div className="w-48 h-[90%] bg-white rounded-t-3xl border-t-[8px] border-x-[8px] border-slate-800 shadow-2xl flex flex-col">
-                    <div className="bg-purple-600 h-16 w-full flex items-center justify-center text-white font-bold text-sm">
-                      Pizzaria Noxus
-                    </div>
-                    <div className="p-3 space-y-3">
-                      <div className="w-1/2 h-3 bg-slate-200 rounded-full"></div>
-                      <div className="flex gap-2">
-                        <div className="w-12 h-12 bg-red-100 rounded-lg"></div>
-                        <div className="flex-1 space-y-2 py-1">
-                          <div className="w-full h-2 bg-slate-200 rounded-full"></div>
-                          <div className="w-2/3 h-2 bg-slate-200 rounded-full"></div>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <div className="w-12 h-12 bg-amber-100 rounded-lg"></div>
-                        <div className="flex-1 space-y-2 py-1">
-                          <div className="w-full h-2 bg-slate-200 rounded-full"></div>
-                          <div className="w-2/3 h-2 bg-slate-200 rounded-full"></div>
-                        </div>
-                      </div>
-                    </div>
+                <div className="px-8 flex-1 flex items-end">
+                  <div className="w-full bg-white rounded-t-xl shadow-xl shadow-slate-300 border-t border-x border-slate-200 overflow-hidden mt-auto">
+                     <img src="/images/dashboard-overview.png" alt="Dashboard Noxus" className="w-full object-cover object-top h-[320px]" />
                   </div>
                 </div>
               </motion.div>
 
-              {/* Card 2: WhatsApp */}
+              {/* Card 2: Gestor */}
               <motion.div 
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ delay: 0.2 }}
-                className="md:col-span-4 bg-gradient-to-br from-[#128C7E] to-[#075E54] rounded-3xl overflow-hidden p-8 flex flex-col text-white shadow-lg"
+                className="bg-slate-50 rounded-3xl border border-slate-200 overflow-hidden flex flex-col shadow-lg shadow-slate-100"
               >
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6">
-                  <Smartphone className="w-6 h-6 text-white" />
+                <div className="p-8 pb-0">
+                  <h3 className="text-2xl font-bold mb-4 text-slate-900">Gestor de pedidos</h3>
+                  <p className="text-slate-600 mb-6">Receba todos os seus pedidos em uma tela limpa e organizada, fácil de entender pela sua equipe.</p>
+                  <ul className="space-y-2 mb-8">
+                    <li className="flex items-center gap-2 text-sm text-slate-700 font-medium"><CheckCircle2 className="w-4 h-4 text-purple-600" /> Impressão de comandas</li>
+                    <li className="flex items-center gap-2 text-sm text-slate-700 font-medium"><CheckCircle2 className="w-4 h-4 text-purple-600" /> Separação por status</li>
+                    <li className="flex items-center gap-2 text-sm text-slate-700 font-medium"><CheckCircle2 className="w-4 h-4 text-purple-600" /> Delivery e balcão integrados</li>
+                  </ul>
                 </div>
-                <h3 className="text-2xl font-bold mb-4">Integração com WhatsApp</h3>
-                <p className="text-green-50 mb-auto">Receba os pedidos direto no seu WhatsApp, já formatados e com todos os dados do cliente e cálculo de troco.</p>
-                <div className="mt-8 bg-white/10 rounded-xl p-4 backdrop-blur-md">
-                  <div className="text-sm font-semibold opacity-90 mb-1">Novo pedido #1024</div>
-                  <div className="text-xs opacity-75">1x Pizza Calabresa G...</div>
-                </div>
-              </motion.div>
-
-              {/* Card 3: Integrations */}
-              <motion.div 
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ delay: 0.3 }}
-                className="md:col-span-12 bg-slate-900 rounded-3xl overflow-hidden p-8 flex flex-col md:flex-row items-center text-white"
-              >
-                <div className="md:w-1/2 mb-8 md:mb-0">
-                  <div className="w-12 h-12 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-6">
-                    <Star className="w-6 h-6 text-purple-400" />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4">Super integradora</h3>
-                  <p className="text-slate-400 mb-6 max-w-md">Conecte sua loja aos principais marketplaces e receba todos os pedidos em uma única tela. Fim do tablet de cada aplicativo apitando sem parar.</p>
-                </div>
-                <div className="md:w-1/2 flex justify-center md:justify-end gap-4 w-full">
-                  <div className="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                    <span className="font-bold text-sm">iFood</span>
-                  </div>
-                  <div className="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                    <span className="font-bold text-sm">Rappi</span>
+                <div className="px-8 flex-1 flex items-end">
+                  <div className="w-full bg-white rounded-t-xl shadow-xl shadow-slate-300 border-t border-x border-slate-200 overflow-hidden mt-auto">
+                     <img src="/images/dashboard-orders.png" alt="Gestor de Pedidos Noxus" className="w-full object-cover object-top h-[320px]" />
                   </div>
                 </div>
               </motion.div>
