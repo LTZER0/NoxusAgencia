@@ -4,6 +4,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import ComplementGroupsManager from "./ComplementGroupsManager";
 
+export const dynamic = 'force-dynamic';
+
 export default async function ComplementGroupsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
