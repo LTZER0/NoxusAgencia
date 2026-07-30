@@ -30,6 +30,7 @@ type Product = {
   image_url: string;
   category: string;
   complement_group_ids?: string[];
+  is_available?: boolean;
 };
 
 type SelectedComplement = {
