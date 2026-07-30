@@ -243,18 +243,18 @@ export default function ComplementGroupsManager({
               </div>
 
               <div className="flex flex-col justify-center pt-2">
-                <label className="relative inline-flex items-center cursor-pointer gap-3">
-                  <input
-                    type="checkbox"
-                    checked={isMandatory}
-                    onChange={(e) => setIsMandatory(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-800"></div>
+                <button
+                  type="button"
+                  onClick={() => setIsMandatory(!isMandatory)}
+                  className="flex items-center gap-3 cursor-pointer"
+                >
+                  <div className={`relative w-11 h-6 rounded-full transition-colors ${isMandatory ? 'bg-purple-800' : 'bg-gray-200'}`}>
+                    <div className={`absolute top-[2px] w-5 h-5 bg-white border border-gray-300 rounded-full shadow-sm transition-transform ${isMandatory ? 'left-[22px]' : 'left-[2px]'}`} />
+                  </div>
                   <span className="text-sm font-semibold text-gray-900">
                     Obrigatório (O cliente deve escolher)
                   </span>
-                </label>
+                </button>
               </div>
 
               <div>
@@ -345,18 +345,18 @@ export default function ComplementGroupsManager({
                         </div>
                       </div>
                       <div className="flex items-center gap-3 w-full sm:w-auto mt-3 sm:mt-0 pt-2 sm:pt-0 sm:pl-2 sm:border-l border-gray-200">
-                        <label className="relative inline-flex items-center cursor-pointer gap-2">
-                          <input
-                            type="checkbox"
-                            checked={item.is_available !== false}
-                            onChange={(e) => handleUpdateItem(index, 'is_available', e.target.checked)}
-                            className="sr-only peer"
-                          />
-                          <div className="w-8 h-4 bg-red-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-green-500"></div>
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateItem(index, 'is_available', item.is_available === false)}
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <div className={`relative w-8 h-4 rounded-full transition-colors ${item.is_available !== false ? 'bg-green-500' : 'bg-red-300'}`}>
+                            <div className={`absolute top-[2px] w-3 h-3 bg-white border border-gray-300 rounded-full shadow-sm transition-transform ${item.is_available !== false ? 'left-[14px]' : 'left-[2px]'}`} />
+                          </div>
                           <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
                             {item.is_available !== false ? 'Ativo' : 'Pausado'}
                           </span>
-                        </label>
+                        </button>
                         <button
                           type="button"
                           onClick={() => handleRemoveItem(index)}

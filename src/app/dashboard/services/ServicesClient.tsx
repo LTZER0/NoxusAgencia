@@ -290,31 +290,31 @@ export default function ServicesClient({
                   </div>
 
                   <div className="flex items-center gap-6 pt-5">
-                    <label className="relative inline-flex items-center cursor-pointer gap-3">
-                      <input
-                        type="checkbox"
-                        checked={isAvailable}
-                        onChange={(e) => setIsAvailable(e.target.checked)}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-red-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-                      <span className="text-sm font-semibold text-gray-900 flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setIsAvailable(!isAvailable)}
+                      className="flex items-center gap-3 cursor-pointer"
+                    >
+                      <div className={`relative w-11 h-6 rounded-full transition-colors ${isAvailable ? 'bg-green-500' : 'bg-red-300'}`}>
+                        <div className={`absolute top-[2px] w-5 h-5 bg-white border border-gray-300 rounded-full shadow-sm transition-transform ${isAvailable ? 'left-[22px]' : 'left-[2px]'}`} />
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900">
                         {isAvailable ? 'Ativo na Vitrine' : 'Pausado (Oculto)'}
                       </span>
-                    </label>
+                    </button>
 
-                    <label className="relative inline-flex items-center cursor-pointer gap-3">
-                      <input
-                        type="checkbox"
-                        checked={isPromotional}
-                        onChange={(e) => setIsPromotional(e.target.checked)}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-                      <span className="text-sm font-semibold text-gray-900 flex items-center gap-1">
-                        Destaque Oferta 🔥
+                    <button
+                      type="button"
+                      onClick={() => setIsPromotional(!isPromotional)}
+                      className="flex items-center gap-3 cursor-pointer"
+                    >
+                      <div className={`relative w-11 h-6 rounded-full transition-colors ${isPromotional ? 'bg-amber-500' : 'bg-gray-200'}`}>
+                        <div className={`absolute top-[2px] w-5 h-5 bg-white border border-gray-300 rounded-full shadow-sm transition-transform ${isPromotional ? 'left-[22px]' : 'left-[2px]'}`} />
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900">
+                        Destaque Oferta
                       </span>
-                    </label>
+                    </button>
                   </div>
                 </div>
               </div>
