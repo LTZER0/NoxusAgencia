@@ -1048,11 +1048,17 @@ export default function StoreFrontClient({
             </section>
 
             {/* Telefone */}
-            <section className="flex items-center gap-3 py-2">
-              <Smartphone className="w-4 h-4 text-gray-500 shrink-0" />
-              <span className="text-sm font-medium text-gray-700">
-                {store.phone || store.pix_receipt_phone || 'Telefone não cadastrado'}
-              </span>
+            <section className="space-y-3">
+              <h2 className="text-lg font-bold text-[#2d2926] flex items-center gap-2">
+                <Smartphone className="w-5 h-5 text-gray-600" />
+                Telefone
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                <span className="bg-white text-gray-700 font-semibold text-sm px-3 py-2 rounded-lg border border-gray-200 shadow-sm flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-green-600" />
+                  {store.phone || store.pix_receipt_phone || 'Telefone não cadastrado'}
+                </span>
+              </div>
             </section>
 
             {/* Formas de Pagamento */}
@@ -1114,11 +1120,8 @@ export default function StoreFrontClient({
               </a>
               <div className="flex flex-col items-center justify-center gap-1 mt-6">
                 <span className="text-xs text-gray-500 font-medium">Desenvolvido por</span>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-5 h-5 bg-[#5e17eb] rounded flex items-center justify-center">
-                    <span className="text-white font-bold text-[10px]">NX</span>
-                  </div>
-                  <span className="font-bold text-[#5e17eb] tracking-tight">Agência Noxus</span>
+                <div className="flex items-center">
+                  <img src="/noxus-logo.jpg" alt="NOXUS" className="h-6 w-auto mix-blend-multiply contrast-[1.1] brightness-[1.05]" />
                 </div>
               </div>
             </div>
