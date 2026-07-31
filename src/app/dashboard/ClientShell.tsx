@@ -52,10 +52,9 @@ export default function ClientShell({ children, hasActivePlan, isAdmin }: { chil
       `}>
         <div className="flex h-16 shrink-0 items-center justify-between px-6 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <div className="bg-purple-900 p-1.5 rounded-lg">
-              <Store className="h-5 w-5 text-white" />
+            <div className="flex flex-shrink-0 items-center">
+              <img src="/noxus-logo.jpg" alt="NOXUS" className="h-8 w-auto mix-blend-multiply contrast-[1.1] brightness-[1.05]" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-gray-900">Agência <span className="text-purple-800">NOXUS</span></span>
           </div>
           <button 
             onClick={() => setSidebarOpen(false)}
