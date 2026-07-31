@@ -50,15 +50,13 @@ export default function ClientShell({ children, hasActivePlan, isAdmin }: { chil
         fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="flex py-5 shrink-0 items-center justify-between px-6 border-b border-gray-200">
-          <div className="flex items-center gap-2">
-            <div className="flex flex-shrink-0 items-center">
-              <img src="/noxus-logo.jpg" alt="NOXUS" className="h-16 w-auto mix-blend-multiply contrast-[1.1] brightness-[1.05]" />
-            </div>
+        <div className="flex py-5 shrink-0 items-center justify-center relative border-b border-gray-200">
+          <div className="flex items-center">
+            <img src="/noxus-logo.jpg" alt="NOXUS" className="h-16 w-auto mix-blend-multiply contrast-[1.1] brightness-[1.05]" />
           </div>
           <button 
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-gray-500 hover:text-gray-900"
+            className="lg:hidden text-gray-500 hover:text-gray-900 absolute right-4"
           >
             <X className="h-6 w-6" />
           </button>

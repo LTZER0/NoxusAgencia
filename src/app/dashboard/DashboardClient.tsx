@@ -132,7 +132,6 @@ export default function DashboardClient({ orders, store }: { orders: Order[], st
     >
       <div className="mb-2">
         <h1 className="text-2xl font-bold text-gray-900">Bem-vindo(a), {store?.name || 'Lojista'}!</h1>
-        <p className="text-sm text-gray-500 mt-1">Acompanhe o desempenho do seu negócio em tempo real.</p>
       </div>
 
       {/* Filters */}
