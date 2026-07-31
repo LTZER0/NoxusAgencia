@@ -52,7 +52,7 @@ export default function ClientShell({ children, hasActivePlan, isAdmin }: { chil
       `}>
         <div className="flex py-5 shrink-0 items-center justify-center relative border-b border-gray-200">
           <div className="flex flex-shrink-0 items-center">
-            <img src="/noxus-logo.jpg" alt="NOXUS" className="h-16 w-auto rounded-lg" />
+            <img src="/noxus-logo.png" alt="NOXUS" className="h-16 w-auto" />
           </div>
           <button 
             onClick={() => setSidebarOpen(false)}

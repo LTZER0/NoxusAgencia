@@ -1118,7 +1118,7 @@ export default function StoreFrontClient({
               <div className="flex flex-col items-center justify-center gap-1.5 mt-2">
                 <span className="text-xs text-gray-400 font-medium tracking-wide">Desenvolvido por</span>
                 <a href="https://ldam.vercel.app/" target="_blank" rel="noopener noreferrer" className="flex items-center hover:opacity-80 transition-opacity">
-                  <img src="/noxus-logo.jpg" alt="NOXUS" className="h-14 w-auto rounded-md" />
+                  <img src="/noxus-logo.png" alt="NOXUS" className="h-14 w-auto" />
                 </a>
               </div>
             </div>

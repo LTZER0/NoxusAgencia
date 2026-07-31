@@ -69,7 +69,7 @@ export default function UpdatePassword() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-8">
       <div className="mb-8 flex items-center justify-center">
-        <img src="/noxus-logo.jpg" alt="NOXUS" className="h-24 w-auto rounded-xl" />
+        <img src="/noxus-logo.png" alt="NOXUS" className="h-24 w-auto" />
       </div>
 
       <motion.div 
