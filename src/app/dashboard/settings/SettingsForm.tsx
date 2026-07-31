@@ -472,7 +472,6 @@ export default function SettingsForm({
               </motion.button>
             </div>
           </motion.form>
-          </motion.form>
         )}
 
         {/* SECURITY TAB */}
