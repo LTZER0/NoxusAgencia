@@ -93,7 +93,7 @@ export default function Home() {
               className="flex items-center"
             >
               <div className="flex items-center">
-                <img src="/noxus-logo.jpg" alt="NOXUS" className="h-8 w-auto mix-blend-multiply contrast-[1.1] brightness-[1.05]" />
+                <img src="/noxus-logo.jpg" alt="NOXUS" className="h-14 w-auto mix-blend-multiply contrast-[1.1] brightness-[1.05]" />
               </div>
             </motion.div>
             
@@ -633,8 +633,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
-              <div className="flex items-center">
-                <img src="/noxus-logo.jpg" alt="NOXUS" className="h-8 w-auto mix-blend-multiply contrast-[1.1] brightness-[1.05]" />
+              <div className="flex items-center mb-6">
+                <img src="/noxus-logo.jpg" alt="NOXUS" className="h-16 w-auto mix-blend-multiply contrast-[1.1] brightness-[1.05]" />
               </div>
               <p className="text-slate-500 max-w-sm mb-6 font-medium">
                 Simplificamos o delivery do seu negócio com tecnologia acessível, design premium e focada em resultados reais.

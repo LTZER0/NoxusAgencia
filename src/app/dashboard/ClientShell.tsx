@@ -53,7 +53,7 @@ export default function ClientShell({ children, hasActivePlan, isAdmin }: { chil
         <div className="flex h-16 shrink-0 items-center justify-between px-6 border-b border-gray-200">
           <div className="flex items-center gap-2">
             <div className="flex flex-shrink-0 items-center">
-              <img src="/noxus-logo.jpg" alt="NOXUS" className="h-8 w-auto mix-blend-multiply contrast-[1.1] brightness-[1.05]" />
+              <img src="/noxus-logo.jpg" alt="NOXUS" className="h-12 w-auto mix-blend-multiply contrast-[1.1] brightness-[1.05]" />
             </div>
           </div>
           <button 
