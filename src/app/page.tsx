@@ -86,14 +86,14 @@ export default function Home() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-20 items-center">
+          <div className="flex justify-between h-24 items-center">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center"
             >
-              <div className="flex items-center">
-                <img src="/noxus-logo.png" alt="NOXUS" className="h-14 w-auto" />
+              <div className="flex items-center ml-2">
+                <img src="/noxus-logo.png" alt="NOXUS" className="h-24 w-auto scale-125 origin-left" />
               </div>
             </motion.div>
             

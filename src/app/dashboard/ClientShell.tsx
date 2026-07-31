@@ -50,9 +50,9 @@ export default function ClientShell({ children, hasActivePlan, isAdmin }: { chil
         fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="flex py-5 shrink-0 items-center justify-center relative border-b border-gray-200">
+        <div className="flex py-6 shrink-0 items-center justify-center relative border-b border-gray-200 overflow-hidden">
           <div className="flex flex-shrink-0 items-center">
-            <img src="/noxus-logo.png" alt="NOXUS" className="h-16 w-auto" />
+            <img src="/noxus-logo.png" alt="NOXUS" className="h-24 w-auto scale-125" />
           </div>
           <button 
             onClick={() => setSidebarOpen(false)}
