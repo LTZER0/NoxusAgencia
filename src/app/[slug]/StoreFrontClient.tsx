@@ -1114,14 +1114,11 @@ export default function StoreFrontClient({
               </div>
             </section>
 
-            <div className="pt-8 pb-4 text-center space-y-4">
-              <a href="#" className="text-sm text-[#0066cc] hover:underline font-medium">
-                Política de privacidade e termos de uso
-              </a>
-              <div className="flex flex-col items-center justify-center gap-1 mt-6">
-                <span className="text-xs text-gray-500 font-medium">Desenvolvido por</span>
+            <div className="pt-8 pb-4 text-center">
+              <div className="flex flex-col items-center justify-center gap-1.5 mt-2">
+                <span className="text-xs text-gray-400 font-medium tracking-wide">Desenvolvido por</span>
                 <div className="flex items-center">
-                  <img src="/noxus-logo.jpg" alt="NOXUS" className="h-6 w-auto mix-blend-multiply contrast-[1.1] brightness-[1.05]" />
+                  <img src="/noxus-logo.jpg" alt="NOXUS" className="h-14 w-auto mix-blend-multiply contrast-[1.1] brightness-[1.05]" />
                 </div>
               </div>
             </div>
