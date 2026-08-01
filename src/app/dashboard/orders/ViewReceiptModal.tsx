@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Eye, X, User, MapPin, CreditCard, Calendar, ShoppingBag } from 'lucide-react';
+import { Eye, X, User, Phone, MapPin, CreditCard, Calendar, ShoppingBag, DollarSign, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 type OrderData = {
@@ -51,6 +51,14 @@ export default function ViewReceiptModal({ order, storeName }: { order: OrderDat
       default:
         return type || 'Não Informado';
     }
+  };
+
+  const handleWhatsAppClient = () => {
+    if (!order.client_whatsapp) return;
+    const numbers = order.client_whatsapp.replace(/\D/g, '');
+    const waNumber = numbers.length <= 11 ? `55${numbers}` : numbers;
+    const message = encodeURIComponent(`Olá ${order.client_name || ''}, aqui é da equipe do estabelecimento ${storeName}. Entramos em contato referente ao seu pedido #${String(order.id).substring(0, 8)}... `);
+    window.open(`https://wa.me/${waNumber}?text=${message}`, '_blank');
   };
 
   return (
@@ -223,7 +231,19 @@ export default function ViewReceiptModal({ order, storeName }: { order: OrderDat
             </div>
 
             {/* Footer */}
-            <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end">
+            <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-between gap-3 flex-wrap">
+              {order.client_whatsapp ? (
+                <button
+                  type="button"
+                  onClick={handleWhatsAppClient}
+                  className="px-4 py-2.5 bg-green-600 text-white font-medium text-sm rounded-xl hover:bg-green-700 transition-colors flex items-center gap-2"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Falar com Cliente
+                </button>
+              ) : (
+                <div></div>
+              )}
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
