@@ -1,32 +1,60 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
+
+function sanitizeString(input: unknown, maxLength = 255): string {
+  if (typeof input !== 'string') return '';
+  return input.trim().slice(0, maxLength);
+}
 
 export async function POST(request: Request) {
   try {
-    const { storeId, orderId, phone } = await request.json();
+    const body = await request.json();
+    const storeId = body.storeId;
+    const orderId = body.orderId;
+    const identifierRaw = body.phone;
 
-    if (!storeId || !orderId || !phone) {
+    if (!storeId || !orderId || !identifierRaw) {
       return NextResponse.json(
         { error: 'Parâmetros inválidos' },
         { status: 400 }
       );
     }
 
-    const supabase = await createClient();
+    const identifier = sanitizeString(identifierRaw, 20).replace(/[^0-9]/g, '');
 
-    // Verify if the order belongs to this store and client phone
-    const { data: order, error: orderError } = await supabase
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceRoleKey) {
+      console.error('SUPABASE_SERVICE_ROLE_KEY não configurada no .env.local');
+      return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
+    }
+
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceRoleKey
+    );
+
+    // Verify if the order belongs to this store and client phone or cpf
+    const { data: order, error: orderError } = await supabaseAdmin
       .from('appointments_orders')
-      .select('id, status, client_whatsapp')
+      .select('id, status, client_whatsapp, customer_cpf')
       .eq('id', orderId)
       .eq('store_id', storeId)
-      .eq('client_whatsapp', phone)
       .single();
 
     if (orderError || !order) {
       return NextResponse.json(
-        { error: 'Pedido não encontrado ou não autorizado' },
+        { error: 'Pedido não encontrado' },
         { status: 404 }
+      );
+    }
+
+    const orderPhoneRaw = sanitizeString(order.client_whatsapp, 20).replace(/[^0-9]/g, '');
+    const orderCpfRaw = sanitizeString(order.customer_cpf, 20).replace(/[^0-9]/g, '');
+
+    if (orderPhoneRaw !== identifier && orderCpfRaw !== identifier) {
+      return NextResponse.json(
+        { error: 'Não autorizado a cancelar este pedido' },
+        { status: 403 }
       );
     }
 
@@ -39,7 +67,7 @@ export async function POST(request: Request) {
     }
 
     // Update status to cancellation_requested
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('appointments_orders')
       .update({ status: 'cancellation_requested' })
       .eq('id', orderId);
