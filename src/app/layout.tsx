@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ['latin'] })
 const poppins = Poppins({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-poppins' })
 
 export const metadata: Metadata = {
-  title: 'Micro-SaaS para Comércio Local',
+  title: 'Noxus | Sistema para Comércio Local',
   description: 'Sistema multi-tenant para pequenos comércios.',
 }
 

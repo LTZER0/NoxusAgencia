@@ -20,7 +20,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   return {
     title: store.name,
     icons: {
-      icon: store.logo_url || "/favicon.ico",
+      icon: store.logo_url || "/icon.png",
     }
   };
 }
