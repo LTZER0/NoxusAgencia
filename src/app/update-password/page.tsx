@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { updatePasswordAction } from '@/app/actions/auth'
 import Link from 'next/link'
 import { Loader2, AlertCircle, Eye, EyeOff, CheckCircle } from 'lucide-react'
 import { motion } from 'motion/react'
@@ -41,18 +42,15 @@ export default function UpdatePassword() {
     }
 
     try {
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: password
-      })
-
-      if (updateError) throw updateError
+      const response = await updatePasswordAction(password)
+      if (response.error) throw new Error(response.error)
 
       setSuccess(true)
       setTimeout(() => {
         router.push('/dashboard')
       }, 2000)
     } catch (err: any) {
-      setError('Não foi possível atualizar a senha. Seu link pode ter expirado.')
+      setError(err.message || 'Não foi possível atualizar a senha. Seu link pode ter expirado.')
     } finally {
       setLoading(false)
     }

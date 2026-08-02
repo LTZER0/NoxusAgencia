@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { LayoutDashboard, Briefcase, Settings, Menu, X, LogOut, Store, ShoppingBag, MapPin, Tag, Layers, ShieldCheck, Home } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { signOutAction } from '@/app/actions/auth'
 
 const navigation = [
   { name: 'Visão Geral', href: '/dashboard', icon: LayoutDashboard },
@@ -20,7 +20,6 @@ export default function ClientShell({ children, hasActivePlan, isAdmin }: { chil
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
     if (hasActivePlan === false) {
@@ -31,7 +30,7 @@ export default function ClientShell({ children, hasActivePlan, isAdmin }: { chil
   }, [hasActivePlan, pathname, router])
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
+    await signOutAction()
     router.push('/login')
   }
 

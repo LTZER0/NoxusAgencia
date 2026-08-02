@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Package, Clock, CheckCircle, Search, AlertCircle, LogOut, XCircle } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
 
@@ -24,8 +23,6 @@ export default function TrackingClient({ store }: { store: any }) {
   const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  
-  const supabase = createClient();
 
   useEffect(() => {
     const savedPhone = localStorage.getItem(`@noxus_customer_${store.id}`);

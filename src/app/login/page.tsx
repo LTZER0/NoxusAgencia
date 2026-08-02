@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { signInAction, resetPasswordAction } from '@/app/actions/auth'
 import Link from 'next/link'
 import { Store, Loader2, AlertCircle, Eye, EyeOff, ArrowLeft, CheckCircle } from 'lucide-react'
 import { Turnstile } from '@marsidev/react-turnstile'
@@ -19,7 +19,6 @@ export default function Login() {
   const [isRecovery, setIsRecovery] = useState(false)
   const [recoverySuccess, setRecoverySuccess] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,19 +30,12 @@ export default function Login() {
         throw new Error('Por favor, confirme que você não é um robô.')
       }
 
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-        options: {
-          captchaToken,
-        }
-      })
-
-      if (authError) throw authError
+      const response = await signInAction({ email, password, captchaToken })
+      if (response.error) throw new Error(response.error)
 
       router.push('/dashboard')
     } catch (err: any) {
-      setError('E-mail ou senha incorretos. Verifique suas credenciais e se seu e-mail já foi confirmado.')
+      setError(err.message || 'E-mail ou senha incorretos. Verifique suas credenciais e se seu e-mail já foi confirmado.')
     } finally {
       setLoading(false)
     }
@@ -60,16 +52,16 @@ export default function Login() {
         throw new Error('Por favor, confirme que você não é um robô.')
       }
 
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      const response = await resetPasswordAction({
+        email,
         redirectTo: `${window.location.origin}/update-password`,
         captchaToken,
       })
-
-      if (resetError) throw resetError
+      if (response.error) throw new Error(response.error)
 
       setRecoverySuccess(true)
     } catch (err: any) {
-      setError('Não foi possível enviar o e-mail de recuperação. Verifique se o endereço está correto.')
+      setError(err.message || 'Não foi possível enviar o e-mail de recuperação.')
     } finally {
       setLoading(false)
     }

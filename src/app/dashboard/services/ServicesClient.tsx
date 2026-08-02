@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, AlertCircle, PackageOpen, X, Edit, Image as ImageIcon, Check, Tag, Sparkles } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { motion } from 'motion/react';
+import { createProduct, updateProduct, deleteProduct } from '@/app/actions/services';
+import { useTransition } from 'react';
 
 
 
@@ -20,7 +21,7 @@ export default function ServicesClient({
   complementGroups?: any[];
 }) {
   const router = useRouter();
-  const supabase = createClient();
+  const [isPending, startTransition] = useTransition();
   const [products, setProducts] = useState(initialProducts);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -109,33 +110,26 @@ export default function ServicesClient({
       }
 
       if (editingId) {
-        const { data, error: updateError } = await supabase
-          .from('products_services')
-          .update(payload)
-          .eq('id', editingId)
-          .select()
-          .single();
-
-        if (updateError) throw updateError;
-        
-        setProducts(products.map(p => p.id === editingId ? data : p));
+        const response = await updateProduct(editingId, storeId, payload);
+        if (response?.error) throw new Error(response.error);
+        if (response?.data) {
+          setProducts(products.map(p => p.id === editingId ? response.data : p));
+        }
       } else {
-        const { data, error: insertError } = await supabase
-          .from('products_services')
-          .insert(payload)
-          .select()
-          .single();
-
-        if (insertError) throw insertError;
-        
-        setProducts([data, ...products]);
+        const response = await createProduct(storeId, payload);
+        if (response?.error) throw new Error(response.error);
+        if (response?.data) {
+          setProducts([response.data, ...products]);
+        }
       }
 
       resetForm();
-      router.refresh();
+      startTransition(() => {
+        router.refresh();
+      });
     } catch (err: any) {
-      console.error("Supabase error:", err);
-      setError(`Erro ao salvar: ${err.message || err.details || 'Verifique os campos.'}`);
+      console.error("Save error:", err);
+      setError(`Erro ao salvar: ${err.message || 'Verifique os campos.'}`);
     } finally {
       setLoading(false);
     }
@@ -144,20 +138,21 @@ export default function ServicesClient({
   const handleDeleteProduct = async (id: string) => {
     if (!confirm('Deseja realmente excluir este produto?')) return;
     
-    try {
-      const { error: deleteError } = await supabase
-        .from('products_services')
-        .delete()
-        .eq('id', id);
+    const previousProducts = [...products];
+    setProducts(products.filter(p => p.id !== id));
+    if (editingId === id) resetForm();
 
-      if (deleteError) throw deleteError;
+    try {
+      const response = await deleteProduct(id, storeId);
+      if (response?.error) throw new Error(response.error);
       
-      setProducts(products.filter(p => p.id !== id));
-      if (editingId === id) resetForm();
-      router.refresh();
+      startTransition(() => {
+        router.refresh();
+      });
     } catch (err: any) {
       console.error(err);
-      alert('Erro ao excluir produto.');
+      alert(err.message || 'Erro ao excluir produto.');
+      setProducts(previousProducts);
     }
   };
 

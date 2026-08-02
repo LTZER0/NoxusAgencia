@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { MapPin, Plus, Trash2, AlertCircle } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { motion } from 'motion/react';
+import { createDeliveryZone, deleteDeliveryZone } from '@/app/actions/delivery';
+import { useTransition } from 'react';
 
 export default function DeliveryClient({
   storeId,
@@ -14,7 +15,7 @@ export default function DeliveryClient({
   initialZones: any[];
 }) {
   const router = useRouter();
-  const supabase = createClient();
+  const [isPending, startTransition] = useTransition();
   const [zones, setZones] = useState(initialZones);
   const [neighborhood, setNeighborhood] = useState('');
   const [fee, setFee] = useState('');
@@ -30,44 +31,44 @@ export default function DeliveryClient({
     try {
       const parsedFee = parseFloat(fee);
       
-      const { data, error: insertError } = await supabase
-        .from('delivery_zones')
-        .insert({
-          store_id: storeId,
-          neighborhood_name: neighborhood,
-          fee: parsedFee
-        })
-        .select()
-        .single();
+      const response = await createDeliveryZone(storeId, {
+        neighborhood_name: neighborhood,
+        fee: parsedFee
+      });
 
-      if (insertError) throw insertError;
+      if (response?.error) throw new Error(response.error);
       
-      setZones([data, ...zones]);
-      setNeighborhood('');
-      setFee('');
-      router.refresh();
+      if (response?.data) {
+        setZones([response.data, ...zones]);
+        setNeighborhood('');
+        setFee('');
+        startTransition(() => {
+          router.refresh();
+        });
+      }
     } catch (err: any) {
       console.error(err);
-      setError('Erro ao adicionar área de entrega.');
+      setError(err.message || 'Erro ao adicionar área de entrega.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
+    const previousZones = [...zones];
+    setZones(zones.filter(z => z.id !== id));
+    
     try {
-      const { error: deleteError } = await supabase
-        .from('delivery_zones')
-        .delete()
-        .eq('id', id);
-
-      if (deleteError) throw deleteError;
+      const response = await deleteDeliveryZone(id, storeId);
+      if (response?.error) throw new Error(response.error);
       
-      setZones(zones.filter(z => z.id !== id));
-      router.refresh();
+      startTransition(() => {
+        router.refresh();
+      });
     } catch (err: any) {
       console.error(err);
-      alert('Erro ao excluir área de entrega.');
+      alert(err.message || 'Erro ao excluir área de entrega.');
+      setZones(previousZones);
     }
   };
 

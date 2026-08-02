@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2, Star, Menu, X, Monitor, Store, Headphones } from "lucide-react";
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
-import { createClient } from '@/lib/supabase/client';
+import { checkUserSessionData } from '@/app/actions/auth';
 import { isAdminEmail } from '@/lib/admins';
 
 const reviews = [
@@ -59,21 +59,13 @@ export default function Home() {
   
   useEffect(() => {
     async function checkTrial() {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const { user, trialUsed } = await checkUserSessionData();
       if (user) {
         setIsLoggedIn(true);
-        if (isAdminEmail(user.email)) {
+        if (user.email && isAdminEmail(user.email)) {
           setIsAdmin(true);
         }
-
-        const { data: store } = await supabase
-          .from('stores')
-          .select('trial_used')
-          .eq('owner_id', user.id)
-          .single();
-        
-        if (store && store.trial_used) {
+        if (trialUsed) {
           setTrialUsed(true);
         }
       }

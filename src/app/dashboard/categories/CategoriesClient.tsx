@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Tag, Plus, Trash2, AlertCircle } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { motion } from 'motion/react';
+import { createCategory, deleteCategory } from '@/app/actions/categories';
 
 export default function CategoriesClient({
   storeId,
@@ -14,7 +14,7 @@ export default function CategoriesClient({
   initialCategories: any[];
 }) {
   const router = useRouter();
-  const supabase = createClient();
+  const [isPending, startTransition] = useTransition();
   const [categories, setCategories] = useState(initialCategories);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,23 +27,23 @@ export default function CategoriesClient({
     setError(null);
 
     try {
-      const { data, error: insertError } = await supabase
-        .from('categories')
-        .insert({
-          store_id: storeId,
-          name: name.trim()
-        })
-        .select()
-        .single();
+      const response = await createCategory(storeId, name.trim());
 
-      if (insertError) throw insertError;
+      if (response?.error) {
+        throw new Error(response.error);
+      }
       
-      setCategories([...categories, data]);
-      setName('');
-      router.refresh();
+      if (response?.data) {
+        setCategories([...categories, response.data]);
+        setName('');
+        // Server action revalidates the path, but we can wrap a refresh if needed
+        startTransition(() => {
+          router.refresh();
+        });
+      }
     } catch (err: any) {
       console.error(err);
-      setError('Erro ao adicionar categoria. Tente novamente.');
+      setError(err.message || 'Erro ao adicionar categoria. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -52,19 +52,25 @@ export default function CategoriesClient({
   const handleDelete = async (id: string) => {
     if (!confirm('Deseja realmente excluir esta categoria? Os produtos vinculados a ela ficarão sem categoria.')) return;
     
+    // Exclusão otimista para UI instantânea
+    const previousCategories = [...categories];
+    setCategories(categories.filter(c => c.id !== id));
+    
     try {
-      const { error: deleteError } = await supabase
-        .from('categories')
-        .delete()
-        .eq('id', id);
+      const response = await deleteCategory(id, storeId);
 
-      if (deleteError) throw deleteError;
+      if (response?.error) {
+        throw new Error(response.error);
+      }
       
-      setCategories(categories.filter(c => c.id !== id));
-      router.refresh();
+      startTransition(() => {
+        router.refresh();
+      });
     } catch (err: any) {
       console.error(err);
-      alert('Erro ao excluir categoria.');
+      alert(err.message || 'Erro ao excluir categoria.');
+      // Reverter alteração otimista em caso de erro
+      setCategories(previousCategories);
     }
   };
 
@@ -112,7 +118,7 @@ export default function CategoriesClient({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             type="submit"
-            disabled={loading || !name.trim()}
+            disabled={loading || isPending || !name.trim()}
             className="w-full sm:w-auto px-6 py-2.5 bg-purple-800 text-white font-medium rounded-lg hover:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
           >
             <Plus className="w-5 h-5" />

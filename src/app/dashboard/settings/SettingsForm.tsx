@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Store, Link as LinkIcon, Phone, Save, CheckCircle, AlertCircle, MapPin, Building, Hash, Tag, Image as ImageIcon, Layout, Power, Info, CreditCard, History, Settings2, Search, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { createClient } from '@/lib/supabase/client';
+import { updatePasswordAction } from '@/app/actions/auth';
 
 export default function SettingsForm({ 
   initialStore, 
@@ -16,7 +16,6 @@ export default function SettingsForm({
   archivedOrders?: any[]
 }) {
   const router = useRouter();
-  const supabase = createClient();
   
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -127,11 +126,8 @@ export default function SettingsForm({
     }
 
     try {
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: newPassword
-      });
-
-      if (updateError) throw updateError;
+      const response = await updatePasswordAction(newPassword);
+      if (response.error) throw new Error(response.error);
 
       setSecuritySuccess(true);
       setNewPassword('');

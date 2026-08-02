@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { signUpAction } from '@/app/actions/auth'
 import { Store, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Turnstile } from '@marsidev/react-turnstile'
 import { motion } from 'motion/react'
@@ -17,8 +17,6 @@ export default function Register() {
   const [success, setSuccess] = useState(false)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
 
-  const supabase = createClient()
-
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -29,41 +27,14 @@ export default function Register() {
         throw new Error('Por favor, confirme que você não é um robô.')
       }
 
-      const { data, error: authError } = await supabase.auth.signUp({
+      const response = await signUpAction({
         email,
         password,
-        options: {
-          captchaToken,
-          data: {
-            full_name: fullName,
-            store_name: storeName
-          }
-        }
+        fullName,
+        storeName,
+        captchaToken,
       })
-
-      if (authError) throw authError
-
-      if (data.user) {
-        const baseSlug = storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
-        const slug = `${baseSlug}-${Math.floor(Math.random() * 10000)}`
-
-        // 14 days from now
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 14);
-
-        const { error: storeError } = await supabase.from('stores').insert({
-          owner_id: data.user.id,
-          name: storeName,
-          slug: slug,
-          plan: 'plus',
-          plan_expires_at: expiresAt.toISOString(),
-          trial_used: true
-        })
-
-        if (storeError) {
-          console.error("Erro ao criar a loja:", storeError)
-        }
-      }
+      if (response.error) throw new Error(response.error)
 
       setSuccess(true)
     } catch (err: any) {
