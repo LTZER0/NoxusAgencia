@@ -1,6 +1,29 @@
+import { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import StoreFrontClient from "./StoreFrontClient";
 import { Store } from "lucide-react";
+
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
+  const supabase = await createClient();
+
+  const { data: store } = await supabase
+    .from("stores")
+    .select("name, logo_url")
+    .eq("slug", params.slug)
+    .single();
+
+  if (!store) {
+    return { title: "Loja não encontrada" };
+  }
+
+  return {
+    title: store.name,
+    icons: {
+      icon: store.logo_url || "/favicon.ico",
+    }
+  };
+}
 
 export default async function StoreFrontPage(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
