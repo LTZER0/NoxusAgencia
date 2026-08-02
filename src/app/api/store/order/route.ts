@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     const orderType = sanitizeString(body.orderType, 20);
     const paymentMethod = sanitizeString(body.paymentMethod, 50);
     const deliveryAddress = sanitizeString(body.deliveryAddress, 500);
-    const clientDeliveryFee = Math.max(0, Number(body.deliveryFee) || 0);
+    const deliveryNeighborhood = sanitizeString(body.deliveryNeighborhood, 100);
     
     const cartItems = Array.isArray(body.cartItems) ? body.cartItems.slice(0, 50) : []; // Max 50 itens
 
@@ -53,8 +53,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `O estabelecimento ${store.name || ''} está fechado no momento e não está aceitando novos pedidos.` }, { status: 403 });
     }
 
-    // 🔒 SEGURANÇA [VULN-11]: Recalculando totalAmount no backend via Zero-Trust
+    // 🔒 SEGURANÇA [VULN-11, BLUE TEAM]: Recalculando totalAmount E Taxa de Entrega no backend via Zero-Trust
     let totalAmount = 0;
+    let serverDeliveryFee = 0;
+
+    if (orderType === 'delivery') {
+      if (!deliveryNeighborhood) {
+        return NextResponse.json({ error: 'Bairro de entrega não informado.' }, { status: 400 });
+      }
+      
+      const { data: zone, error: zoneError } = await supabase
+        .from('delivery_zones')
+        .select('fee')
+        .eq('store_id', storeId)
+        .eq('neighborhood_name', deliveryNeighborhood)
+        .single();
+        
+      if (zoneError || !zone) {
+        return NextResponse.json({ error: 'Bairro de entrega não atendido ou inválido.' }, { status: 400 });
+      }
+      
+      serverDeliveryFee = Number(zone.fee) || 0;
+    }
+
     try {
       const productIds = Array.from(new Set(cartItems.map((item: any) => item.product?.id).filter(Boolean)));
       
@@ -111,8 +132,8 @@ export async function POST(req: NextRequest) {
         totalAmount += itemActualUnitPrice * itemQuantity;
       }
       
-      // Adiciona a taxa de entrega ao total calculado
-      totalAmount += clientDeliveryFee;
+      // Adiciona a taxa de entrega validada ao total calculado
+      totalAmount += serverDeliveryFee;
       
     } catch (calcError) {
       console.error('Calculation error:', calcError);

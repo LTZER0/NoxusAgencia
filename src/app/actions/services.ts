@@ -21,9 +21,25 @@ export async function createProduct(storeId: string, payload: any) {
     if (storeError || !store) return { error: 'Loja não encontrada ou acesso negado.' }
 
     const admin = getSupabaseAdmin()
+    
+    // 🔒 SEGURANÇA [BLUE TEAM]: Sanitização anti-Mass Assignment
+    const sanitizedData = {
+      name: payload.name,
+      description: payload.description,
+      price: payload.price,
+      discount_price: payload.discount_price,
+      is_promotional: payload.is_promotional,
+      image_url: payload.image_url,
+      category: payload.category,
+      category_id: payload.category_id,
+      complement_group_ids: payload.complement_group_ids,
+      is_available: payload.is_available,
+      store_id: storeId // Força o storeId validado contra spoofing
+    }
+
     const { data, error } = await admin
       .from('products_services')
-      .insert({ ...payload, store_id: storeId })
+      .insert(sanitizedData)
       .select()
       .single()
 
@@ -68,9 +84,24 @@ export async function updateProduct(productId: string, storeId: string, payload:
       
     if (checkError || !product) return { error: 'Produto não encontrado na sua loja.' }
 
+    // 🔒 SEGURANÇA [BLUE TEAM]: Sanitização anti-Mass Assignment
+    const sanitizedData = {
+      name: payload.name,
+      description: payload.description,
+      price: payload.price,
+      discount_price: payload.discount_price,
+      is_promotional: payload.is_promotional,
+      image_url: payload.image_url,
+      category: payload.category,
+      category_id: payload.category_id,
+      complement_group_ids: payload.complement_group_ids,
+      is_available: payload.is_available,
+      // Não permitimos que o store_id e id sejam atualizados
+    }
+
     const { data, error } = await admin
       .from('products_services')
-      .update(payload)
+      .update(sanitizedData)
       .eq('id', productId)
       .select()
       .single()

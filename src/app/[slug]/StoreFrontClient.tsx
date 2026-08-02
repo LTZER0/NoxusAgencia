@@ -489,6 +489,7 @@ export default function StoreFrontClient({
           cartItems: cart,
           totalAmount: finalTotalValue,
           deliveryFee: deliveryFee,
+          deliveryNeighborhood: orderType === 'delivery' ? address.neighborhood : null,
           deliveryAddress: fullAddress
         })
       });

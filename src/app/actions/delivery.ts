@@ -19,9 +19,17 @@ export async function createDeliveryZone(storeId: string, payload: any) {
     if (storeError || !store) return { error: 'Loja não encontrada ou acesso negado.' }
 
     const admin = getSupabaseAdmin()
+    
+    // 🔒 SEGURANÇA [BLUE TEAM]: Sanitização anti-Mass Assignment
+    const sanitizedData = {
+      neighborhood_name: payload.neighborhood_name,
+      fee: payload.fee,
+      store_id: storeId
+    }
+
     const { data, error } = await admin
       .from('delivery_zones')
-      .insert({ ...payload, store_id: storeId })
+      .insert(sanitizedData)
       .select()
       .single()
 
