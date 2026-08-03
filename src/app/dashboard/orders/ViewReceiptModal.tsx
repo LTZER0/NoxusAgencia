@@ -57,7 +57,21 @@ export default function ViewReceiptModal({ order, storeName }: { order: OrderDat
     if (!order.client_whatsapp) return;
     const numbers = order.client_whatsapp.replace(/\D/g, '');
     const waNumber = numbers.length <= 11 ? `55${numbers}` : numbers;
-    const message = encodeURIComponent(`Olá ${order.client_name || ''}, aqui é da equipe do estabelecimento ${storeName}. Entramos em contato referente ao seu pedido no valor de ${formatCurrency(totalAmount)}... `);
+    
+    let baseMessage = `Olá ${order.client_name || ''}, aqui é da equipe do estabelecimento ${storeName}. `;
+    
+    // Customize message based on status
+    if (order.status === 'pending') {
+      baseMessage += `Entramos em contato referente ao seu pedido de ${formatCurrency(totalAmount)}. `;
+    } else if (order.status === 'confirmed') {
+      baseMessage += `Passando para avisar que o seu pedido de ${formatCurrency(totalAmount)} já está sendo preparado! 👨‍🍳`;
+    } else if (order.status === 'completed') {
+      baseMessage += `Seu pedido de ${formatCurrency(totalAmount)} foi finalizado e já está pronto/saiu para entrega! 🛵`;
+    } else {
+      baseMessage += `Entramos em contato referente ao seu pedido... `;
+    }
+
+    const message = encodeURIComponent(baseMessage);
     window.open(`https://wa.me/${waNumber}?text=${message}`, '_blank');
   };
 
