@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const { 
-      userId, name, slug, phone, street, block, lot, neighborhood, 
+      userId, name, slug, phone, description, street, block, lot, neighborhood, 
       store_category, is_open, opening_hours, logo_url, cover_url, isUpdate,
       open_days, open_time, close_time,
       accepts_pix, accepts_card, accepts_cash, pix_key, pix_receipt_phone
@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
       name: sanitizedName,
       slug: sanitizedSlug,
       phone: sanitizeString(phone, 20),
+      description: sanitizeString(description, 1000),
       street: sanitizeString(street, 150),
       block: sanitizeString(block, 20),
       lot: sanitizeString(lot, 20),
