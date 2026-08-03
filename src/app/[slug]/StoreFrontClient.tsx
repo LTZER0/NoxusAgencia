@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, CreditCard, User, Phone, CheckCircle2, Sparkles, Utensils, Home, Percent, ChevronDown, ChevronUp, AlertCircle, Edit, Trash2, Wallet, MapPin, Smartphone, DollarSign, PlusCircle } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, CreditCard, User, Phone, CheckCircle2, Sparkles, Utensils, Home, Percent, ChevronDown, ChevronUp, AlertCircle, Edit, Trash2, Wallet, MapPin, Smartphone, DollarSign, PlusCircle, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 
@@ -842,8 +842,8 @@ export default function StoreFrontClient({
                 onClick={() => router.push(`/${store.slug}/rastreio`)}
                 className={`inline-flex items-center justify-center gap-2 text-sm font-bold ${theme.primaryBg} text-white hover:opacity-90 px-4 py-2.5 rounded-xl shadow-md transition-all self-center sm:self-auto shrink-0`}
               >
-                <User className="w-4 h-4" />
-                <span>Meus Pedidos</span>
+                <Search className="w-4 h-4" />
+                <span>Pesquisar Pedido</span>
               </button>
             </div>
           </div>
