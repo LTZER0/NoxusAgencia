@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { ShoppingCart, Plus, Minus, X, ArrowRight, Store as StoreIcon, Check, CreditCard, User, Phone, CheckCircle2, Sparkles, Utensils, Home, Percent, ChevronDown, ChevronUp, AlertCircle, Edit, Trash2, Wallet, MapPin, Smartphone, DollarSign, PlusCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
@@ -221,7 +221,7 @@ export default function StoreFrontClient({
     setClientWhatsapp(formatted);
   };
 
-  const getThemeClasses = () => {
+  const theme = useMemo(() => {
     switch (store.store_category) {
       case 'acaiteria':
         return {
@@ -305,9 +305,7 @@ export default function StoreFrontClient({
           inputBg: 'bg-gray-50 text-gray-900 border-gray-200',
         };
     }
-  };
-
-  const theme = getThemeClasses();
+  }, [store.store_category]);
 
   const hasOffers = useMemo(() => {
     return products.some(p => p.is_promotional && p.discount_price !== null);
@@ -334,7 +332,7 @@ export default function StoreFrontClient({
     return names;
   }, [products, categories, hasOffers]);
 
-  const handleProductClick = (product: Product) => {
+  const handleProductClick = useCallback((product: Product) => {
     if (!isStoreOpen) {
       setToastMessage(`O estabelecimento ${store.name} está fechado no momento e não está aceitando pedidos.`);
       return;
@@ -352,7 +350,7 @@ export default function StoreFrontClient({
       });
       setExpandedGroups(initialExpanded);
     }
-  };
+  }, [isStoreOpen, store.name]);
 
   const productGroups = useMemo(() => {
     if (!selectedProduct || !selectedProduct.complement_group_ids) return [];
@@ -473,8 +471,8 @@ export default function StoreFrontClient({
     setSelectedProduct(item.product);
   };
 
-  const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
-  const cartTotalValue = cart.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
+  const totalItems = useMemo(() => cart.reduce((acc, item) => acc + item.quantity, 0), [cart]);
+  const cartTotalValue = useMemo(() => cart.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0), [cart]);
   
   const deliveryFee = useMemo(() => {
     if (orderType !== 'delivery') return 0;
@@ -485,7 +483,7 @@ export default function StoreFrontClient({
     return 0;
   }, [orderType, address.neighborhood, deliveryZones]);
 
-  const finalTotalValue = cartTotalValue + deliveryFee;
+  const finalTotalValue = useMemo(() => cartTotalValue + deliveryFee, [cartTotalValue, deliveryFee]);
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -895,94 +893,96 @@ export default function StoreFrontClient({
       </div>
 
       {/* 4. Main Product Grid */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
-        {products.length === 0 ? (
-          <div className={`${theme.secondaryBg} rounded-2xl p-12 text-center border ${theme.border} my-8`}>
-            <Utensils className="w-12 h-12 mx-auto mb-3 opacity-20" />
-            <p className={`font-medium ${theme.mutedText}`}>Nenhum produto disponível no momento.</p>
-          </div>
-        ) : (
-          <div className="space-y-10">
-            {categoryTabs
-              .filter(category => selectedCategory === 'Todos' || selectedCategory === category)
-              .map(category => {
-                const categoryProducts = category === 'Ofertas'
-                  ? products.filter(p => p.is_promotional && p.discount_price !== null && p.is_available !== false)
-                  : products.filter(p => (p.category || 'Outros') === category && p.is_available !== false);
+      {useMemo(() => (
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+          {products.length === 0 ? (
+            <div className={`${theme.secondaryBg} rounded-2xl p-12 text-center border ${theme.border} my-8`}>
+              <Utensils className="w-12 h-12 mx-auto mb-3 opacity-20" />
+              <p className={`font-medium ${theme.mutedText}`}>Nenhum produto disponível no momento.</p>
+            </div>
+          ) : (
+            <div className="space-y-10">
+              {categoryTabs
+                .filter(category => selectedCategory === 'Todos' || selectedCategory === category)
+                .map(category => {
+                  const categoryProducts = category === 'Ofertas'
+                    ? products.filter(p => p.is_promotional && p.discount_price !== null && p.is_available !== false)
+                    : products.filter(p => (p.category || 'Outros') === category && p.is_available !== false);
 
-                if (categoryProducts.length === 0) return null;
-                return (
-                  <section key={category} className="space-y-4">
-                    <div className="flex items-center gap-2 border-b border-gray-200/15 pb-2">
-                      <h3 className="text-xl font-extrabold tracking-tight">{category}</h3>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${theme.secondaryBg} ${theme.mutedText} border ${theme.border}`}>
-                        {categoryProducts.length}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {categoryProducts.map(product => (
-                        <div 
-                          key={product.id}
-                          onClick={() => handleProductClick(product)}
-                          className={`${theme.secondaryBg} border ${theme.border} rounded-2xl p-4 flex justify-between gap-4 cursor-pointer hover:shadow-lg hover:border-gray-400/30 transition-all group relative overflow-hidden`}
-                        >
-                          <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                            <div>
-                              <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                                <h4 className={`font-bold text-base sm:text-lg ${theme.hoverText} transition-colors leading-snug`} style={{ fontFamily: "var(--font-poppins), sans-serif" }}>
-                                  {product.name}
-                                </h4>
-                                {(product.is_promotional && product.discount_price !== null) && (
-                                  <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-gradient-to-r from-red-500 to-orange-500 text-white flex items-center gap-0.5 uppercase tracking-wider shadow-sm">
-                                    <Percent className="w-2.5 h-2.5" /> Oferta
-                                  </span>
-                                )}
+                  if (categoryProducts.length === 0) return null;
+                  return (
+                    <section key={category} className="space-y-4">
+                      <div className="flex items-center gap-2 border-b border-gray-200/15 pb-2">
+                        <h3 className="text-xl font-extrabold tracking-tight">{category}</h3>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${theme.secondaryBg} ${theme.mutedText} border ${theme.border}`}>
+                          {categoryProducts.length}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {categoryProducts.map(product => (
+                          <div 
+                            key={product.id}
+                            onClick={() => handleProductClick(product)}
+                            className={`${theme.secondaryBg} border ${theme.border} rounded-2xl p-4 flex justify-between gap-4 cursor-pointer hover:shadow-lg hover:border-gray-400/30 transition-all group relative overflow-hidden`}
+                          >
+                            <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                              <div>
+                                <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                                  <h4 className={`font-bold text-base sm:text-lg ${theme.hoverText} transition-colors leading-snug`} style={{ fontFamily: "var(--font-poppins), sans-serif" }}>
+                                    {product.name}
+                                  </h4>
+                                  {(product.is_promotional && product.discount_price !== null) && (
+                                    <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-gradient-to-r from-red-500 to-orange-500 text-white flex items-center gap-0.5 uppercase tracking-wider shadow-sm">
+                                      <Percent className="w-2.5 h-2.5" /> Oferta
+                                    </span>
+                                  )}
+                                </div>
+                                <p className={`text-xs sm:text-sm ${theme.mutedText} line-clamp-2 mb-3 leading-relaxed`} style={{ fontFamily: "var(--font-poppins), sans-serif" }}>
+                                  {product.description || 'Sem descrição.'}
+                                </p>
                               </div>
-                              <p className={`text-xs sm:text-sm ${theme.mutedText} line-clamp-2 mb-3 leading-relaxed`} style={{ fontFamily: "var(--font-poppins), sans-serif" }}>
-                                {product.description || 'Sem descrição.'}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2 mt-2 flex-wrap">
-                              {(product.is_promotional && product.discount_price !== null) ? (
-                                <div className="flex flex-col items-start">
-                                  <span className="line-through text-gray-400 text-xs font-medium">
+                              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                {(product.is_promotional && product.discount_price !== null) ? (
+                                  <div className="flex flex-col items-start">
+                                    <span className="line-through text-gray-400 text-xs font-medium">
+                                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(product.price))}
+                                    </span>
+                                    <span className="font-extrabold text-base sm:text-lg text-black">
+                                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(product.discount_price))}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="font-extrabold text-base sm:text-lg text-black">
                                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(product.price))}
                                   </span>
-                                  <span className="font-extrabold text-base sm:text-lg text-black">
-                                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(product.discount_price))}
-                                  </span>
-                                </div>
-                              ) : (
-                                <span className="font-extrabold text-base sm:text-lg text-black">
-                                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(product.price))}
-                                </span>
-                              )}
+                                )}
 
+                              </div>
+                            </div>
+                            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden shrink-0 relative group-hover:scale-[1.02] transition-transform">
+                              {product.image_url ? (
+                                <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full" style={{
+                                  backgroundColor: '#f5f4f2',
+                                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%23e0ddd8' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2'/%3E%3Cpath d='M7 2v20'/%3E%3Cpath d='M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7'/%3E%3C/svg%3E")`,
+                                  backgroundSize: '28px 28px',
+                                }} />
+                              )}
+                              <div className={`absolute bottom-1.5 right-1.5 ${theme.primaryBg} text-white p-1.5 rounded-lg shadow-md flex items-center justify-center`}>
+                                <Plus className="w-4 h-4" />
+                              </div>
                             </div>
                           </div>
-                          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden shrink-0 relative group-hover:scale-[1.02] transition-transform">
-                            {product.image_url ? (
-                              <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full" style={{
-                                backgroundColor: '#f5f4f2',
-                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%23e0ddd8' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2'/%3E%3Cpath d='M7 2v20'/%3E%3Cpath d='M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7'/%3E%3C/svg%3E")`,
-                                backgroundSize: '28px 28px',
-                              }} />
-                            )}
-                            <div className={`absolute bottom-1.5 right-1.5 ${theme.primaryBg} text-white p-1.5 rounded-lg shadow-md flex items-center justify-center`}>
-                              <Plus className="w-4 h-4" />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                );
-              })}
-          </div>
-        )}
-      </main>
+                        ))}
+                      </div>
+                    </section>
+                  );
+                })}
+            </div>
+          )}
+        </main>
+      ), [products, categoryTabs, selectedCategory, theme, handleProductClick])}
 
       {/* 5. Mobile Bottom Navigation Bar */}
       <div className={`fixed bottom-0 left-0 right-0 z-40 ${theme.secondaryBg} border-t ${theme.border} px-6 py-2.5 flex items-center justify-around sm:hidden shadow-lg backdrop-blur-lg bg-opacity-95`}>
