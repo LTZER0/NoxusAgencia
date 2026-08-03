@@ -57,7 +57,7 @@ export default function ViewReceiptModal({ order, storeName }: { order: OrderDat
     if (!order.client_whatsapp) return;
     const numbers = order.client_whatsapp.replace(/\D/g, '');
     const waNumber = numbers.length <= 11 ? `55${numbers}` : numbers;
-    const message = encodeURIComponent(`Olá ${order.client_name || ''}, aqui é da equipe do estabelecimento ${storeName}. Entramos em contato referente ao seu pedido #${String(order.id).substring(0, 8)}... `);
+    const message = encodeURIComponent(`Olá ${order.client_name || ''}, aqui é da equipe do estabelecimento ${storeName}. Entramos em contato referente ao seu pedido no valor de ${formatCurrency(totalAmount)}... `);
     window.open(`https://wa.me/${waNumber}?text=${message}`, '_blank');
   };
 
