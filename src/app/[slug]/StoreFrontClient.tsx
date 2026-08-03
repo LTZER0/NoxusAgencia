@@ -1482,7 +1482,7 @@ export default function StoreFrontClient({
                       <h3 className="font-bold border-b border-gray-200/20 pb-2">Pagamento</h3>
                       <div className="grid grid-cols-1 gap-2">
                         {[
-                          { id: 'pix', label: 'PIX (Automático)', active: store.accepts_pix !== false },
+                          { id: 'pix', label: 'PIX', active: store.accepts_pix !== false },
                           { id: 'cartao', label: 'Cartão (pagar na entrega)', active: store.accepts_card !== false },
                           { id: 'dinheiro', label: 'Dinheiro', active: store.accepts_cash !== false }
                         ].filter(t => t.active).map(type => (
