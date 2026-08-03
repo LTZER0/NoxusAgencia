@@ -1305,7 +1305,7 @@ export default function StoreFrontClient({
                              <div className="border-t border-gray-200 pt-4 mt-2">
                                <p className="text-sm text-gray-600 mb-3 font-medium">Após realizar o pagamento, envie o comprovante pelo WhatsApp:</p>
                                <a 
-                                 href={`https://wa.me/55${(store.pix_receipt_phone || store.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Acabei de fazer um pedido na ${store.name}. Paguei via PIX e este é o meu comprovante:`)}`}
+                                 href={`https://wa.me/55${(store.pix_receipt_phone || store.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Sou ${clientName}, acabei de fazer um pedido na ${store.name} no valor de ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(finalTotalValue)}. Paguei via PIX e este é o meu comprovante:`)}`}
                                  target="_blank"
                                  rel="noopener noreferrer"
                                  className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm"
