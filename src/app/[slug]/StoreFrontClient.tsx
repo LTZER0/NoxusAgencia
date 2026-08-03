@@ -88,6 +88,10 @@ export default function StoreFrontClient({
   const [isCheckoutReady, setIsCheckoutReady] = useState(false);
   const [isStoreOpen, setIsStoreOpen] = useState(store.is_open !== false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  
+  // Pix Automated State
+  const [isGeneratingPix, setIsGeneratingPix] = useState(false);
+  const [generatedPixData, setGeneratedPixData] = useState<{qr_code: string, qr_code_base64: string, payment_id: string} | null>(null);
 
   useEffect(() => {
     const checkStatus = () => {
@@ -538,10 +542,33 @@ export default function StoreFrontClient({
 
       const data = await res.json();
       if (res.ok) {
+        if (paymentMethod === 'pix' && store.mp_access_token) {
+          setIsGeneratingPix(true);
+          try {
+            const pixRes = await fetch('/api/store/pix/generate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                storeId: store.id,
+                amount: finalTotalValue,
+                customerName: clientName,
+                customerEmail: 'cliente@noxus.com'
+              })
+            });
+            if (pixRes.ok) {
+               const pixData = await pixRes.json();
+               setGeneratedPixData(pixData);
+            }
+          } catch (err) {
+             console.error('Pix generation error:', err);
+          }
+          setIsGeneratingPix(false);
+        }
+
         setCheckoutStep('success');
         setCart([]);
         // Optional: Reset payment method so next order doesn't default to PIX if they don't want it
-        setPaymentMethod('');
+        // setPaymentMethod('');
         setChangeFor('');
       } else {
         if (data.error) {
@@ -1222,35 +1249,72 @@ export default function StoreFrontClient({
                         <p className="text-xl font-bold text-gray-900 mb-2">
                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(finalTotalValue)}
                         </p>
-                        <p className="text-sm text-gray-600 mb-4">Copie a chave PIX abaixo para pagar.</p>
-                        <div className="flex flex-col gap-2">
-                           <div className="bg-gray-200 p-3 rounded-lg text-sm font-mono break-all text-gray-800 text-center font-semibold">
-                             {store.pix_key || 'Chave não configurada'}
-                           </div>
-                           <button 
-                             onClick={(e) => {
-                               navigator.clipboard.writeText(store.pix_key || '');
-                               const target = e.currentTarget;
-                               target.innerText = "Chave Copiada!";
-                               setTimeout(() => { target.innerText = "Copiar Chave PIX" }, 2000);
-                             }}
-                             className={`w-full ${theme.primaryBg} ${theme.primaryHover} text-white font-semibold py-3 rounded-lg transition-colors mb-4`}
-                           >
-                             Copiar Chave PIX
-                           </button>
-
-                           <div className="border-t border-gray-200 pt-4 mt-2">
-                             <p className="text-sm text-gray-600 mb-3 font-medium">Após realizar o pagamento, envie o comprovante pelo WhatsApp:</p>
-                             <a 
-                               href={`https://wa.me/55${(store.pix_receipt_phone || store.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Acabei de fazer um pedido na ${store.name}. Paguei via PIX e este é o meu comprovante:`)}`}
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm"
+                        
+                        {store.mp_access_token ? (
+                          // Pix Integrado (Mercado Pago)
+                          isGeneratingPix ? (
+                             <div className="py-8 flex flex-col items-center justify-center">
+                                <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                                <p className="text-sm text-gray-600">Gerando seu Pix...</p>
+                             </div>
+                          ) : generatedPixData ? (
+                             <div className="flex flex-col gap-4 items-center">
+                                <p className="text-sm text-gray-600 text-center">Escaneie o QR Code ou copie o código abaixo para pagar.</p>
+                                <img src={`data:image/jpeg;base64,${generatedPixData.qr_code_base64}`} alt="QR Code Pix" className="w-48 h-48 mx-auto rounded-lg shadow-sm" />
+                                <div className="bg-gray-200 p-3 rounded-lg text-xs font-mono break-all text-gray-800 text-center font-semibold w-full">
+                                  {generatedPixData.qr_code}
+                                </div>
+                                <button 
+                                  onClick={(e) => {
+                                    navigator.clipboard.writeText(generatedPixData.qr_code);
+                                    const target = e.currentTarget;
+                                    target.innerText = "Código Copiado!";
+                                    setTimeout(() => { target.innerText = "Copiar Pix Copia e Cola" }, 2000);
+                                  }}
+                                  className={`w-full ${theme.primaryBg} ${theme.primaryHover} text-white font-semibold py-3 rounded-lg transition-colors`}
+                                >
+                                  Copiar Pix Copia e Cola
+                                </button>
+                                <p className="text-sm text-green-600 font-medium animate-pulse mt-2 flex items-center gap-2">
+                                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                  Aguardando confirmação...
+                                </p>
+                             </div>
+                          ) : (
+                             <p className="text-red-500 text-sm py-4">Ocorreu um erro ao gerar o Pix automático. Por favor, pague no balcão ou chame no WhatsApp.</p>
+                          )
+                        ) : (
+                          // Pix Manual (Chave Estática)
+                          <div className="flex flex-col gap-2">
+                             <p className="text-sm text-gray-600 mb-2">Copie a chave PIX abaixo para pagar.</p>
+                             <div className="bg-gray-200 p-3 rounded-lg text-sm font-mono break-all text-gray-800 text-center font-semibold">
+                               {store.pix_key || 'Chave não configurada'}
+                             </div>
+                             <button 
+                               onClick={(e) => {
+                                 navigator.clipboard.writeText(store.pix_key || '');
+                                 const target = e.currentTarget;
+                                 target.innerText = "Chave Copiada!";
+                                 setTimeout(() => { target.innerText = "Copiar Chave PIX" }, 2000);
+                               }}
+                               className={`w-full ${theme.primaryBg} ${theme.primaryHover} text-white font-semibold py-3 rounded-lg transition-colors mb-4`}
                              >
-                               <Phone className="w-5 h-5" /> Enviar Comprovante no WhatsApp
-                             </a>
-                           </div>
-                        </div>
+                               Copiar Chave PIX
+                             </button>
+  
+                             <div className="border-t border-gray-200 pt-4 mt-2">
+                               <p className="text-sm text-gray-600 mb-3 font-medium">Após realizar o pagamento, envie o comprovante pelo WhatsApp:</p>
+                               <a 
+                                 href={`https://wa.me/55${(store.pix_receipt_phone || store.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Acabei de fazer um pedido na ${store.name}. Paguei via PIX e este é o meu comprovante:`)}`}
+                                 target="_blank"
+                                 rel="noopener noreferrer"
+                                 className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm"
+                               >
+                                 <Phone className="w-5 h-5" /> Enviar Comprovante
+                               </a>
+                             </div>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <p className="opacity-70 max-w-[250px]">O restaurante já recebeu seu pedido. Aguarde o contato ou acompanhe o status.</p>

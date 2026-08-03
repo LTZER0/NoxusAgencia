@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       userId, name, slug, phone, description, street, block, lot, neighborhood, 
       store_category, is_open, opening_hours, logo_url, cover_url, isUpdate,
       open_days, open_time, close_time,
-      accepts_pix, accepts_card, accepts_cash, pix_key, pix_receipt_phone
+      accepts_pix, accepts_card, accepts_cash, pix_key, pix_receipt_phone, mp_access_token
     } = body;
 
     // 🔒 SEGURANÇA [VULN-3, VULN-4]: Verifica explicitamente o userId contra a sessão
@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
       accepts_cash: Boolean(accepts_cash),
       pix_key: sanitizeString(pix_key, 255),
       pix_receipt_phone: sanitizeString(pix_receipt_phone, 20),
+      mp_access_token: sanitizeString(mp_access_token, 1000)
     };
 
     if (store_category !== undefined) {

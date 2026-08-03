@@ -52,6 +52,8 @@ export default function SettingsForm({
   const [acceptsCash, setAcceptsCash] = useState<boolean>(initialStore?.accepts_cash ?? true);
   const [pixKey, setPixKey] = useState(initialStore?.pix_key || '');
   const [pixReceiptPhone, setPixReceiptPhone] = useState(initialStore?.pix_receipt_phone || '');
+  const [mpAccessToken, setMpAccessToken] = useState(initialStore?.mp_access_token || '');
+  const [pixMode, setPixMode] = useState<'manual' | 'automated'>(initialStore?.mp_access_token ? 'automated' : 'manual');
 
   const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
@@ -94,8 +96,9 @@ export default function SettingsForm({
           accepts_pix: acceptsPix,
           accepts_card: acceptsCard,
           accepts_cash: acceptsCash,
-          pix_key: pixKey,
+          pix_key: pixMode === 'manual' ? pixKey : '',
           pix_receipt_phone: pixReceiptPhone,
+          mp_access_token: pixMode === 'automated' ? mpAccessToken : null,
           isUpdate: !!initialStore
         }),
       });
@@ -418,20 +421,66 @@ export default function SettingsForm({
                   </div>
 
                   {acceptsPix && (
-                    <div className="space-y-4 pl-4 border-l-2 border-purple-100 sm:max-w-md">
+                    <div className="space-y-6 pl-4 border-l-2 border-purple-100 sm:max-w-md">
                       <div>
-                        <label htmlFor="pixKey" className="block text-sm font-medium leading-6 text-gray-900">Chave Pix</label>
-                        <div className="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-purple-800">
-                          <input type="text" name="pixKey" id="pixKey" value={pixKey} onChange={(e) => setPixKey(e.target.value)} className="block flex-1 border-0 bg-transparent py-1.5 pl-3 text-gray-900 focus:ring-0 sm:text-sm sm:leading-6" placeholder="email, cpf ou telefone" />
+                        <label className="block text-sm font-medium leading-6 text-gray-900 mb-3">Modo de Operação do Pix</label>
+                        <div className="flex gap-4">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input 
+                              type="radio" 
+                              name="pixMode" 
+                              value="manual" 
+                              checked={pixMode === 'manual'} 
+                              onChange={() => setPixMode('manual')}
+                              className="text-purple-600 focus:ring-purple-600"
+                            />
+                            <span className="text-sm text-gray-700">Manual (Chave Fixa)</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input 
+                              type="radio" 
+                              name="pixMode" 
+                              value="automated" 
+                              checked={pixMode === 'automated'} 
+                              onChange={() => setPixMode('automated')}
+                              className="text-purple-600 focus:ring-purple-600"
+                            />
+                            <span className="text-sm text-gray-700">Automático (Mercado Pago)</span>
+                          </label>
                         </div>
                       </div>
-                      <div>
-                        <label htmlFor="pixReceiptPhone" className="block text-sm font-medium leading-6 text-gray-900">WhatsApp para envio do comprovante</label>
-                        <div className="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-purple-800">
-                          <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm"><Phone className="h-4 w-4 mr-2" /></span>
-                          <input type="text" name="pixReceiptPhone" id="pixReceiptPhone" value={pixReceiptPhone} onChange={(e) => setPixReceiptPhone(e.target.value)} className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 focus:ring-0 sm:text-sm sm:leading-6" placeholder="(11) 99999-9999" />
+
+                      {pixMode === 'manual' ? (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                          <div>
+                            <label htmlFor="pixKey" className="block text-sm font-medium leading-6 text-gray-900">Sua Chave Pix</label>
+                            <div className="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-purple-800">
+                              <input type="text" name="pixKey" id="pixKey" value={pixKey} onChange={(e) => setPixKey(e.target.value)} className="block flex-1 border-0 bg-transparent py-1.5 pl-3 text-gray-900 focus:ring-0 sm:text-sm sm:leading-6" placeholder="email, cpf ou telefone" />
+                            </div>
+                          </div>
+                          <div>
+                            <label htmlFor="pixReceiptPhone" className="block text-sm font-medium leading-6 text-gray-900">WhatsApp p/ Comprovante</label>
+                            <div className="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-purple-800">
+                              <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm"><Phone className="h-4 w-4 mr-2" /></span>
+                              <input type="text" name="pixReceiptPhone" id="pixReceiptPhone" value={pixReceiptPhone} onChange={(e) => setPixReceiptPhone(e.target.value)} className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 focus:ring-0 sm:text-sm sm:leading-6" placeholder="(11) 99999-9999" />
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                          <div>
+                            <label htmlFor="mpAccessToken" className="block text-sm font-medium leading-6 text-gray-900 flex items-center gap-2">
+                              Mercado Pago Access Token
+                              <span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full font-bold">API</span>
+                            </label>
+                            <p className="text-xs text-gray-500 mb-2">Use o token de produção do Mercado Pago para gerar Pix copia e cola com aprovação automática.</p>
+                            <div className="mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-purple-800">
+                              <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm"><Lock className="h-4 w-4 mr-2" /></span>
+                              <input type="password" name="mpAccessToken" id="mpAccessToken" value={mpAccessToken} onChange={(e) => setMpAccessToken(e.target.value)} className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 focus:ring-0 sm:text-sm sm:leading-6 font-mono" placeholder="APP_USR-..." />
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
