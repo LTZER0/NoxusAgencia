@@ -64,6 +64,7 @@ export default function StoreFrontClient({
   const [cart, setCart] = useState<CartItem[]>([]);
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'success'>('cart');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   
@@ -842,8 +843,8 @@ export default function StoreFrontClient({
                 onClick={() => router.push(`/${store.slug}/rastreio`)}
                 className={`inline-flex items-center justify-center gap-2 text-sm font-bold ${theme.primaryBg} text-white hover:opacity-90 px-4 py-2.5 rounded-xl shadow-md transition-all self-center sm:self-auto shrink-0`}
               >
-                <Search className="w-4 h-4" />
-                <span>Pesquisar Pedido</span>
+                <User className="w-4 h-4" />
+                <span>Meus Pedidos</span>
               </button>
             </div>
           </div>
@@ -886,6 +887,20 @@ export default function StoreFrontClient({
           </p>
         </div>
       )}
+
+      {/* 2.5 Search Bar */}
+      <div className="bg-[#fcf8f5] px-4 sm:px-6 pb-3 pt-1 border-b border-gray-200/10">
+        <div className="max-w-4xl mx-auto relative">
+          <Search className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 ${theme.mutedText}`} />
+          <input
+            type="text"
+            placeholder="Buscar no cardápio..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={`w-full bg-white border ${theme.border} rounded-xl pl-11 pr-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-${theme.primaryText.split('-')[1]}-600 transition-all shadow-sm`}
+          />
+        </div>
+      </div>
 
       {/* 3. Horizontal Category Tabs */}
       <div className={`sticky top-0 z-30 ${theme.secondaryBg}/95 backdrop-blur-md border-b ${theme.border} shadow-sm`}>
@@ -932,9 +947,14 @@ export default function StoreFrontClient({
               {categoryTabs
                 .filter(category => selectedCategory === 'Todos' || selectedCategory === category)
                 .map(category => {
-                  const categoryProducts = category === 'Ofertas'
+                  let categoryProducts = category === 'Ofertas'
                     ? products.filter(p => p.is_promotional && p.discount_price !== null && p.is_available !== false)
                     : products.filter(p => (p.category || 'Outros') === category && p.is_available !== false);
+
+                  if (searchQuery.trim()) {
+                    const q = searchQuery.toLowerCase();
+                    categoryProducts = categoryProducts.filter(p => p.name.toLowerCase().includes(q) || (p.description && p.description.toLowerCase().includes(q)));
+                  }
 
                   if (categoryProducts.length === 0) return null;
                   return (
@@ -1009,7 +1029,7 @@ export default function StoreFrontClient({
             </div>
           )}
         </main>
-      ), [products, categoryTabs, selectedCategory, theme, handleProductClick])}
+      ), [products, categoryTabs, selectedCategory, searchQuery, theme, handleProductClick])}
 
       {/* 5. Mobile Bottom Navigation Bar */}
       <div className={`fixed bottom-0 left-0 right-0 z-40 ${theme.secondaryBg} border-t ${theme.border} px-6 py-2.5 flex items-center justify-around sm:hidden shadow-lg backdrop-blur-lg bg-opacity-95`}>
