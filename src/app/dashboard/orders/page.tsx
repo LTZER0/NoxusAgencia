@@ -13,7 +13,7 @@ import {
 import PrintReceiptButton from "./PrintReceiptButton";
 import ViewReceiptModal from "./ViewReceiptModal";
 import { MotionDiv } from "@/components/MotionDiv";
-import OrdersAccordion from "./OrdersAccordion";
+import OrdersManager from "./OrdersManager";
 
 export default async function OrdersPage() {
   const supabase = await createClient();
@@ -72,82 +72,100 @@ export default async function OrdersPage() {
   // Server Action para atualizar o status do pedido
   async function updateOrderStatus(orderId: string, newStatus: string) {
     "use server";
-    const supabaseServer = await createClient();
-    
-    const { data: { user } } = await supabaseServer.auth.getUser();
-    if (!user) throw new Error('Não autorizado');
-
-    const VALID_STATUSES = ['pending', 'confirmed', 'completed', 'canceled', 'cancellation_requested'];
-    if (!VALID_STATUSES.includes(newStatus)) {
-      throw new Error('Status inválido');
-    }
-
-    const { data: storeOwner } = await supabaseServer
-      .from('stores')
-      .select('id')
-      .eq('owner_id', user.id)
-      .single();
-
-    if (!storeOwner) throw new Error('Loja não encontrada');
-
-    await supabaseServer
-      .from('appointments_orders')
-      .update({ status: newStatus })
-      .eq('id', orderId)
-      .eq('store_id', storeOwner.id);
+    try {
+      const supabaseServer = await createClient();
       
-    revalidatePath('/dashboard/orders');
+      const { data: { user } } = await supabaseServer.auth.getUser();
+      if (!user) throw new Error('Não autorizado');
+
+      const VALID_STATUSES = ['pending', 'confirmed', 'completed', 'canceled', 'cancellation_requested'];
+      if (!VALID_STATUSES.includes(newStatus)) {
+        throw new Error('Status inválido');
+      }
+
+      const { data: storeOwner } = await supabaseServer
+        .from('stores')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!storeOwner) throw new Error('Loja não encontrada');
+
+      const { error } = await supabaseServer
+        .from('appointments_orders')
+        .update({ status: newStatus })
+        .eq('id', orderId)
+        .eq('store_id', storeOwner.id);
+        
+      if (error) throw error;
+      return { success: true };
+    } catch (e: any) {
+      console.error(e);
+      return { success: false, error: e.message || 'Erro ao atualizar' };
+    }
   }
 
   // Server Action para arquivar o pedido
   async function archiveOrder(orderId: string) {
     "use server";
-    const supabaseServer = await createClient();
-    
-    const { data: { user } } = await supabaseServer.auth.getUser();
-    if (!user) throw new Error('Não autorizado');
-
-    const { data: storeOwner } = await supabaseServer
-      .from('stores')
-      .select('id')
-      .eq('owner_id', user.id)
-      .single();
-
-    if (!storeOwner) throw new Error('Loja não encontrada');
-
-    await supabaseServer
-      .from('appointments_orders')
-      .update({ is_archived: true })
-      .eq('id', orderId)
-      .eq('store_id', storeOwner.id);
+    try {
+      const supabaseServer = await createClient();
       
-    revalidatePath('/dashboard/orders');
+      const { data: { user } } = await supabaseServer.auth.getUser();
+      if (!user) throw new Error('Não autorizado');
+
+      const { data: storeOwner } = await supabaseServer
+        .from('stores')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!storeOwner) throw new Error('Loja não encontrada');
+
+      const { error } = await supabaseServer
+        .from('appointments_orders')
+        .update({ is_archived: true })
+        .eq('id', orderId)
+        .eq('store_id', storeOwner.id);
+        
+      if (error) throw error;
+      return { success: true };
+    } catch (e: any) {
+      console.error(e);
+      return { success: false, error: e.message || 'Erro ao arquivar' };
+    }
   }
 
   // Server Action para arquivar múltiplos pedidos
   async function archiveMultipleOrders(orderIds: string[]) {
     "use server";
-    if (!orderIds || orderIds.length === 0) return;
-    const supabaseServer = await createClient();
-    
-    const { data: { user } } = await supabaseServer.auth.getUser();
-    if (!user) throw new Error('Não autorizado');
-
-    const { data: storeOwner } = await supabaseServer
-      .from('stores')
-      .select('id')
-      .eq('owner_id', user.id)
-      .single();
-
-    if (!storeOwner) throw new Error('Loja não encontrada');
-
-    await supabaseServer
-      .from('appointments_orders')
-      .update({ is_archived: true })
-      .in('id', orderIds)
-      .eq('store_id', storeOwner.id);
+    if (!orderIds || orderIds.length === 0) return { success: true };
+    try {
+      const supabaseServer = await createClient();
       
-    revalidatePath('/dashboard/orders');
+      const { data: { user } } = await supabaseServer.auth.getUser();
+      if (!user) throw new Error('Não autorizado');
+
+      const { data: storeOwner } = await supabaseServer
+        .from('stores')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!storeOwner) throw new Error('Loja não encontrada');
+
+      const { error } = await supabaseServer
+        .from('appointments_orders')
+        .update({ is_archived: true })
+        .in('id', orderIds)
+        .eq('store_id', storeOwner.id);
+        
+      if (error) throw error;
+      return { success: true };
+    } catch (e: any) {
+      console.error(e);
+      return { success: false, error: e.message || 'Erro ao arquivar' };
+    }
   }
 
   return (
@@ -177,44 +195,13 @@ export default async function OrdersPage() {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
-          <OrdersAccordion 
-            title="Pendentes e Novos" 
-            orders={pendingOrders} 
-            storeName={store.name || ''} 
-            updateAction={updateOrderStatus} 
-            archiveAction={archiveOrder}
-            archiveMultipleAction={archiveMultipleOrders}
-            defaultOpen={true}
-          />
-          <OrdersAccordion 
-            title="Confirmados / Em Preparo" 
-            orders={confirmedOrders} 
-            storeName={store.name || ''} 
-            updateAction={updateOrderStatus} 
-            archiveAction={archiveOrder}
-            archiveMultipleAction={archiveMultipleOrders}
-            defaultOpen={true}
-          />
-          <OrdersAccordion 
-            title="Finalizados / Entregues" 
-            orders={completedOrders} 
-            storeName={store.name || ''} 
-            updateAction={updateOrderStatus} 
-            archiveAction={archiveOrder}
-            archiveMultipleAction={archiveMultipleOrders}
-            defaultOpen={false}
-          />
-          <OrdersAccordion 
-            title="Cancelados" 
-            orders={canceledOrders} 
-            storeName={store.name || ''} 
-            updateAction={updateOrderStatus} 
-            archiveAction={archiveOrder}
-            archiveMultipleAction={archiveMultipleOrders}
-            defaultOpen={false}
-          />
-        </div>
+        <OrdersManager 
+          initialOrders={orderList}
+          storeName={store.name || ''}
+          serverUpdateAction={updateOrderStatus}
+          serverArchiveAction={archiveOrder}
+          serverArchiveMultipleAction={archiveMultipleOrders}
+        />
       )}
     </MotionDiv>
   );

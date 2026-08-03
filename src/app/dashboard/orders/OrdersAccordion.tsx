@@ -12,7 +12,8 @@ import {
   Truck, 
   ArrowRight,
   Archive,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 import PrintReceiptButton from "./PrintReceiptButton";
 import ViewReceiptModal from "./ViewReceiptModal";
@@ -31,14 +32,29 @@ export default function OrdersAccordion({
   title: string;
   orders: Order[];
   storeName: string;
-  updateAction: (id: string, status: string) => Promise<void>;
-  archiveAction: (id: string) => Promise<void>;
-  archiveMultipleAction?: (ids: string[]) => Promise<void>;
+  updateAction: (id: string, status: string) => Promise<{ success: boolean; error?: string } | void>;
+  archiveAction: (id: string) => Promise<{ success: boolean; error?: string } | void>;
+  archiveMultipleAction?: (ids: string[]) => Promise<{ success: boolean; error?: string } | void>;
   defaultOpen?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [isArchivingAll, setIsArchivingAll] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
+  const [processingIds, setProcessingIds] = useState<Record<string, string>>({}); // { orderId: 'actionType' }
+
+  const handleActionClick = async (orderId: string, actionType: string, actionFn: () => Promise<any>) => {
+    setProcessingIds(prev => ({ ...prev, [orderId]: actionType }));
+    try {
+      await actionFn();
+    } finally {
+      // In a real optimistic UI, the item might unmount before this runs. That's fine.
+      setProcessingIds(prev => {
+        const next = { ...prev };
+        delete next[orderId];
+        return next;
+      });
+    }
+  };
 
   const getStatusDetails = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -139,7 +155,7 @@ export default function OrdersAccordion({
                         disabled={isArchivingAll}
                         className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 py-1.5 px-3 rounded-lg flex items-center gap-2 transition-colors font-medium disabled:opacity-50"
                       >
-                        <Archive className="w-4 h-4" /> 
+                        {isArchivingAll ? <Loader2 className="w-4 h-4 animate-spin" /> : <Archive className="w-4 h-4" />}
                         {isArchivingAll ? 'Arquivando...' : 'Arquivar Todos'}
                       </button>
                     </div>
@@ -206,28 +222,43 @@ export default function OrdersAccordion({
                         <div className="bg-gray-50 border-t border-gray-100 p-4 flex flex-col gap-2">
                           {statusDetails.nextStatus && (
                             <button 
-                              onClick={() => updateAction(order.id, statusDetails.nextStatus!)}
-                              className="w-full flex items-center justify-center gap-2 bg-purple-800 hover:bg-purple-900 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-purple-800 focus:ring-offset-1"
+                              onClick={() => handleActionClick(order.id, 'update', () => updateAction(order.id, statusDetails.nextStatus!))}
+                              disabled={!!processingIds[order.id]}
+                              className="w-full flex items-center justify-center gap-2 bg-purple-800 hover:bg-purple-900 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-purple-800 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              {statusDetails.nextLabel}
-                              <ArrowRight className="w-4 h-4" />
+                              {processingIds[order.id] === 'update' ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <>
+                                  {statusDetails.nextLabel}
+                                  <ArrowRight className="w-4 h-4" />
+                                </>
+                              )}
                             </button>
                           )}
                           
                           {(order.status === 'completed' || order.status === 'canceled') && (
                             <button 
-                              onClick={() => archiveAction(order.id)}
-                              className="w-full flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none"
+                              onClick={() => handleActionClick(order.id, 'archive', () => archiveAction(order.id))}
+                              disabled={!!processingIds[order.id]}
+                              className="w-full flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              <Archive className="w-4 h-4" />
-                              Arquivar Pedido (Limpar)
+                              {processingIds[order.id] === 'archive' ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <Archive className="w-4 h-4" />
+                                  Arquivar Pedido (Limpar)
+                                </>
+                              )}
                             </button>
                           )}
 
                           {(order.status !== 'canceled' && order.status !== 'completed' && order.status !== 'cancellation_requested') && (
                             <button 
                               onClick={() => setOrderToCancel(order.id)}
-                              className="w-full flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none"
+                              disabled={!!processingIds[order.id]}
+                              className="w-full flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 py-2 px-4 rounded-lg text-sm font-medium transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               Cancelar Pedido
                             </button>
@@ -258,12 +289,13 @@ export default function OrdersAccordion({
               </button>
               <button 
                 onClick={() => { 
-                  updateAction(orderToCancel, 'canceled'); 
+                  handleActionClick(orderToCancel, 'cancel', () => updateAction(orderToCancel, 'canceled')); 
                   setOrderToCancel(null); 
                 }} 
-                className="px-4 py-2 bg-red-600 text-white font-medium hover:bg-red-700 rounded-lg shadow-sm transition-colors"
+                className="px-4 py-2 bg-red-600 text-white font-medium hover:bg-red-700 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                disabled={processingIds[orderToCancel] === 'cancel'}
               >
-                Sim, Cancelar
+                {processingIds[orderToCancel] === 'cancel' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sim, Cancelar'}
               </button>
             </div>
           </div>
