@@ -179,11 +179,46 @@ export default function StoreFrontClient({
   }
 
   useEffect(() => {
-    const savedName = localStorage.getItem('@delivery_client_name');
-    const savedPhone = localStorage.getItem('@delivery_client_whatsapp');
-    if (savedName) setClientName(savedName);
-    if (savedPhone) setClientWhatsapp(savedPhone);
+    // Integração da Memória "Mágica" do Guest Checkout
+    const savedData = localStorage.getItem('noxus_customer_data');
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        if (parsed.name) setClientName(parsed.name);
+        if (parsed.phone) setClientWhatsapp(parsed.phone);
+        if (parsed.cpf) setCustomerCpf(parsed.cpf);
+        if (parsed.address) setAddress(parsed.address);
+      } catch (e) {
+        console.error("Erro ao ler dados salvos");
+      }
+    } else {
+      // Fallback para clientes antigos
+      const savedName = localStorage.getItem('@delivery_client_name');
+      const savedPhone = localStorage.getItem('@delivery_client_whatsapp');
+      if (savedName) setClientName(savedName);
+      if (savedPhone) setClientWhatsapp(savedPhone);
+    }
   }, []);
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    const digits = rawValue.replace(/\D/g, '').slice(0, 11);
+    
+    let formatted = '';
+    if (digits.length > 0) {
+      formatted += '(' + digits.substring(0, 2);
+      if (digits.length > 2) {
+        formatted += ') ' + digits.substring(2, 3);
+        if (digits.length > 3) {
+          formatted += digits.substring(3, 7);
+          if (digits.length > 7) {
+            formatted += '-' + digits.substring(7, 11);
+          }
+        }
+      }
+    }
+    setClientWhatsapp(formatted);
+  };
 
   const getThemeClasses = () => {
     switch (store.store_category) {
@@ -473,6 +508,14 @@ export default function StoreFrontClient({
     }
 
     try {
+      // Salva os dados para compras futuras sem atrito (Zero Friction Checkout)
+      localStorage.setItem('noxus_customer_data', JSON.stringify({
+        name: clientName,
+        phone: clientWhatsapp,
+        cpf: customerCpf,
+        address: address
+      }));
+      // Mantém retrocompatibilidade
       localStorage.setItem('@delivery_client_name', clientName);
       localStorage.setItem('@delivery_client_whatsapp', clientWhatsapp);
 
@@ -1267,21 +1310,36 @@ export default function StoreFrontClient({
                     )}
                   </>
                 ) : (
-                  <form id="checkout-form" onSubmit={handleSubmitOrder} className="space-y-6">
+                  <form id="checkout-form" onSubmit={handleSubmitOrder} className="space-y-6 animate-in fade-in duration-300">
                     <div className="space-y-4">
                       <h3 className="font-bold border-b border-gray-200/20 pb-2">Seus Dados</h3>
                       <div>
-                        <label className="block text-sm font-semibold mb-1">Nome Completo</label>
-                        <input required type="text" value={clientName} onChange={e => setClientName(e.target.value)} className={`w-full rounded-xl p-3 ${theme.inputBg} focus:ring-2 focus:ring-${theme.primaryText.split('-')[1]}-500`} placeholder="João Silva" />
+                        <label className="block text-sm font-semibold mb-1.5 text-gray-700">Nome Completo</label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <User className="h-5 w-5 text-gray-400" />
+                          </div>
+                          <input required type="text" value={clientName} onChange={e => setClientName(e.target.value)} className={`pl-10 w-full rounded-xl p-3 ${theme.inputBg} border-0 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-${theme.primaryText.split('-')[1]}-600 transition-all`} placeholder="Seu nome" />
+                        </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-semibold mb-1">WhatsApp</label>
-                          <input required type="tel" value={clientWhatsapp} onChange={e => setClientWhatsapp(e.target.value)} className={`w-full rounded-xl p-3 ${theme.inputBg} focus:ring-2 focus:ring-${theme.primaryText.split('-')[1]}-500`} placeholder="(00) 00000-0000" />
+                          <label className="block text-sm font-semibold mb-1.5 text-gray-700">WhatsApp</label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <Phone className="h-5 w-5 text-gray-400" />
+                            </div>
+                            <input required type="tel" inputMode="numeric" value={clientWhatsapp} onChange={handlePhoneChange} className={`pl-10 w-full rounded-xl p-3 ${theme.inputBg} border-0 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-${theme.primaryText.split('-')[1]}-600 transition-all`} placeholder="(00) 90000-0000" />
+                          </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-semibold mb-1">CPF (Opcional)</label>
-                          <input type="text" value={customerCpf} onChange={e => setCustomerCpf(e.target.value)} className={`w-full rounded-xl p-3 ${theme.inputBg} focus:ring-2 focus:ring-${theme.primaryText.split('-')[1]}-500`} placeholder="000.000.000-00" />
+                          <label className="block text-sm font-semibold mb-1.5 text-gray-700">CPF (Opcional)</label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <CreditCard className="h-5 w-5 text-gray-400" />
+                            </div>
+                            <input type="text" value={customerCpf} onChange={e => setCustomerCpf(e.target.value)} className={`pl-10 w-full rounded-xl p-3 ${theme.inputBg} border-0 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-${theme.primaryText.split('-')[1]}-600 transition-all`} placeholder="000.000.000-00" />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1304,26 +1362,28 @@ export default function StoreFrontClient({
 
                     {orderType === 'delivery' && (
                       <div className="space-y-4 animate-in slide-in-from-top-4">
-                        <h3 className="font-bold border-b border-gray-200/20 pb-2">Endereço de Entrega</h3>
+                        <h3 className="font-bold border-b border-gray-200/20 pb-2 flex items-center gap-2">
+                          <MapPin className="w-5 h-5 text-gray-500" /> Endereço de Entrega
+                        </h3>
                         <div className="grid grid-cols-4 gap-4">
                           <div className="col-span-3">
-                            <label className="block text-sm font-semibold mb-1">Rua / Avenida</label>
-                            <input required type="text" value={address.street} onChange={e => setAddress({...address, street: e.target.value})} className={`w-full rounded-xl p-3 ${theme.inputBg}`} />
+                            <label className="block text-sm font-semibold mb-1.5 text-gray-700">Rua / Avenida</label>
+                            <input required type="text" value={address.street} onChange={e => setAddress({...address, street: e.target.value})} className={`w-full rounded-xl p-3 ${theme.inputBg} border-0 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-${theme.primaryText.split('-')[1]}-600 transition-all`} placeholder="Ex: Rua das Flores" />
                           </div>
                           <div className="col-span-1">
-                            <label className="block text-sm font-semibold mb-1">Número</label>
-                            <input required type="text" value={address.number} onChange={e => setAddress({...address, number: e.target.value})} className={`w-full rounded-xl p-3 ${theme.inputBg}`} />
+                            <label className="block text-sm font-semibold mb-1.5 text-gray-700">Número</label>
+                            <input required type="text" value={address.number} onChange={e => setAddress({...address, number: e.target.value})} className={`w-full rounded-xl p-3 ${theme.inputBg} border-0 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-${theme.primaryText.split('-')[1]}-600 transition-all`} placeholder="Nº" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-sm font-semibold mb-1">Bairro *</label>
+                            <label className="block text-sm font-semibold mb-1.5 text-gray-700">Bairro *</label>
                             {deliveryZones.length > 0 ? (
                               <select 
                                 required 
                                 value={address.neighborhood} 
                                 onChange={e => setAddress({...address, neighborhood: e.target.value})} 
-                                className={`w-full rounded-xl p-3 ${theme.inputBg}`}
+                                className={`w-full rounded-xl p-3 ${theme.inputBg} border-0 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-${theme.primaryText.split('-')[1]}-600 transition-all`}
                               >
                                 <option value="">Selecione seu bairro...</option>
                                 {deliveryZones.map(zone => (
@@ -1339,8 +1399,8 @@ export default function StoreFrontClient({
                             )}
                           </div>
                           <div>
-                            <label className="block text-sm font-semibold mb-1">Complemento</label>
-                            <input type="text" value={address.complement} onChange={e => setAddress({...address, complement: e.target.value})} className={`w-full rounded-xl p-3 ${theme.inputBg}`} placeholder="Apto, Bloco..." />
+                            <label className="block text-sm font-semibold mb-1.5 text-gray-700">Complemento</label>
+                            <input type="text" value={address.complement} onChange={e => setAddress({...address, complement: e.target.value})} className={`w-full rounded-xl p-3 ${theme.inputBg} border-0 shadow-sm ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-inset focus:ring-${theme.primaryText.split('-')[1]}-600 transition-all`} placeholder="Apto, Bloco, Casa 2..." />
                           </div>
                         </div>
                       </div>
