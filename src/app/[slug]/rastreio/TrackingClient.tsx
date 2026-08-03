@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Package, Clock, CheckCircle, Search, AlertCircle, LogOut, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 type Order = {
   id: string;
@@ -23,6 +24,7 @@ export default function TrackingClient({ store }: { store: any }) {
   const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   useEffect(() => {
     const savedPhone = localStorage.getItem(`@noxus_customer_${store.id}`);
@@ -62,6 +64,10 @@ export default function TrackingClient({ store }: { store: any }) {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!identifier.trim()) return;
+    if (!captchaToken && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
+      alert("Por favor, resolva o Captcha.");
+      return;
+    }
 
     localStorage.setItem(`@noxus_customer_${store.id}`, identifier);
     setIsLoggedIn(true);
@@ -168,9 +174,22 @@ export default function TrackingClient({ store }: { store: any }) {
                     className="w-full rounded-xl p-4 bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent text-center font-medium"
                   />
                 </div>
+
+                {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+                  <div className="flex justify-center my-2 min-h-[65px]">
+                    <Turnstile 
+                      siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY} 
+                      onSuccess={(token) => setCaptchaToken(token)} 
+                      onError={() => setCaptchaToken(null)}
+                      onExpire={() => setCaptchaToken(null)}
+                    />
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  className="w-full bg-purple-700 hover:bg-purple-800 text-white rounded-xl px-6 py-4 font-bold transition-all shadow-lg shadow-purple-200 flex items-center justify-center gap-2"
+                  disabled={!captchaToken && !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                  className="w-full bg-purple-700 hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl px-6 py-4 font-bold transition-all shadow-lg shadow-purple-200 flex items-center justify-center gap-2"
                 >
                   Entrar
                 </button>

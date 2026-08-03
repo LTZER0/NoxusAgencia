@@ -1146,16 +1146,24 @@ export default function StoreFrontClient({
               </div>
 
               {/* Mapa Google Maps Embed */}
-              <div className="w-full h-64 rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative bg-gray-100">
-                <iframe
-                  title="Mapa do Estabelecimento"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  allowFullScreen
-                  src={`https://maps.google.com/maps?q=${encodeURIComponent(`${store.street || ''} ${store.neighborhood || ''} ${store.name}`)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
-                />
+              <div className="w-full h-64 rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative bg-gray-100 flex items-center justify-center">
+                {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
+                  <iframe
+                    title="Mapa do Estabelecimento"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    allowFullScreen
+                    src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(`${store.street || ''}, ${store.number || ''}, ${store.neighborhood || ''} - ${store.name}`)}`}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-gray-500 p-6 text-center">
+                    <MapPin className="w-8 h-8 mb-2 opacity-50" />
+                    <p className="text-sm font-medium">Mapa indisponível no momento.</p>
+                    <p className="text-xs mt-1">Endereço: {store.street ? `${store.street}${store.number ? `, nº${store.number}` : ''} - ${store.neighborhood || 'Centro'}` : 'Não cadastrado'}</p>
+                  </div>
+                )}
               </div>
             </section>
 
@@ -1347,11 +1355,10 @@ export default function StoreFrontClient({
 
                     <div className="space-y-4">
                       <h3 className="font-bold border-b border-gray-200/20 pb-2">Tipo de Pedido</h3>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 gap-2">
                         {[
-                          { id: 'delivery', label: 'Delivery' },
-                          { id: 'retirada_comer', label: 'Comer no Local' },
-                          { id: 'retirada_levar', label: 'Para Levar' }
+                          { id: 'delivery', label: 'Entrega' },
+                          { id: 'retirada_comer', label: 'Buscar no local' }
                         ].map(type => (
                           <label key={type.id} className={`cursor-pointer rounded-xl p-3 text-center text-sm font-semibold border-2 transition-colors ${orderType === type.id ? `border-${theme.primaryText.split('-')[1]}-500 bg-${theme.primaryText.split('-')[1]}-500/10` : 'border-transparent bg-gray-500/5 hover:bg-gray-500/10'}`}>
                             <input type="radio" name="orderType" value={type.id} checked={orderType === type.id} onChange={e => setOrderType(e.target.value)} className="sr-only" />
