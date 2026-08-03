@@ -85,6 +85,7 @@ export default function StoreFrontClient({
   const [address, setAddress] = useState({ street: '', number: '', neighborhood: '', complement: '' });
   const [changeFor, setChangeFor] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckoutReady, setIsCheckoutReady] = useState(false);
   const [isStoreOpen, setIsStoreOpen] = useState(store.is_open !== false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -1460,7 +1461,11 @@ export default function StoreFrontClient({
                   {checkoutStep === 'cart' ? (
                     <button
                       disabled={cart.length === 0 || !isStoreOpen}
-                      onClick={() => setCheckoutStep('checkout')}
+                      onClick={() => {
+                        setCheckoutStep('checkout');
+                        setIsCheckoutReady(false);
+                        setTimeout(() => setIsCheckoutReady(true), 600);
+                      }}
                       className={`w-full ${theme.primaryBg} ${theme.primaryHover} disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 text-lg shadow-lg`}
                     >
                       {!isStoreOpen ? 'Loja Fechada para Pedidos' : 'Continuar para Pagamento'}
@@ -1470,10 +1475,10 @@ export default function StoreFrontClient({
                     <button
                       type="submit"
                       form="checkout-form"
-                      disabled={isSubmitting || !isStoreOpen}
+                      disabled={isSubmitting || !isStoreOpen || !isCheckoutReady}
                       className={`w-full ${theme.primaryBg} ${theme.primaryHover} disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 text-lg shadow-lg`}
                     >
-                      {isSubmitting ? 'Processando...' : !isStoreOpen ? 'Loja Fechada' : 'Confirmar Pedido'}
+                      {isSubmitting ? 'Processando...' : (!isStoreOpen ? 'Loja Fechada' : (!isCheckoutReady ? 'Aguarde...' : 'Confirmar Pedido'))}
                       <Check className="w-5 h-5" />
                     </button>
                   )}
