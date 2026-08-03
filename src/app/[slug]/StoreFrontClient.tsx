@@ -1126,10 +1126,29 @@ export default function StoreFrontClient({
                 Telefone
               </h2>
               <div className="flex flex-wrap gap-2">
-                <span className="bg-white text-gray-700 font-semibold text-sm px-3 py-2 rounded-lg border border-gray-200 shadow-sm flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-green-600" />
-                  {store.phone || store.pix_receipt_phone || 'Telefone não cadastrado'}
-                </span>
+                {(() => {
+                  const phoneStr = store.phone || store.pix_receipt_phone || '';
+                  const cleanPhone = phoneStr.replace(/\D/g, '');
+                  if (cleanPhone) {
+                    return (
+                      <a 
+                        href={`https://wa.me/55${cleanPhone}`}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="bg-white text-gray-700 hover:text-green-700 font-semibold text-sm px-3 py-2 rounded-lg border border-gray-200 shadow-sm flex items-center gap-2 hover:bg-green-50 hover:border-green-200 transition-colors"
+                      >
+                        <Phone className="w-4 h-4 text-green-600" />
+                        {phoneStr}
+                      </a>
+                    );
+                  }
+                  return (
+                    <span className="bg-white text-gray-700 font-semibold text-sm px-3 py-2 rounded-lg border border-gray-200 shadow-sm flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-gray-400" />
+                      Telefone não cadastrado
+                    </span>
+                  );
+                })()}
               </div>
             </section>
 
